@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns:xodm="http://www.corel.com/coreldraw/odm/2003"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 6000 9000"
+	 style="enable-background:new 0 0 6000 9000;" xml:space="preserve">
+<g id="Layer_x5F_1">
+	<g id="_1758636031872">
+		<rect style="fill:#FFFFFF;" width="6000" height="9000"/>
+		
+			<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="6230.0469" y1="6503.5752" x2="616.9606" y2="10069.8994" gradientTransform="matrix(1 0 0 -1 0 9002)">
+			<stop  offset="0" style="stop-color:#8C9AA9"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path style="fill:url(#SVGID_1_);" d="M980.7,0h2825.91C4433.5,458.81,5184.55,757.92,6000,837.47v2084.41
+			C3902.3,2783.07,2075.21,1655.18,980.7,0L980.7,0z"/>
+		
+			<linearGradient id="SVGID_00000063611905314572743150000012885889975945158791_" gradientUnits="userSpaceOnUse" x1="6672.0947" y1="3565.5471" x2="-6059.7231" y2="819.4813" gradientTransform="matrix(1 0 0 -1 0 9002)">
+			<stop  offset="0" style="stop-color:#8C9AA9"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path style="fill:url(#SVGID_00000063611905314572743150000012885889975945158791_);" d="M6000,3712.02v2109.51
+			c-301.32-64.23-613.8-98.32-934.29-98.32c-2053.55,0-3782.68,1387.92-4301.26,3276.79H0V6050.03
+			c1198.97-1467.61,3022.81-2404.75,5065.71-2404.75C5382.98,3645.28,5694.81,3668.34,6000,3712.02L6000,3712.02z"/>
+		
+			<linearGradient id="SVGID_00000173151204748402020180000016485561641533298877_" gradientUnits="userSpaceOnUse" x1="2832.8149" y1="213.558" x2="109.7763" y2="10698.5918" gradientTransform="matrix(1 0 0 -1 0 9002)">
+			<stop  offset="0" style="stop-color:#8C9AA9"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path style="fill:url(#SVGID_00000173151204748402020180000016485561641533298877_);" d="M3377.55,9000H1024.73
+			c489.79-716.03,776.45-1581.99,776.45-2515c0-1466.86-708.17-2768.23-1801.18-3581.16V510.51
+			C2285.66,1529.35,3879.11,3820.96,3879.11,6485C3879.11,7376.28,3700.49,8225.76,3377.55,9000L3377.55,9000z"/>
+	</g>
+</g>
+</svg>
