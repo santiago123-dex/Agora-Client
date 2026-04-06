@@ -36,7 +36,7 @@ export default function FeatureSection() {
     ];
 
     return (
-        <section id="funciones" className="mt-5 py-20 border-t-2 border-[#eaeaea]">
+        <section id="funciones" className="mt-10 py-20 border-t-2 border-[#eaeaea]">
             <div className="max-w-6xl mx-auto px-6">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
                     <h2 className="text-4xl font-semibold">Todo lo que necesitas par enseñar mejor</h2>
