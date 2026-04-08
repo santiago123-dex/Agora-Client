@@ -1,4 +1,4 @@
-import WorkspacePage from "../../src/features/dashboard/components/workspacePage/workspacePage";
+import WorkspacePage from "../../src/features/dashboard/components/workspacePage/workspace";
 
 export default function Workspace() {
   return (
