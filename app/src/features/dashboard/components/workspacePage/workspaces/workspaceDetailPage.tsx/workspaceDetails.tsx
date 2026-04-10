@@ -16,10 +16,8 @@ export default function WorkspaceDetails({ workspaceId }: WorkspaceDetailsProps)
     return <div>Workspace no encontrado</div>;
   }
   
-  if (workspace?.roleLabel === "admin") {
-    return (
-      <WorkspaceAdmin></WorkspaceAdmin>
-    )
+  if (workspace.roleLabel === "admin") {
+    return <WorkspaceAdmin workspace={workspace} />;
   } else {
     return (
       <WorkspaceMember></WorkspaceMember>
