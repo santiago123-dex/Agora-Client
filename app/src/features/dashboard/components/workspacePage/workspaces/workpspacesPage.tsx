@@ -168,7 +168,7 @@ export default function WorkspacesPage() {
 
         <div className="grid gap-5 xl:grid-cols-2">
           {workspacesToDisplay.map((workspace) => (
-            <Link href={`/dashboard/workspace/${workspace.id}`} key={workspace.id}>
+            <Link href={`/dashboard/workspace/${workspace.id}?from=workspace`} key={workspace.id}>
               <article
 
                 className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]"

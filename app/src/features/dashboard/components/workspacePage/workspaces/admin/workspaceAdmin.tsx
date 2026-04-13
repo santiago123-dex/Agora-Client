@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import type { WorkspaceAdminTask, AdminWorkspace } from "../../data/workspace";
+import { useSearchParams } from "next/navigation";
 
 type Props = {
   workspace: AdminWorkspace;
@@ -51,6 +52,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
   const members = workspace.adminMembers ?? [];
   const code = workspace.inviteCode ?? "—";
 
+
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -61,8 +63,22 @@ export default function WorkspaceAdmin({ workspace }: Props) {
     }
   };
 
+  {/*redireccion, si entra al espacio desde workspace lo devuelve a la ruta de workspace si no al dashboard*/}
+  {/*osea el seacrhParams va a leer la url la almacena y el from lo que hace es decir, de searchParams trae lo del from*/}
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+
+  const backHref =
+    from === "dashboard" ? "/dashboard" : "/dashboard/workspace";
+
+  const backLabel =
+    from === "dashboard"
+      ? "Volver al dashboard"
+      : "Volver a los workspaces";
+
+
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6">
       <div className="mx-auto w-full max-w-5xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-[0_20px_50px_rgba(37,93,121,0.35)]"
@@ -72,11 +88,11 @@ export default function WorkspaceAdmin({ workspace }: Props) {
           <div className="relative z-10">
             <div className="flex flex-col gap-4 border-b border-white/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
               <Link
-                href="/dashboard/workspace"
+                href={backHref}
                 className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/95 backdrop-blur-sm transition hover:bg-white/20"
               >
                 <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-                Volver a los workspaces
+                {backLabel}
               </Link>
               <div className="flex flex-wrap items-center gap-3">
                 <button
