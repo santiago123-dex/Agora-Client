@@ -1,17 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/app/src/features/landing/assets/logo.png";
+import logo from "@/public/images/logo-cropped.png";
 
 export default function   NavbarLanding() {
   return (
     <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-10">
-        <Link href="/" className="flex items-center gap-2 text-slate-950 sm:gap-3">
-          <div className="flex  items-center justify-center rounded-xl">
+        <Link href="/" className="flex items-center gap-2.5 text-slate-950 sm:gap-3">
+          <div className="flex items-center justify-center rounded-xl">
             <Image
               src={logo}
               alt="Logo de Agora"
-              className="h-12 w-14 object-contain sm:h-16 sm:w-20"
+              className="h-9 w-9 object-contain sm:h-11 sm:w-11"
             />
           </div>
           <span className="text-xl font-semibold tracking-tight sm:text-2xl">Agora</span>
