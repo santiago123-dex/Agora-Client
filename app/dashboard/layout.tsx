@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import logo from "@/public/images/logo.png";
+import logo from "@/public/images/logo-cropped.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -59,7 +59,7 @@ export default function LayoutDashboard({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -81,10 +81,12 @@ export default function LayoutDashboard({
     <div className="flex min-h-screen flex-col bg-slate-50 lg:flex-row">
       {/* Vista de deskstop*/}
       <aside className="hidden bg-[#275D79] lg:flex lg:min-h-screen lg:w-60 lg:shrink-0 lg:flex-col">
-        <div className="flex h-16 items-center border-b border-[#ededed]/10 px-3">
-          <Image src={logo} alt="Logo Agora" className="h-11 w-18 brightness-1000" />
+
+        <Link href="/" className="flex h-16 items-center gap-2 border-b border-[#ededed]/10 px-3">
+          <Image src={logo} alt="Logo Agora" className="h-10 w-10 shrink-0 object-contain brightness-1000" />
           <h2 className="text-xl font-bold text-white">Agora</h2>
-        </div>
+        </Link>
+
         <div className="flex flex-col gap-2 px-3 py-4">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -140,7 +142,7 @@ export default function LayoutDashboard({
         </header>
         <main>{children}</main>
       </div>
-
+      {/*Parte mobile*/}
       <div
         className={`fixed inset-0 z-40 bg-black/35 transition-opacity duration-300 lg:hidden ${isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
@@ -154,10 +156,12 @@ export default function LayoutDashboard({
           }`}
       >
         <div className="flex h-16 items-center justify-between border-b border-[#ededed]/10 px-3">
-          <div className="flex items-center">
-            <Image src={logo} alt="Logo Agora" className="h-11 w-18 brightness-1000" />
-            <h2 className="text-xl font-bold text-white">Agora</h2>
-          </div>
+         
+            <Link href="/" className="flex items-center gap-2">
+              <Image src={logo} alt="Logo Agora" className="h-10 w-10 shrink-0 object-contain brightness-1000" />
+              <h2 className="text-xl font-bold text-white">Agora</h2>
+            </Link>
+         
           <button
             type="button"
             aria-label="Cerrar menú lateral"
