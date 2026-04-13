@@ -1,3 +1,13 @@
+
+type BaseWorkspace = {
+  id: string;
+  title: string;
+  secondaryLabel: string;
+  accentColor: string;
+  roleLabel: "admin" | "member";
+  description?: string;
+}
+
 /** Tarea en la vista detalle admin (mock). */
 export type WorkspaceAdminTask = {
   id: string;
@@ -18,28 +28,50 @@ export type WorkspaceAdminMember = {
   email: string;
 };
 
-export type WorkspaceCard = {
-  id: string;
-  title: string;
-  secondaryLabel: string;
-  roleLabel: "admin" | "member";
-  accentColor: string;
+export type AdminWorkspace = BaseWorkspace & {
+  roleLabel: "admin";
   statusLabel?: string;
   statusVariant?: "pending" | "done";
   inviteCode?: string;
-  description?: string;
   adminStats?: {
     members: number;
     tasks: number;
     toGrade: number;
     completedLabel: string;
-  };
+  }
   activitiesToGrade?: WorkspaceAdminTask[];
   activitiesGraded?: WorkspaceAdminTask[];
   adminMembers?: WorkspaceAdminMember[];
+}
+
+export type WorkspaceMemberTask = {
+  id: string;
+  title: string;
+  description: string;
+  dueLabel: string;
+  points: number;
+  taskState: "graded" | "pending_submission" | "submitted";
+  gradeLabel?: string;      // ej: "95%"
+  feedback?: string;        // ej: "Excelente trabajo..."
+  actionLabel?: string;     // ej: "Entregar tarea"
 };
 
-export const adminWorkspaces: WorkspaceCard[] = [
+type MemberWorkspace = BaseWorkspace & {
+  roleLabel: "member";
+  statusLabel?: string;
+  statusVariant?: "pending" | "done";
+  inviteCode?: string;
+  memberStats?: {
+    members: number;
+    tasks: number;
+    toGrade: number;
+    completedLabel: string;
+  }
+  memberTask?: WorkspaceMemberTask[];
+}
+
+
+export const adminWorkspaces: AdminWorkspace[] = [
   {
     id: "workspace-1",
     title: "Matematicas Avanzadas",
@@ -170,13 +202,33 @@ export const adminWorkspaces: WorkspaceCard[] = [
   },
 ];
 
-export const memberWorkspaces: WorkspaceCard[] = [
+export const memberWorkspaces: MemberWorkspace[] = [
   {
     id: "joined-workspace-1",
     title: "Quimica Organica",
     secondaryLabel: "Prof. Garcia",
     roleLabel: "member",
     accentColor: "#C44F4C",
+    memberStats: {
+      members: 32,
+      tasks: 4,
+      toGrade: 26,
+      completedLabel: "2/4",
+    },
+    memberTask: [
+      {
+        id: "t1",
+        title: "Integrales Definidas",
+        description:
+          "Resuelve los ejercicios del capitulo 5 usando el teorema fundamental del calculo.",
+        dueLabel: "29 feb",
+        points: 100,
+        taskState: "pending_submission",
+        gradeLabel: "95%",
+        feedback: "excelente trabajo",
+        actionLabel: "Entregar tarea"
+      }
+    ],
   },
   {
     id: "joined-workspace-2",

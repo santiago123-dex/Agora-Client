@@ -1,8 +1,8 @@
 "use client";
-import { use, useState } from "react";
+import { useState } from "react";
 import { adminWorkspaces, memberWorkspaces } from "../data/workspace";
 import Link from "next/link";
-import { ArrowLeft, Copy, UserRound } from "lucide-react";
+import { ArrowLeft, Copy } from "lucide-react";
 
 const colors = [
   "#EAB308",
@@ -16,10 +16,6 @@ const colors = [
 ]
 
 const invitacionCode = "HJK3-02P7"
-const currentAccount = {
-    name: "Santiago Fajardo Morales",
-    email: "santiago@gmail.com",
-}
 
 export default function WorkspacesPage() {
   const [showCreatedWorkspaces, setShowCreatedWorkspaces] = useState(true);
@@ -45,7 +41,7 @@ export default function WorkspacesPage() {
     : memberWorkspaces;
 
   return (
-    <section className="px-7 py-6 pb-10">
+    <section className="px-4 py-6 pb-10 sm:px-7">
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
@@ -70,15 +66,15 @@ export default function WorkspacesPage() {
           <button
             onClick={() => setOpenModalCreate(true)}
             type="button"
-            className="inline-flex w-fit items-center gap-2 self-start rounded-md bg-[#275D79] px-3 py-2 text-sm font-medium text-white shadow-sm md:self-auto"
+            className="inline-flex w-fit items-center gap-2 self-start rounded-md bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm md:self-auto"
           >
             <span className="text-base leading-none">+</span>
             Crear Espacio
           </button>
 
           {openModalCreate && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-              <div className="w-full max-w-150 bg-white p-6 shadow-lg rounded-xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-6">
+              <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-4 shadow-lg sm:p-6">
                 <div className="mb-4 flex items-center justify-center relative">
                   <button
                     onClick={() => setOpenModalCreate(false)}
@@ -88,11 +84,11 @@ export default function WorkspacesPage() {
                   </button>
                   <h2 className="text-xl font-medium text-center ">Crear espacio</h2>
                 </div>
-                <div className="border border-gray-400 rounded-xl p-4">
-                  <div className="rounded-2xl border border-gray-300 bg-white overflow-hidden">
+                <div className="rounded-xl border border-gray-400 p-4">
+                  <div className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
                     <div className="h-16 w-full" style={{ backgroundColor: selectedColor }} />
                     <div className="px-3 py-2">
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="text-lg font-semibold">
                         {nombre || "Nombre del espacio"}
                       </h3>
                       <p className="mb-2">
@@ -108,7 +104,7 @@ export default function WorkspacesPage() {
                       onChange={(e) => setNombre(e.target.value)}
                       placeholder="Nombre del espacio"
                       required
-                      className="w-full rounded-lg border border-gray-300 bg-[#eee] py-2 px-3 focus:outline-none"
+                      className="w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 focus:outline-none"
                     />
                     <label>Descripción</label>
                     <textarea
@@ -116,7 +112,7 @@ export default function WorkspacesPage() {
                       onChange={(e) => setDescription(e.target.value)}
                       rows={4}
                       placeholder="Escribe la descripcion para tu espacio de trabajo"
-                      className="w-full rounded-lg border border-gray-300 bg-[#eee] py-2 px-3 h-20 outline-none"
+                      className="h-20 w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 outline-none"
                     />
                   </div>
                   <div className="mt-5 flex items-center gap-3 flex-wrap">
@@ -131,7 +127,7 @@ export default function WorkspacesPage() {
                     ))}
                   </div>
 
-                  <div className="relative mt-4 border border-gray-300 bg-[#eee] p-3 rounded-lg">
+                  <div className="relative mt-4 rounded-lg border border-gray-300 bg-[#eee] p-3">
                     <button
                       type="button"
                       className="absolute right-3 top-3 rounded-full p-2 hover:bg-gray-100"
@@ -144,14 +140,14 @@ export default function WorkspacesPage() {
                         Código copiado
                       </span>
                     )}
-                    <div className="w-[80%] flex flex-col gap-2">
+                    <div className="flex w-full flex-col gap-2 pr-10 sm:pr-12">
                       <h3 className="font-semibold">Código de invitación</h3>
                       <input
                         type="text"
                         value={invitacionCode ?? ""}
                         readOnly
                         placeholder="HUYS-1190"
-                        className="border border-[#d0d0d0] rounded-lg p-3 w-[70%] focus:outline-none"
+                        className="w-full rounded-lg border border-[#d0d0d0] p-3 focus:outline-none sm:max-w-xs"
                         required
                       />
                       <p className="text-[13px] text-gray-500">Comparte este código para unir usuarios al espacio de trabajo</p>
@@ -159,7 +155,7 @@ export default function WorkspacesPage() {
                   </div>
 
                   <div className="mt-4 flex justify-start gap-2">
-                    <button className="flex gap-2 items-center justify-center rounded border border-[#275D79] bg-[#275D79] px-3 py-1 text-white">
+                    <button className="flex items-center justify-center gap-2 rounded border border-[#275D79] bg-[#275D79] px-3 py-2 text-white">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                       Crear Espacio
                     </button>

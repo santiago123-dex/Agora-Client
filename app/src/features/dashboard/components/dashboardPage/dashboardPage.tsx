@@ -50,8 +50,8 @@ export default function DashboardPage() {
     <>
       <DashboardHeader />
 
-      <section className="px-7 pb-10">
-        <div className="grid xl:gap-10 xl:grid-cols-[minmax(0,1.7fr)_20rem] [@media(min-width:1450px)]:grid-cols-[minmax(0,1.7fr)_30rem] [@media(min-width:1450px)]:gap-8">
+      <section className="px-4 pb-10 sm:px-7">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.7fr)_20rem] xl:gap-10 [@media(min-width:1450px)]:grid-cols-[minmax(0,1.7fr)_30rem] [@media(min-width:1450px)]:gap-8">
           <div className="space-y-10">
             <section className="space-y-5">
               <DashboardSectionHeader
