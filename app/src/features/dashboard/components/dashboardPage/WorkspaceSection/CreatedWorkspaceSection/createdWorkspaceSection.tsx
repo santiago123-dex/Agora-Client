@@ -1,22 +1,12 @@
-const createdWorkspaces = [
-  {
-    title: "Matematicas Avanzadas",
-    membersLabel: "32 miembros",
-    roleLabel: "Creador",
-    accentColor: "#0E6174",
-  },
-  {
-    title: "Fisica I",
-    membersLabel: "28 miembros",
-    roleLabel: "Creador",
-    accentColor: "#359677",
-  },
-];
+import { adminWorkspaces } from "../../../workspacePage/data/workspace";  
 
 export default function CreatedWorkspaceSection() {
+
+  const firstTwoAdminWorkspaces = adminWorkspaces.slice(0, 2);
+
   return (
     <div className="grid gap-5 md:grid-cols-2">
-      {createdWorkspaces.map((workspace) => (
+      {firstTwoAdminWorkspaces.map((workspace) => (
         <article
           key={workspace.title}
           className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)]"
@@ -34,7 +24,7 @@ export default function CreatedWorkspaceSection() {
             <h4 className="text-lg font-semibold tracking-[-0.02em] text-slate-950">
               {workspace.title}
             </h4>
-            <p className="text-sm text-slate-500">{workspace.membersLabel}</p>
+            <p className="text-sm text-slate-500">{workspace.secondaryLabel}</p>
           </div>
         </article>
       ))}
