@@ -56,7 +56,7 @@ export type WorkspaceMemberTask = {
   actionLabel?: string;     // ej: "Entregar tarea"
 };
 
-type MemberWorkspace = BaseWorkspace & {
+export type MemberWorkspace = BaseWorkspace & {
   roleLabel: "member";
   statusLabel?: string;
   statusVariant?: "pending" | "done";
@@ -206,6 +206,7 @@ export const memberWorkspaces: MemberWorkspace[] = [
   {
     id: "joined-workspace-1",
     title: "Quimica Organica",
+    inviteCode: "MAT-2024",
     secondaryLabel: "Prof. Garcia",
     roleLabel: "member",
     accentColor: "#C44F4C",
@@ -227,6 +228,18 @@ export const memberWorkspaces: MemberWorkspace[] = [
         gradeLabel: "95%",
         feedback: "excelente trabajo",
         actionLabel: "Entregar tarea"
+      },
+      {
+        id: "t2",
+        title: "Programacion Types",
+        description:
+          "Resuelve los ejercicios del capitulo 5 usando el teorema fundamental del calculo.",
+        dueLabel: "29 feb",
+        points: 100,
+        taskState: "pending_submission",
+        gradeLabel: "95%",
+        feedback: "excelente trabajo",
+        actionLabel: "Entregar tarea"
       }
     ],
   },
@@ -236,6 +249,26 @@ export const memberWorkspaces: MemberWorkspace[] = [
     secondaryLabel: "Prof. Rodriguez",
     roleLabel: "member",
     accentColor: "#DC8738",
+    memberStats: {
+      members: 32,
+      tasks: 4,
+      toGrade: 26,
+      completedLabel: "2/4",
+    },
+    memberTask: [
+      {
+        id: "t1",
+        title: "Programacion Java",
+        description:
+          "Resuelve los ejercicios del capitulo 5 usando el teorema fundamental del calculo.",
+        dueLabel: "29 feb",
+        points: 100,
+        taskState: "pending_submission",
+        gradeLabel: "95%",
+        feedback: "excelente trabajo",
+        actionLabel: "Entregar tarea"
+      }
+    ],
   },
   {
     id: "joined-workspace-3",

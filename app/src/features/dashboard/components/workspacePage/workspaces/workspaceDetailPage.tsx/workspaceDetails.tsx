@@ -20,7 +20,7 @@ export default function WorkspaceDetails({ workspaceId }: WorkspaceDetailsProps)
     return <WorkspaceAdmin workspace={workspace} />;
   } else {
     return (
-      <WorkspaceMember></WorkspaceMember>
+      <WorkspaceMember workspace={workspace}></WorkspaceMember>
     )
   }
 
