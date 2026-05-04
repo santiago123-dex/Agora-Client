@@ -3,15 +3,16 @@
 import Image from "next/image";
 import logo from "@/public/images/logo-cropped.png";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
 
 const navLinks = [
   {
     label: "Dashboard",
     href: "/dashboard",
     svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-dashboard-icon lucide-layout-dashboard">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect width="7" height="9" x="3" y="3" rx="1" />
         <rect width="7" height="5" x="14" y="3" rx="1" />
         <rect width="7" height="9" x="14" y="12" rx="1" />
@@ -23,7 +24,7 @@ const navLinks = [
     label: "Mis Espacios",
     href: "/dashboard/workspace",
     svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-book-open-icon lucide-book-open">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 7v14" />
         <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
       </svg>
@@ -33,7 +34,7 @@ const navLinks = [
     label: "Configuración",
     href: "/dashboard/configuration",
     svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cog-icon lucide-cog">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M11 10.27 7 3.34" />
         <path d="m11 13.73-4 6.93" />
         <path d="M12 22v-2" />
@@ -51,7 +52,87 @@ const navLinks = [
       </svg>
     ),
   },
+  {
+    label: "Suscripción",
+    href: "/dashboard/suscription",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    ),
+  },
 ];
+
+type CurrentUser = {
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
+  username?: string;
+};
+
+function SidebarUserBlock({
+  user,
+  isLoggingOut,
+  onLogout,
+}: {
+  user: CurrentUser | null;
+  isLoggingOut: boolean;
+  onLogout: () => Promise<void>;
+}) {
+  const displayName =
+    user?.name ||
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    user?.username ||
+    "Usuario";
+
+  const displayEmail = user?.email || "Sin correo";
+
+  const initials = useMemo(() => {
+    const source =
+      user?.name ||
+      [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+      user?.email ||
+      "U";
+
+    return source
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("");
+  }, [user]);
+
+  return (
+    <div className="mt-auto border-t border-white/10 px-1 py-4">
+      <div className="flex items-center gap-3 rounded-xl px-2 py-2 text-white">
+        <div className="flex h-10 w-20 items-center justify-center rounded-full bg-[#3f7a99] text-sm font-semibold">
+          {initials}
+        </div>
+
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{displayName}</p>
+          <p className="truncate text-xs text-white/65">{displayEmail}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onLogout}
+        disabled={isLoggingOut}
+        className="mt-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m9 21 6-6-6-6" />
+          <path d="M15 15H3" />
+          <path d="M3 3h12a2 2 0 0 1 2 2v4" />
+        </svg>
+        {isLoggingOut ? "Cerrando..." : "Cerrar Sesión"}
+      </button>
+    </div>
+  );
+}
 
 export default function LayoutDashboard({
   children,
@@ -59,8 +140,12 @@ export default function LayoutDashboard({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -76,35 +161,89 @@ export default function LayoutDashboard({
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        setIsLoadingUser(true);
+
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if(response.status === 401){
+          await clearSessionCookies();
+          router.push("/auth/login");
+          router.refresh();
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data?.message ?? "No se pudo cargar el usuario");
+        }
+
+        setUser(data);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await clearSessionCookies();
+      router.push("/auth/login");
+      router.refresh();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const renderNavLinks = (isMobile = false) =>
+    navLinks.map((link) => {
+      const isActive = pathname === link.href;
+
+      return (
+        <Link
+          key={link.href}
+          href={link.href}
+          onClick={isMobile ? () => setIsMobileMenuOpen(false) : undefined}
+          className={`inline-flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive
+              ? "bg-white text-[#275D79] font-semibold"
+              : "text-white/90 hover:bg-white/15 hover:text-white"
+            }`}
+        >
+          {link.svg}
+          {link.label}
+        </Link>
+      );
+    });
+
   return (
-
     <div className="flex min-h-screen flex-col bg-slate-50 lg:flex-row">
-      {/* Vista de deskstop*/}
       <aside className="hidden bg-[#275D79] lg:flex lg:min-h-screen lg:w-60 lg:shrink-0 lg:flex-col">
-
-        <Link href="/" className="flex h-16 items-center gap-2 border-b border-[#ededed]/10 px-3">
-          <Image src={logo} alt="Logo Agora" className="h-10 w-10 shrink-0 object-contain brightness-1000" />
-          <h2 className="text-xl font-bold text-white">Agora</h2>
+        <Link href="/" className="flex h-16 items-center gap-2 border-b border-white/10 px-4">
+          <Image src={logo} alt="Logo Agora" className="h-9 w-9 shrink-0 object-contain brightness-1000" />
+          <h2 className="text-lg font-semibold text-white">Agora</h2>
         </Link>
 
-        <div className="flex flex-col gap-2 px-3 py-4">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+        <div className="flex flex-1 flex-col px-3 py-4">
+          <div className="flex flex-col gap-2">{renderNavLinks()}</div>
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2.5 transition-colors ${isActive
-                  ? "bg-white font-semibold text-[#275D79]"
-                  : "text-white/90 hover:bg-white/15 hover:text-white"
-                  }`}
-              >
-                {link.svg}
-                {link.label}
-              </Link>
-            );
-          })}
+          {!isLoadingUser && (
+            <SidebarUserBlock
+              user={user}
+              isLoggingOut={isLoggingOut}
+              onLogout={handleLogout}
+            />
+          )}
         </div>
       </aside>
 
@@ -115,6 +254,7 @@ export default function LayoutDashboard({
               type="button"
               aria-label={isMobileMenuOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
               aria-expanded={isMobileMenuOpen}
+              //Esto es para accesibilidad, le dice al lector de pantalla que este boton controla el menu lateral
               aria-controls="mobile-dashboard-menu"
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] lg:hidden"
@@ -132,36 +272,33 @@ export default function LayoutDashboard({
                 </svg>
               )}
             </button>
-            <span className="text-[18px] text-center font-semibold text-[#275D79] sm:hidden">Agora</span>
-            <input
-              type="text"
-              className="hidden w-full max-w-full rounded-md border border-[#dadada] bg-[#ddecf1] px-4 py-1 text-[#275d79] placeholder:text-[#275D79] focus:border-[#dadada] focus:outline-none focus:ring-0 sm:block sm:max-w-sm sm:px-6"
-              placeholder="/Configuration"
-            />
+
+            <span className="text-[18px] font-semibold text-[#275D79] sm:hidden">Agora</span>
           </nav>
         </header>
+
         <main>{children}</main>
       </div>
-      {/*Parte mobile*/}
+
       <div
         className={`fixed inset-0 z-40 bg-black/35 transition-opacity duration-300 lg:hidden ${isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         onClick={() => setIsMobileMenuOpen(false)}
         aria-hidden="true"
       />
+
       <aside
         id="mobile-dashboard-menu"
         aria-hidden={!isMobileMenuOpen}
         className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82vw] bg-[#275D79] shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-[#ededed]/10 px-3">
-         
-            <Link href="/" className="flex items-center gap-2">
-              <Image src={logo} alt="Logo Agora" className="h-10 w-10 shrink-0 object-contain brightness-1000" />
-              <h2 className="text-xl font-bold text-white">Agora</h2>
-            </Link>
-         
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src={logo} alt="Logo Agora" className="h-9 w-9 shrink-0 object-contain brightness-1000" />
+            <h2 className="text-lg font-semibold text-white">Agora</h2>
+          </Link>
+
           <button
             type="button"
             aria-label="Cerrar menú lateral"
@@ -174,25 +311,17 @@ export default function LayoutDashboard({
             </svg>
           </button>
         </div>
-        <div className="flex flex-col gap-2 px-3 py-4">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2.5 transition-colors ${isActive
-                  ? "bg-white font-semibold text-[#275D79]"
-                  : "text-white/90 hover:bg-white/15 hover:text-white"
-                  }`}
-              >
-                {link.svg}
-                {link.label}
-              </Link>
-            );
-          })}
+        <div className="flex h-[calc(100%-4rem)] flex-col px-3 py-4">
+          <div className="flex flex-col gap-2">{renderNavLinks(true)}</div>
+
+          {!isLoadingUser && (
+            <SidebarUserBlock
+              user={user}
+              isLoggingOut={isLoggingOut}
+              onLogout={handleLogout}
+            />
+          )}
         </div>
       </aside>
     </div>
