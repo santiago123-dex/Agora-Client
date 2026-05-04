@@ -1,13 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { refreshAccessToken } from "@/app/src/lib/api/auth";
-
-const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-};
+import { authCookieOptions } from "@/app/src/lib/auth/cookie-options";
 
 export async function POST() {
     const cookieStore = await cookies();
@@ -27,13 +21,13 @@ export async function POST() {
         });
 
         cookieStore.set("agora_access_token", response.access_token, {
-            ...cookieOptions,
+            ...authCookieOptions,
             maxAge: 60 * 60,
         });
 
         if (response.refresh_token) {
             cookieStore.set("agora_refresh_token", response.refresh_token, {
-                ...cookieOptions,
+                ...authCookieOptions,
                 maxAge: 60 * 60 * 24 * 30,
             });
         }
@@ -41,12 +35,12 @@ export async function POST() {
         return NextResponse.json({ ok: true });
     } catch (error) {
         cookieStore.set("agora_access_token", "", {
-            ...cookieOptions,
+            ...authCookieOptions,
             maxAge: 0,
         });
 
         cookieStore.set("agora_refresh_token", "", {
-            ...cookieOptions,
+            ...authCookieOptions,
             maxAge: 0,
         });
 
