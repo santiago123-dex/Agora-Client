@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -15,10 +16,23 @@ import {
 } from "lucide-react";
 import type { WorkspaceAdminTask, AdminWorkspace } from "../../data/workspace";
 import { useSearchParams } from "next/navigation";
+import { updateWorkspace } from "@/app/src/lib/api/workspaces";
 
 type Props = {
   workspace: AdminWorkspace;
 };
+
+const colors = [
+  "#EAB308",
+  "#84CC16",
+  "#10B981",
+  "#DC2626",
+  "#2563EB",
+  "#0EA5E9",
+  "#A21CAF",
+  "#EC4899",
+];
+
 
 function TaskIcon({ task }: { task: WorkspaceAdminTask }) {
   if (task.taskState === "graded") {
@@ -45,6 +59,62 @@ function TaskIcon({ task }: { task: WorkspaceAdminTask }) {
 export default function WorkspaceAdmin({ workspace }: Props) {
   const [tab, setTab] = useState<"tareas" | "miembros">("tareas");
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editedWorkspace, setEditedWorkspace] = useState({
+    title: workspace.title,
+    description: workspace.description ?? "",
+    accentColor: workspace.accentColor,
+  });
+
+  const [editTitle, setEditTitle] = useState(workspace.title);
+  const [editDescription, setEditDescription] = useState(workspace.description ?? "");
+  const [editColor, setEditColor] = useState(workspace.accentColor);
+
+  const openEditModal = () => {
+    setEditTitle(editedWorkspace.title);
+    setEditDescription(editedWorkspace.description);
+    setEditColor(editedWorkspace.accentColor);
+    setIsEditing(true);
+  };
+  const handleEditWorkspace = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setIsSavingEdit(true);
+    setEditError(null);
+
+    try {
+      await updateWorkspace(workspace.id, {
+        name: editTitle.trim(),
+        description: editDescription.trim(),
+        accentColor: editColor,
+      });
+
+      setEditedWorkspace({
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        accentColor: editColor,
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      setEditError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar el workspace"
+      );
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   const stats = workspace.adminStats;
   const toGrade = workspace.activitiesToGrade ?? [];
@@ -63,8 +133,8 @@ export default function WorkspaceAdmin({ workspace }: Props) {
     }
   };
 
-  {/*redireccion, si entra al espacio desde workspace lo devuelve a la ruta de workspace si no al dashboard*/}
-  {/*osea el seacrhParams va a leer la url la almacena y el from lo que hace es decir, de searchParams trae lo del from*/}
+  {/*redireccion, si entra al espacio desde workspace lo devuelve a la ruta de workspace si no al dashboard*/ }
+  {/*osea el seacrhParams va a leer la url la almacena y el from lo que hace es decir, de searchParams trae lo del from*/ }
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
 
@@ -82,7 +152,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
       <div className="mx-auto w-full max-w-5xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-[0_20px_50px_rgba(37,93,121,0.35)]"
-          style={{ background: workspace.accentColor }}
+          style={{ background: editedWorkspace.accentColor }}
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.3),transparent_45%)]" />
           <div className="relative z-10">
@@ -97,11 +167,121 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
+                  onClick={openEditModal}
                   aria-label="Editar espacio"
                   className="rounded-lg border border-white/20 bg-white/10 p-2 text-white/95 backdrop-blur-sm transition hover:bg-white/20"
                 >
-                  <Pencil className="h-5 w-5" />
+                  <Pencil className="h-4 w-4" />
                 </button>
+                {isMounted && isEditing
+                  ? createPortal(
+                    <div className="fixed inset-0 z-9999 flex min-h-screen items-center justify-center bg-black/40 px-4 py-6">
+                      <form
+                        onSubmit={handleEditWorkspace}
+                        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-4 text-slate-900 shadow-2xl sm:p-6"
+                      >
+                        <div className="relative mb-4 flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => setIsEditing(false)}
+                            className="absolute left-0 rounded-full p-2 hover:bg-gray-100"
+                          >
+                            <ArrowLeft className="h-6 w-6 text-black" />
+                          </button>
+
+                          <h2 className="text-center text-xl font-semibold">
+                            Editar espacio
+                          </h2>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-300 p-4">
+                          <div className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
+                            <div
+                              className="h-16 w-full"
+                              style={{ backgroundColor: editColor }}
+                            />
+
+                            <div className="px-3 py-2">
+                              <h3 className="text-lg font-semibold">
+                                {editTitle || "Nombre del espacio"}
+                              </h3>
+
+                              <p className="text-sm text-slate-600">
+                                {editDescription || "Descripción del espacio de trabajo"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex flex-col gap-2">
+                            <label className="text-sm font-medium text-slate-700">
+                              Nombre del espacio
+                            </label>
+
+                            <input
+                              type="text"
+                              value={editTitle}
+                              onChange={(event) => setEditTitle(event.target.value)}
+                              placeholder="Nombre del espacio"
+                              required
+                              minLength={3}
+                              className="w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 focus:outline-none"
+                            />
+
+                            <label className="mt-2 text-sm font-medium text-slate-700">
+                              Descripción
+                            </label>
+
+                            <textarea
+                              value={editDescription}
+                              onChange={(event) => setEditDescription(event.target.value)}
+                              rows={4}
+                              placeholder="Escribe la descripción para tu espacio de trabajo"
+                              required
+                              className="h-24 w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 outline-none"
+                            />
+                          </div>
+
+                          <div className="mt-5 flex flex-wrap items-center gap-3">
+                            {colors.map((color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() => setEditColor(color)}
+                                className={`h-8 w-8 rounded-md border-2 ${editColor === color ? "border-blue-500" : "border-transparent"
+                                  }`}
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                          {editError ? (
+                            <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                              {editError}
+                            </p>
+                          ) : null}
+
+                          <div className="mt-5 flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsEditing(false)}
+                              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                            >
+                              Cancelar
+                            </button>
+
+                            <button
+                              type="submit"
+                              disabled={isSavingEdit}
+                              className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f4a61]"
+                            >
+                              {isSavingEdit ? "Guardando..." : "Guardar cambios"}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>,
+                    document.body
+                  )
+                  : null}
                 <div className="relative flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/15 px-3 py-1.5 pl-4 text-sm font-medium backdrop-blur-sm">
                   <span className="break-all">Código: {code}</span>
                   <button
@@ -126,10 +306,10 @@ export default function WorkspaceAdmin({ workspace }: Props) {
                 Creador
               </span>
               <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                {workspace.title}
+                {editedWorkspace.title}
               </h1>
               <p className="mt-2 max-w-3xl text-base text-white/90 sm:text-lg">
-                {workspace.description}
+                {editedWorkspace.description}
               </p>
 
               {stats ? (
@@ -161,11 +341,10 @@ export default function WorkspaceAdmin({ workspace }: Props) {
             <button
               type="button"
               onClick={() => setTab("tareas")}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${
-                tab === "tareas"
-                  ? "bg-[#275D79] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${tab === "tareas"
+                ? "bg-[#275D79] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+                }`}
             >
               <FileText className="h-4 w-4" aria-hidden />
               Tareas
@@ -173,11 +352,10 @@ export default function WorkspaceAdmin({ workspace }: Props) {
             <button
               type="button"
               onClick={() => setTab("miembros")}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${
-                tab === "miembros"
-                  ? "bg-[#275D79] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${tab === "miembros"
+                ? "bg-[#275D79] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+                }`}
             >
               <Users className="h-4 w-4" aria-hidden />
               Miembros

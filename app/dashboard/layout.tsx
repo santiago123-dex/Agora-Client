@@ -107,7 +107,7 @@ function SidebarUserBlock({
   return (
     <div className="mt-auto border-t border-white/10 px-1 py-4">
       <div className="flex items-center gap-3 rounded-xl px-2 py-2 text-white">
-        <div className="flex h-10 w-20 items-center justify-center rounded-full bg-[#3f7a99] text-sm font-semibold">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3f7a99] text-sm font-semibold">
           {initials}
         </div>
 

@@ -10,7 +10,6 @@ import {
   Copy,
   FileText,
   Paperclip,
-  Pencil,
   Send,
   Upload,
   X,
@@ -140,13 +139,6 @@ export default function WorkspaceMember({ workspace }: Props) {
                 {backLabel}
               </Link>
               <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  aria-label="Editar espacio"
-                  className="rounded-lg border border-white/20 bg-white/10 p-2 text-white/95 backdrop-blur-sm transition hover:bg-white/20"
-                >
-                  <Pencil className="h-5 w-5" />
-                </button>
                 <div className="relative flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/15 px-3 py-1.5 pl-4 text-sm font-medium backdrop-blur-sm">
                   <span className="break-all">Código: {code}</span>
                   <button

@@ -77,14 +77,6 @@ export default function LoginForm() {
 
     return (
         <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10">
-            <Image
-                src={backgroundFormLogin}
-                alt=""
-                fill
-                priority
-                aria-hidden="true"
-                className="object-cover object-center"
-            />
 
             <div className="z-10 w-full max-w-120 rounded-[1.6rem] bg-[#2c6888] px-6 py-10 text-white shadow-[0_24px_70px_rgba(16,57,80,0.28)] sm:px-7">
                 <div className="flex flex-col items-center text-center">
@@ -98,12 +90,12 @@ export default function LoginForm() {
 
                     <h1 className="text-[2rem] font-bold tracking-[0.08em]">AGORA</h1>
                     <p className="mt-2 text-2xl font-semibold">Bienvenidos a Agora</p>
-                    <p className="mt-2 text-[1.9rem] font-bold leading-tight">
-                        Login in your account to continue
+                    <p className="mt-2 text-[1.5rem] font-bold leading-tight">
+                        Inicia sesión en tu cuenta para continuar
                     </p>
                 </div>
 
-                <form className="mt-10 space-y-4" onSubmit={handleSubmit}>
+                <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
                     <label className="block">
                         <span className="sr-only">Email</span>
                         <input
