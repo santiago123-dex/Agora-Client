@@ -28,7 +28,7 @@ export default function WorkspacesPage() {
   const [showCreatedWorkspaces, setShowCreatedWorkspaces] = useState(true);
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#48f");
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [description, setDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [workspaces, setWorkspaces] = useState<WorkspaceCard[]>([]);
@@ -70,6 +70,7 @@ export default function WorkspacesPage() {
 
       setNombre("");
       setDescription("");
+      setSelectedColor(colors[0]);
       setOpenModalCreate(false);
       await loadWorkspaces();
       setShowCreatedWorkspaces(true);

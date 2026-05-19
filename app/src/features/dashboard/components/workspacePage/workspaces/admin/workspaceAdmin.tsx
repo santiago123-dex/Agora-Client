@@ -12,11 +12,12 @@ import {
   FileText,
   Pencil,
   Send,
+  Trash2,
   Users,
 } from "lucide-react";
 import type { WorkspaceAdminTask, AdminWorkspace } from "../../data/workspace";
-import { useSearchParams } from "next/navigation";
-import { updateWorkspace } from "@/app/src/lib/api/workspaces";
+import { useRouter, useSearchParams } from "next/navigation";
+import { deleteWorkspace, updateWorkspace } from "@/app/src/lib/api/workspaces";
 
 type Props = {
   workspace: AdminWorkspace;
@@ -110,11 +111,58 @@ export default function WorkspaceAdmin({ workspace }: Props) {
     }
   };
 
+  // sección eliminar
+
+  const router = useRouter();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // redireccion: si viene desde dashboard lo manda ahí, si no al listado de workspaces
+  // searchParams lee la URL, y from extrae el valor del query param "from"
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+
+  const backHref =
+    from === "dashboard" ? "/dashboard" : "/dashboard/workspace";
+
+  const backLabel =
+    from === "dashboard"
+      ? "Volver al dashboard"
+      : "Volver a los workspaces";
+
+  const openDeleteModal = () => {
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setIsDeleteModalOpen(false);
+    setDeleteError(null);
+  };
+
+  const confirmDeleteWorkspace = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await deleteWorkspace(workspace.id);
+      setIsDeleteModalOpen(false);
+      router.push(backHref);
+      router.refresh();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error ? error.message : "No se pudo eliminar el espacio"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const stats = workspace.adminStats;
   const toGrade = workspace.activitiesToGrade ?? [];
@@ -132,19 +180,6 @@ export default function WorkspaceAdmin({ workspace }: Props) {
       /* ignore */
     }
   };
-
-  {/*redireccion, si entra al espacio desde workspace lo devuelve a la ruta de workspace si no al dashboard*/ }
-  {/*osea el seacrhParams va a leer la url la almacena y el from lo que hace es decir, de searchParams trae lo del from*/ }
-  const searchParams = useSearchParams();
-  const from = searchParams.get("from");
-
-  const backHref =
-    from === "dashboard" ? "/dashboard" : "/dashboard/workspace";
-
-  const backLabel =
-    from === "dashboard"
-      ? "Volver al dashboard"
-      : "Volver a los workspaces";
 
 
   return (
@@ -165,6 +200,81 @@ export default function WorkspaceAdmin({ workspace }: Props) {
                 {backLabel}
               </Link>
               <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={openDeleteModal}
+                  aria-label="Eliminar espacio"
+                  className="rounded-lg border border-red-300/50 bg-red-500/20 p-2 text-white transition hover:bg-red-500/40"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+
+                {isDeleteModalOpen
+                  ? createPortal(
+                    <div className="fixed inset-0 z-9999 flex min-h-screen items-center justify-center bg-black/40 px-4 py-6">
+                      {/* clic fuera = cancelar */}
+                      <button
+                        type="button"
+                        aria-label="Cerrar"
+                        className="absolute inset-0"
+                        onClick={closeDeleteModal}
+                      />
+
+                      <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-workspace-title"
+                        className="flex flex-col items-center relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                          <Trash2 className="h-6 w-6 text-red-600" aria-hidden />
+                        </div>
+
+                        <h2
+                          id="delete-workspace-title"
+                          className="mt-4 text-center text-xl font-semibold text-slate-900"
+                        >
+                          ¿Eliminar este espacio?
+                        </h2>
+
+                        <p className="mt-2 text-center text-sm text-slate-600">
+                          Vas a eliminar{" "}
+                          <span className="font-semibold text-slate-900">
+                            {editedWorkspace.title}
+                          </span>
+                          . Se borrarán miembros, tareas y entregas. Esta acción no se puede deshacer.
+                        </p>
+
+                        {deleteError ? (
+                          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            {deleteError}
+                          </p>
+                        ) : null}
+
+                        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                          <button
+                            type="button"
+                            onClick={closeDeleteModal}
+                            disabled={isDeleting}
+                            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={confirmDeleteWorkspace}
+                            disabled={isDeleting}
+                            className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {isDeleting ? "Eliminando..." : "Sí, eliminar espacio"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
+                  )
+                  : null}
                 <button
                   type="button"
                   onClick={openEditModal}
@@ -372,117 +482,119 @@ export default function WorkspaceAdmin({ workspace }: Props) {
           ) : null}
         </div>
 
-        {tab === "tareas" ? (
-          <div className="mt-8 space-y-10">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Actividades por calificar</h2>
-              <div className="mt-4 space-y-4">
-                {toGrade.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
-                    No hay actividades pendientes de calificar.
-                  </p>
-                ) : (
-                  toGrade.map((task) => (
-                    <article
-                      key={task.id}
-                      className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]"
-                    >
-                      <div className="flex gap-4 p-5">
+        {
+          tab === "tareas" ? (
+            <div className="mt-8 space-y-10">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Actividades por calificar</h2>
+                <div className="mt-4 space-y-4">
+                  {toGrade.length === 0 ? (
+                    <p className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
+                      No hay actividades pendientes de calificar.
+                    </p>
+                  ) : (
+                    toGrade.map((task) => (
+                      <article
+                        key={task.id}
+                        className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]"
+                      >
+                        <div className="flex gap-4 p-5">
+                          <TaskIcon task={task} />
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold text-slate-900">{task.title}</h3>
+                            <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                              {task.description}
+                            </p>
+                            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                {task.dueLabel}
+                              </span>
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                {task.points} pts
+                              </span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                <Send className="h-3.5 w-3.5" aria-hidden />
+                                {task.doneCount}/{task.totalCount}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        {task.gradeButtonLabel ? (
+                          <button
+                            type="button"
+                            className="w-full border-t border-slate-100 bg-sky-50 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100"
+                          >
+                            {task.gradeButtonLabel}
+                          </button>
+                        ) : null}
+                      </article>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Actividades calificadas</h2>
+                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {graded.length === 0 ? (
+                    <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
+                      No hay actividades calificadas aún.
+                    </p>
+                  ) : (
+                    graded.map((task) => (
+                      <article
+                        key={task.id}
+                        className="flex gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)]"
+                      >
                         <TaskIcon task={task} />
                         <div className="min-w-0 flex-1">
                           <h3 className="font-semibold text-slate-900">{task.title}</h3>
-                          <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                          <p className="mt-1 text-sm text-slate-600 line-clamp-2">
                             {task.description}
                           </p>
-                          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                              {task.dueLabel}
-                            </span>
-                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                              {task.points} pts
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                              <Send className="h-3.5 w-3.5" aria-hidden />
+                          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                            <span>{task.dueLabel}</span>
+                            <span>{task.points} pts</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Send className="h-3 w-3" aria-hidden />
                               {task.doneCount}/{task.totalCount}
                             </span>
                           </div>
                         </div>
-                      </div>
-                      {task.gradeButtonLabel ? (
-                        <button
-                          type="button"
-                          className="w-full border-t border-slate-100 bg-sky-50 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100"
-                        >
-                          {task.gradeButtonLabel}
-                        </button>
-                      ) : null}
-                    </article>
-                  ))
-                )}
+                      </article>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
-
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Actividades calificadas</h2>
-              <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {graded.length === 0 ? (
-                  <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
-                    No hay actividades calificadas aún.
-                  </p>
-                ) : (
-                  graded.map((task) => (
-                    <article
-                      key={task.id}
-                      className="flex gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)]"
-                    >
-                      <TaskIcon task={task} />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-slate-900">{task.title}</h3>
-                        <p className="mt-1 text-sm text-slate-600 line-clamp-2">
-                          {task.description}
-                        </p>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                          <span>{task.dueLabel}</span>
-                          <span>{task.points} pts</span>
-                          <span className="inline-flex items-center gap-1">
-                            <Send className="h-3 w-3" aria-hidden />
-                            {task.doneCount}/{task.totalCount}
-                          </span>
-                        </div>
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-8">
-            <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
-              {members.length === 0 ? (
-                <li className="px-4 py-12 text-center text-sm text-slate-500">
-                  No hay miembros en el mock de este espacio.
-                </li>
-              ) : (
-                members.map((m) => (
-                  <li
-                    key={m.id}
-                    className="flex flex-col gap-1 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-200/80 text-sm font-semibold text-slate-700">
-                        {m.name.slice(0, 1)}
-                      </span>
-                      <span className="font-medium text-slate-900">{m.name}</span>
-                    </div>
-                    <span className="text-sm text-slate-500">{m.email}</span>
+          ) : (
+            <div className="mt-8">
+              <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                {members.length === 0 ? (
+                  <li className="px-4 py-12 text-center text-sm text-slate-500">
+                    No hay miembros en el mock de este espacio.
                   </li>
-                ))
-              )}
-            </ul>
-          </div>
-        )}
-      </div>
-    </section>
+                ) : (
+                  members.map((m) => (
+                    <li
+                      key={m.id}
+                      className="flex flex-col gap-1 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-200/80 text-sm font-semibold text-slate-700">
+                          {m.name.slice(0, 1)}
+                        </span>
+                        <span className="font-medium text-slate-900">{m.name}</span>
+                      </div>
+                      <span className="text-sm text-slate-500">{m.email}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )
+        }
+      </div >
+    </section >
   );
 }

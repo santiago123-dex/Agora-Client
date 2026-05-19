@@ -68,6 +68,12 @@ export function getWorkspaceById(id: string | number) {
   return localFetch<WorkspaceWithRole>(`/api/workspaces/${id}`);
 }
 
+export function getWorkspaceInvitationCode(id: string | number) {
+  return localFetch<{ workspaceId: number; code: string }>(
+    `/api/workspaces/${id}/invitation-code`
+  );
+}
+
 export function createWorkspace(payload: CreateWorkspacePayload) {
   return localFetch<WorkspaceWithRole>("/api/workspaces", {
     method: "POST",
@@ -86,5 +92,11 @@ export function joinWorkspace(code: string) {
   return localFetch<WorkspaceWithRole>("/api/workspaces/join", {
     method: "POST",
     body: JSON.stringify({ code }),
+  });
+}
+
+export function deleteWorkspace(id: string | number) {
+  return localFetch<void>(`/api/workspaces/${id}`, {
+    method: "DELETE",
   });
 }

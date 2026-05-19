@@ -23,7 +23,7 @@ const currentAccount = {
 export default function DashboardHeader() {
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [openModalJoin, setOpenModalJoin] = useState(false);
-  const [selectedColor, setSelectedColor] = useState("#48f");
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [nombre, setNombre] = useState("");
   const [description, setDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
@@ -48,6 +48,7 @@ export default function DashboardHeader() {
       });
       setNombre("");
       setDescription("");
+      setSelectedColor(colors[0]);
       setOpenModalCreate(false);
       refreshDashboard();
     } catch (error) {

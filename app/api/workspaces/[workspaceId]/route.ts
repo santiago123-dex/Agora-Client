@@ -77,7 +77,7 @@ export async function PATCH(request: Request, { params }: Props) {
     ])
 
     const membership = memberships.find(
-      (item) => String(item.workspaceId) === String(updatedWorkspace.id)
+      (item) => String(item.workspaceId) === String(currentWorkspace.id)
     );
 
     if (!membership) {
@@ -121,6 +121,51 @@ export async function PATCH(request: Request, { params }: Props) {
       {
         message:
           error instanceof Error ? error.message : "No se pudo actualizar el workspace",
+      },
+      { status: 400 }
+    );
+  }
+}
+
+export async function DELETE(_request: Request, { params }: Props) {
+  try {
+    const { workspaceId } = await params;
+
+    const memberships = await serverApiFetch<WorkspaceMemberResponse[]>(
+      "/workspaces/member/user",
+      { method: "GET" }
+    );
+
+    const membership = memberships.find(
+      (item) => String(item.workspaceId) === String(workspaceId)
+    );
+
+    if (!membership) {
+      return NextResponse.json(
+        { message: "No perteneces a este workspace" },
+        { status: 403 }
+      );
+    }
+
+    if (membership.role !== "ADMIN") {
+      return NextResponse.json(
+        { message: "Solo un administrador puede eliminar este espacio" },
+        { status: 403 }
+      );
+    }
+
+    await serverApiFetch<void>(`/workspaces/deleteWorkspace/${workspaceId}`, {
+      method: "DELETE",
+    });
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "No se pudo eliminar el workspace",
       },
       { status: 400 }
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getWorkspaceById } from "@/app/src/lib/api/workspaces";
+import { getWorkspaceById, getWorkspaceInvitationCode } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "../../data/workspace-api";
 import WorkspaceAdmin from "../admin/workspaceAdmin";
 import WorkspaceMember from "../member/workspaceMember";
@@ -22,8 +22,20 @@ export default function WorkspaceDetails({ workspaceId }: WorkspaceDetailsProps)
       setError(null);
 
       try {
-        const response = await getWorkspaceById(workspaceId);
-        setWorkspace(workspaceToCard(response));
+        const [response, invitation] = await Promise.all([
+          getWorkspaceById(workspaceId),
+          getWorkspaceInvitationCode(workspaceId),
+        ]);
+
+        setWorkspace(
+          workspaceToCard({
+            ...response,
+            data: {
+              ...(response.data ?? {}),
+              code: invitation.code,
+            },
+          })
+        );
       } catch (error) {
         setError(error instanceof Error ? error.message : "No se pudo cargar el workspace");
       } finally {
