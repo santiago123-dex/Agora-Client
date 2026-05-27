@@ -40,13 +40,13 @@ export default function   NavbarLanding() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/login"
+            href="/auth/login"
             className="inline-flex h-10 min-w-[130px] items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-slate-50 sm:px-5 sm:text-sm"
           >
             Iniciar Sesion
           </Link>
           <Link
-            href="/register"
+            href="/auth/register"
             className="inline-flex h-10 min-w-[130px] items-center justify-center rounded-xl bg-[#2f6787] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 sm:px-5 sm:py-2.5 sm:text-sm"
           >
             Comenzar Gratis

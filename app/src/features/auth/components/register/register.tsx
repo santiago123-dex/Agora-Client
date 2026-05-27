@@ -1,17 +1,74 @@
+"use client";
+
 import Image from "next/image";
 import logo from "@/app/src/features/auth/components/assets/logo.png"
 import backgroundFormRegister from "@/app/src/features/auth/components/assets/backgroundFormRegister.svg"
 import Link from "next/link";
-
-
-const fields = [
-  { label: "First name", type: "text", name: "firstName" },
-  { label: "Last name", type: "text", name: "lastName" },
-  { label: "Email", type: "email", name: "email" },
-  { label: "Password", type: "password", name: "password" },
-];
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { register } from "@/app/src/lib/api/auth";
 
 export default function RegisterForm() {
+
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const router = useRouter();
+
+  const handleGoogleRegister = () => {
+
+    if (!googleClientId || !googleRedirectUri) {
+      setError("Faltan las variables de entorno de Google OAuth.");
+      return;
+    }
+
+    const state = crypto.randomUUID();
+    sessionStorage.setItem("google_oauth_state", state);
+
+    const params = new URLSearchParams({
+      client_id: googleClientId,
+      redirect_uri: googleRedirectUri,
+      response_type: "code",
+      scope: "openid email profile",
+      state,
+      access_type: "offline",
+      prompt: "consent",
+    });
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+
+  }
+
+  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (event) => {
+    // prevenir la recarga de la pagina 
+    event.preventDefault();
+    // establecer el estado de envio 
+    setIsSubmitting(true);
+    // limpiar errores 
+    setError("");
+
+    try {
+      await register(formData);
+      // redirigir al login con un mensaje de exito
+      router.push("/auth/login?registered=1");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo crear la cuenta");
+    } finally {
+      setIsSubmitting(false);
+    }
+
+  }
+
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10">
       <Image
@@ -48,45 +105,85 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <form className="mt-10 space-y-4">
-          {fields.map((field) => (
-            <label key={field.name} className="block">
-              <span className="sr-only">{field.label}</span>
-              <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.label}
-                className="h-11 w-full rounded-lg border border-white/45 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/70 transition focus:border-white focus:ring-2 focus:ring-white/25"
-              />
-            </label>
-          ))}
-
-          <div className="mt-2 h-11 w-full rounded-full bg-white text-sm font-medium text-slate-700 transition hover:bg-slate-100 flex cursor-pointer">
-            <Link href="/dashboard" className="w-full text-center h-full flex justify-center items-center">
-
-              Create account
-
-            </Link>
+        <form className="mt-10 space-y-4" onSubmit={handleSubmit}>
+          <label className="block">
+            <span className="sr-only">First name</span>
+            <input
+              type="text"
+              name="firstName"
+              placeholder="First name"
+              value={formData.firstName}
+              onChange={(event) =>
+                // prev es el estado anterior
+                // lo copia y cambia el valor de firstName
+                setFormData((prev) => ({ ...prev, firstName: event.target.value }))
+              }
+              required
+              className="h-11 w-full rounded-lg border border-white/45 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/70 transition focus:border-white focus:ring-2 focus:ring-white/25"
+            />
+          </label>
+          <label className="block">
+            <span className="sr-only">Last name</span>
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Last name"
+              value={formData.lastName}
+              onChange={(event) =>
+                setFormData((prev) => ({ ...prev, lastName: event.target.value }))
+              }
+              required
+              className="h-11 w-full rounded-lg border border-white/45 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/70 transition focus:border-white focus:ring-2 focus:ring-white/25"
+            />
+          </label>
+          <label className="block">
+            <span className="sr-only">Email</span>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(event) =>
+                setFormData((prev) => ({ ...prev, email: event.target.value }))
+              }
+              required
+              className="h-11 w-full rounded-lg border border-white/45 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/70 transition focus:border-white focus:ring-2 focus:ring-white/25"
+            />
+          </label>
+          <label className="block">
+            <span className="sr-only">Password</span>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={(event) =>
+                setFormData((prev) => ({ ...prev, password: event.target.value }))
+              }
+              required
+              className="h-11 w-full rounded-lg border border-white/45 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/70 transition focus:border-white focus:ring-2 focus:ring-white/25"
+            />
+          </label>
+          {error ? <p className="text-sm text-rose-200">{error}</p> : null}
+          <div className="mt-2 h-11 w-full text-sm font-medium text-slate-700 flex">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-white text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-200"
+            >
+                {isSubmitting ? "Creating account..." : "Create account"}
+            </button>
           </div>
         </form>
 
         <div className="mt-12 flex justify-center">
-          <Link href="/">
             <button
               type="button"
+              onClick={handleGoogleRegister}
               className="inline-flex h-11 items-center justify-center gap-3 rounded-full bg-white px-5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-100"
             >
-              <span className="text-xl leading-none">
-                <span className="text-[#EA4335]">G</span>
-                <span className="text-[#FBBC05]">o</span>
-                <span className="text-[#34A853]">o</span>
-                <span className="text-[#4285F4]">g</span>
-                <span className="text-[#EA4335]">l</span>
-                <span className="text-[#4285F4]">e</span>
-              </span>
               Continue with Google
             </button>
-          </Link>
         </div>
       </div>
     </section>
