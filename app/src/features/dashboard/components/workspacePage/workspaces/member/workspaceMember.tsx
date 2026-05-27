@@ -16,8 +16,11 @@ import {
 } from "lucide-react";
 
 import type { MemberWorkspace, WorkspaceMemberTask } from "../../data/workspace";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { createSubmission } from "@/app/src/lib/api/submissions";
+import type { SubmissionFilePayload } from "@/app/src/lib/api/submissions";
+import { useWorkspaceMemberAssignments } from "./hooks/useWorkspaceMemberAssignments";
 
 type Props = {
   workspace: MemberWorkspace;
@@ -25,6 +28,7 @@ type Props = {
 
 export default function WorkspaceMember({ workspace }: Props) {
 
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [submit, setSubmit] = useState(false);
   //guarda los datos de la tarea que el usuario hizo click
@@ -33,12 +37,20 @@ export default function WorkspaceMember({ workspace }: Props) {
   const [deliveryText, setDeliveryText] = useState("");
   //Guarda los archivos seleccionados por el usuario, empieza vacio
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [isSubmittingDelivery, setIsSubmittingDelivery] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   //Referencia al input de archivos
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const stats = workspace.memberStats;
   const code = workspace.inviteCode ?? "-";
-  const tasks = workspace.memberTask ?? [];
+  const {
+    memberTasks,
+    isLoadingMemberTasks,
+    memberTasksError,
+    setMemberTasks,
+  } = useWorkspaceMemberAssignments(workspace.id, workspace.memberTask ?? []);
+  const tasks = memberTasks;
 
   //Verificamos si el usuario agrego texto o archivo para habilitar el boton de enviar
   const hasDeliveryContent =
@@ -71,10 +83,13 @@ export default function WorkspaceMember({ workspace }: Props) {
   };
 
   const resetSubmitModal = () => {
+    if (isSubmittingDelivery) return;
+
     setSubmit(false);
     setSelectedTask(null);
     setDeliveryText("");
     setAttachedFiles([]);
+    setSubmitError(null);
   };
 
   // Cada que cambie el input de archivos, se ejecuta esta funcion
@@ -99,6 +114,69 @@ export default function WorkspaceMember({ workspace }: Props) {
 
     //Limpia el input
     event.target.value = "";
+  };
+
+  const fileToPayload = (file: File) =>
+    new Promise<SubmissionFilePayload>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        resolve({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          dataUrl: typeof reader.result === "string" ? reader.result : undefined,
+        });
+      };
+
+      reader.onerror = () => reject(new Error(`No se pudo leer ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+
+  const handleSubmitDelivery = async () => {
+    if (!selectedTask || !hasDeliveryContent || isSubmittingDelivery) return;
+
+    setIsSubmittingDelivery(true);
+    setSubmitError(null);
+
+    try {
+      const filesPayload = await Promise.all(attachedFiles.map(fileToPayload));
+
+      await createSubmission({
+        assignmentId: Number(selectedTask.id),
+        content: {
+          text: deliveryText.trim(),
+        },
+        files: {
+          attachments: filesPayload,
+        },
+      });
+
+      setMemberTasks((currentTasks) =>
+        currentTasks.map((task) =>
+          task.id === selectedTask.id
+            ? {
+                ...task,
+                taskState: "submitted",
+                actionLabel: undefined,
+                gradeLabel: "Entregada",
+              }
+            : task,
+        ),
+      );
+
+      setSubmit(false);
+      setSelectedTask(null);
+      setDeliveryText("");
+      setAttachedFiles([]);
+      router.refresh();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "No se pudo enviar la entrega",
+      );
+    } finally {
+      setIsSubmittingDelivery(false);
+    }
   };
 
   // Elimina un archivo del estado
@@ -174,7 +252,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                   {(
                     [
                       ["Miembros", String(stats.members)],
-                      ["Tareas", String(stats.tasks)],
+                      ["Tareas", String(tasks.length || stats.tasks)],
                       ["Por calificar", String(stats.toGrade)],
                       ["Completadas", stats.completedLabel],
                     ] as const
@@ -203,6 +281,18 @@ export default function WorkspaceMember({ workspace }: Props) {
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl">
+        {isLoadingMemberTasks ? (
+          <p className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+            Cargando tareas guardadas...
+          </p>
+        ) : null}
+
+        {memberTasksError ? (
+          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {memberTasksError}
+          </p>
+        ) : null}
+
         <div className="grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 lg:grid-cols-3">
           {tasks.length === 0 ? (
             <p className="col-span-full w-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
@@ -243,6 +333,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                       type="button"
                       onClick={() => {
                         setSelectedTask(task);
+                        setSubmitError(null);
                         setSubmit(true);
                       }}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f5a73] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(31,90,115,0.25)] transition hover:bg-[#184a5f]"
@@ -250,6 +341,13 @@ export default function WorkspaceMember({ workspace }: Props) {
                       <Upload className="h-4 w-4" aria-hidden />
                       {task.actionLabel}
                     </button>
+                  </div>
+                ) : task.gradeLabel ? (
+                  <div className="mt-auto px-5 pb-5">
+                    <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+                      <Check className="h-4 w-4" aria-hidden />
+                      {task.gradeLabel}
+                    </span>
                   </div>
                 ) : null}
               </article>
@@ -278,7 +376,8 @@ export default function WorkspaceMember({ workspace }: Props) {
               <button
                 type="button"
                 onClick={resetSubmitModal}
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                disabled={isSubmittingDelivery}
+                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Cerrar modal"
               >
                 <X className="h-5 w-5" />
@@ -291,6 +390,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                 <textarea
                   value={deliveryText}
                   onChange={(event) => setDeliveryText(event.target.value)}
+                  disabled={isSubmittingDelivery}
                   placeholder="Escribe tu respuesta aqui"
                   className="min-h-[114px] w-full resize-none rounded-2xl border border-[#cdcdcd] px-5 py-4 text-base text-slate-700 outline-none transition placeholder:text-[#a0a0a0] focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10"
                 />
@@ -302,13 +402,15 @@ export default function WorkspaceMember({ workspace }: Props) {
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
+                disabled={isSubmittingDelivery}
               />
 
               {/*Cuando le demos click en el boton se va a ejecutar el input oculto*/}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex min-h-[84px] w-full items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d4d4d4] px-4 py-6 text-center text-lg text-[#939393] transition hover:border-[#275D79]/40 hover:bg-slate-50"
+                disabled={isSubmittingDelivery}
+                className="flex min-h-[84px] w-full items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d4d4d4] px-4 py-6 text-center text-lg text-[#939393] transition hover:border-[#275D79]/40 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                   <Upload className="h-5 w-5" />
@@ -339,7 +441,8 @@ export default function WorkspaceMember({ workspace }: Props) {
                         <button
                           type="button"
                           onClick={() => removeFile(file.name)}
-                          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500"
+                          disabled={isSubmittingDelivery}
+                          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label={`Quitar ${file.name}`}
                         >
                           <CircleX className="h-4 w-4" />
@@ -351,17 +454,25 @@ export default function WorkspaceMember({ workspace }: Props) {
               ) : null}
             </div>
 
+            {submitError ? (
+              <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {submitError}
+              </p>
+            ) : null}
+
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={resetSubmitModal}
-                className="inline-flex min-w-[126px] items-center justify-center rounded-xl border border-[#d0d0d0] bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                disabled={isSubmittingDelivery}
+                className="inline-flex min-w-[126px] items-center justify-center rounded-xl border border-[#d0d0d0] bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                disabled={!hasDeliveryContent}
+                onClick={handleSubmitDelivery}
+                disabled={!hasDeliveryContent || isSubmittingDelivery}
                 className="inline-flex min-w-[148px] items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
               >
                 {hasDeliveryContent ? (
@@ -369,7 +480,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                 ) : (
                   <Check className="h-4 w-4" aria-hidden />
                 )}
-                Enviar entrega
+                {isSubmittingDelivery ? "Enviando..." : "Enviar entrega"}
               </button>
             </div>
           </div>

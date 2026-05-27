@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, UserRound } from "lucide-react";
 import { createWorkspace, joinWorkspace } from "@/app/src/lib/api/workspaces";
+import { useRouter } from "next/navigation";
+import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
 
 const colors = [
   "#EAB308",
@@ -20,6 +22,18 @@ const currentAccount = {
   email: "santiago@gmail.com",
 };
 
+
+type User = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  avatarUrl?: string;
+}
+
+
+
+
+
 export default function DashboardHeader() {
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [openModalJoin, setOpenModalJoin] = useState(false);
@@ -29,6 +43,45 @@ export default function DashboardHeader() {
   const [joinCode, setJoinCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (response.status === 401) {
+          await clearSessionCookies();
+          router.push("/auth/login");
+          router.refresh();
+          return;
+        }
+
+        setUser(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await clearSessionCookies();
+      router.push("/auth/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
 
   const refreshDashboard = () => {
     window.location.reload();
@@ -164,17 +217,18 @@ export default function DashboardHeader() {
 
                       <div className="flex flex-col justify-center">
                         <h3 className="text-[18px] font-semibold leading-6 text-[#1c1c1c]">
-                          {currentAccount.name}
+                          {user?.firstName}
                         </h3>
-                        <p className="mt-1 text-[14px] text-[#c4c4c4]">{currentAccount.email}</p>
+                        <p className="mt-1 text-[14px] text-[#c4c4c4]">{user?.email}</p>
                       </div>
                     </div>
 
                     <button
                       type="button"
+                      onClick={handleLogout}
                       className="mt-4 w-full rounded-xl bg-[#dddddd] px-4 py-3 text-[16px] font-semibold text-[#1c1c1c] transition-colors hover:bg-[#d3d3d3]"
                     >
-                      Cambiar de cuenta
+                      Cerrar sesión
                     </button>
                   </div>
                 </div>

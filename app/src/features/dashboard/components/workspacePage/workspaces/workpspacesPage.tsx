@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import {
   createWorkspace,
   getMyWorkspaces,
+  getWorkspaceMemberCount,
   joinWorkspace,
 } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "../data/workspace-api";
@@ -42,7 +43,49 @@ export default function WorkspacesPage() {
 
     try {
       const response = await getMyWorkspaces();
-      setWorkspaces(response.map(workspaceToCard));
+      const cards = response.map(workspaceToCard);
+
+      const cardsWithMemberCount = await Promise.all(
+        cards.map(async (workspace) => {
+          const fallbackCount =
+            workspace.roleLabel === "admin"
+              ? workspace.adminStats?.members ?? 0
+              : workspace.memberStats?.members ?? 0;
+
+          let count = fallbackCount;
+
+          try {
+            const response = await getWorkspaceMemberCount(workspace.id);
+            count = response.count;
+          } catch {
+            // Si no se puede cargar el conteo, mantenemos el valor inicial.
+          }
+
+          if (workspace.roleLabel === "admin") {
+            return {
+              ...workspace,
+              adminStats: workspace.adminStats
+                ? {
+                    ...workspace.adminStats,
+                    members: count,
+                  }
+                : undefined,
+            };
+          }
+
+          return {
+            ...workspace,
+            memberStats: workspace.memberStats
+              ? {
+                  ...workspace.memberStats,
+                  members: count,
+                }
+              : undefined,
+          };
+        }),
+      );
+
+      setWorkspaces(cardsWithMemberCount);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "No se pudieron cargar los workspaces"
@@ -269,7 +312,13 @@ export default function WorkspacesPage() {
               No tienes workspaces en esta sección.
             </p>
           ) : (
-            workspacesToDisplay.map((workspace) => (
+            workspacesToDisplay.map((workspace) => {
+              const totalMembers =
+                workspace.roleLabel === "admin"
+                  ? workspace.adminStats?.members
+                  : workspace.memberStats?.members;
+
+              return (
               <Link
                 href={`/dashboard/workspace/${workspace.id}?from=workspace`}
                 key={workspace.id}
@@ -308,10 +357,14 @@ export default function WorkspacesPage() {
                       {workspace.title}
                     </h3>
                     <p className="text-sm text-slate-500">{workspace.secondaryLabel}</p>
+                    <p className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                      {totalMembers ?? 0} miembros
+                    </p>
                   </div>
                 </article>
               </Link>
-            ))
+              );
+            })
           )}
         </div>
       </div>

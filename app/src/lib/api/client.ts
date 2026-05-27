@@ -1,5 +1,5 @@
 const API_URL =
-    process.env.NEXT_PUBLIC_GATEWAY_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 type ApiFetchOptions = RequestInit & {
     token?: string;
@@ -12,7 +12,7 @@ export async function apiFetch<T>(
     //T es el tipo de dato que se espera recibir
 ): Promise<T> {
     if (!API_URL) {
-        throw new Error("NEXT_PUBLIC_GATEWAY_URL no está configurada");
+        throw new Error("API_URL no está configurada");
     }
 
     const { token, headers, ...rest } = options;

@@ -42,6 +42,17 @@ export type UpdateWorkspacePayload = {
   accentColor: string;
 }
 
+export type WorkspaceMemberDetailsResponse = {
+  id: number;
+  workspaceId: number;
+  userId: string;
+  role: WorkspaceRole;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  avatarUrl: string | null;
+}
+
 async function localFetch<T>(path: string, options: RequestInit = {}) {
   const response = await fetch(path, {
     ...options,
@@ -71,6 +82,16 @@ export function getWorkspaceById(id: string | number) {
 export function getWorkspaceInvitationCode(id: string | number) {
   return localFetch<{ workspaceId: number; code: string }>(
     `/api/workspaces/${id}/invitation-code`
+  );
+}
+
+export function getWorkspaceMembers(workspaceId: string | number){
+  return localFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members`);
+}
+
+export function getWorkspaceMemberCount(workspaceId: string | number) {
+  return localFetch<{ count: number }>(
+    `/api/workspaces/${workspaceId}/members/count`
   );
 }
 

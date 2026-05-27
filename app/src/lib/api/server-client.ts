@@ -2,7 +2,7 @@ import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 import { refreshSession } from "@/app/src/lib/auth/refresh-session";
 
 const API_URL =
-    process.env.NEXT_PUBLIC_GATEWAY_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 type ServerApiFetchOptions = RequestInit & {
     headers?: HeadersInit;
@@ -13,7 +13,7 @@ export async function serverApiFetch<T>(
     options: ServerApiFetchOptions = {}
 ): Promise<T> {
     if (!API_URL) {
-        throw new Error("NEXT_PUBLIC_GATEWAY_URL no está configurada");
+        throw new Error("API_URL no está configurada");
     }
 
     const { headers, ...rest } = options;
