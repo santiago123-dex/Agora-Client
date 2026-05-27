@@ -1,5 +1,6 @@
 import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 import { refreshSession } from "@/app/src/lib/auth/refresh-session";
+import { ApiError } from "./client";
 
 const API_URL =
     process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
@@ -13,7 +14,7 @@ export async function serverApiFetch<T>(
     options: ServerApiFetchOptions = {}
 ): Promise<T> {
     if (!API_URL) {
-        throw new Error("API_URL no está configurada");
+        throw new ApiError("API_URL no está configurada", 500);
     }
 
     const { headers, ...rest } = options;
@@ -37,7 +38,7 @@ export async function serverApiFetch<T>(
     let token = await getAccessTokenFromCookies();
 
     if (!token) {
-        throw new Error("No hay sesión activa");
+        throw new ApiError("No hay sesión activa", 401);
     }
 
     let { response, data } = await makeRequest(token);
@@ -52,7 +53,11 @@ export async function serverApiFetch<T>(
     }
 
     if (!response.ok) {
-        throw new Error(data?.message ?? "Ocurrió un error en la petición");
+        throw new ApiError(
+            data?.message ?? "Ocurrió un error en la petición",
+            response.status,
+            data
+        );
     }
 
     return data as T;

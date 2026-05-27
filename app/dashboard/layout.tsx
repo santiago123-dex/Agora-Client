@@ -169,6 +169,7 @@ export default function LayoutDashboard({
         const response = await fetch("/api/auth/me", {
           method: "GET",
           cache: "no-store",
+          credentials: "same-origin",
         });
 
         const data = await response.json().catch(() => null);

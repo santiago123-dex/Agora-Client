@@ -1,6 +1,17 @@
 const API_URL =
     process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
+export class ApiError extends Error {
+    constructor(
+        message: string,
+        public readonly status: number,
+        public readonly data: unknown = null
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
+}
+
 type ApiFetchOptions = RequestInit & {
     token?: string;
 }
@@ -36,7 +47,11 @@ export async function apiFetch<T>(
 
     //si la respuesta no es ok, lanza un error
     if (!response.ok) {
-        throw new Error(data?.message ?? "Ocurrió un error en la petición");
+        throw new ApiError(
+            data?.message ?? "Ocurrió un error en la petición",
+            response.status,
+            data
+        );
     }
 
     // se castea el tipo de dato que se espera recibir
