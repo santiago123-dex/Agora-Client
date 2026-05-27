@@ -1,4 +1,4 @@
-import AssignmentAdminDetail from "@/app/src/features/dashboard/components/workspacePage/workspaces/admin/taskDetail/AssignmentAdminDetail";
+import TaskDetailWrapper from "@/app/src/features/dashboard/components/workspacePage/TaskDetailWrapper";
 
 type Props = {
   params: Promise<{
@@ -7,8 +7,8 @@ type Props = {
   }>;
 };
 
-export default async function AssignmentAdminDetailPage({ params }: Props) {
+export default async function TaskDetailPage({ params }: Props) {
   const { workspaceId, taskId } = await params;
 
-  return <AssignmentAdminDetail workspaceId={workspaceId} taskId={taskId} />;
+  return <TaskDetailWrapper workspaceId={workspaceId} taskId={taskId} />;
 }
