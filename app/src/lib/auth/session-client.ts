@@ -12,6 +12,7 @@ export async function saveSessionInCookies({
 }: SaveSessionParams) {
     const response = await fetch("/api/auth/session", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
             "Content-Type": "application/json",
         },
@@ -32,6 +33,7 @@ export async function saveSessionInCookies({
 export async function clearSessionCookies() {
     const response = await fetch("/api/auth/logout", {
         method: "POST",
+        credentials: "same-origin",
     });
 
     if (!response.ok) {

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { serverApiFetch } from "@/app/src/lib/api/server-client";
+import { register, type RegisterPayload } from "@/app/src/lib/api/auth";
 import { ApiError } from "@/app/src/lib/api/client";
 
-export async function GET() {
+export async function POST(request: Request) {
     try {
-        const data = await serverApiFetch("/users/get-user", {
-            method: "GET",
-        });
+        const body = (await request.json()) as RegisterPayload;
+        await register(body);
 
-        return NextResponse.json(data);
+        return NextResponse.json({ ok: true }, { status: 201 });
     } catch (error) {
         const status = error instanceof ApiError ? error.status : 500;
 
@@ -17,7 +16,7 @@ export async function GET() {
                 message:
                     error instanceof Error
                         ? error.message
-                        : "No se pudo obtener el usuario",
+                        : "No se pudo crear la cuenta",
             },
             { status }
         );
