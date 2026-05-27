@@ -10,8 +10,8 @@ import { register } from "@/app/src/lib/api/auth";
 
 export default function RegisterForm() {
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const googleRedirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   const [formData, setFormData] = useState({
     firstName: "",

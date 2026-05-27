@@ -9,8 +9,8 @@ import { login } from "@/app/src/lib/api/auth";
 import { saveSessionInCookies } from "@/app/src/lib/auth/session-client";
 
 export default function LoginForm() {
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    const googleRedirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
 
     const router = useRouter();
     const searchParams = useSearchParams();
