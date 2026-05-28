@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAssignmentsByWorkspace } from "@/app/src/lib/api/assignments";
 import type { AssignmentResponse } from "@/app/src/lib/api/assignments";
@@ -8,13 +8,15 @@ import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
 import type { SubmissionResponse } from "@/app/src/lib/api/submissions";
 import { getWorkspaceMembers } from "@/app/src/lib/api/workspaces";
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
+import { suggestGrades, approveSuggestion } from "@/app/src/lib/api/ai";
+import type { GradeResult, CriterionResult } from "@/app/src/lib/api/ai";
 import AssignmentHeader from "./components/AssignmentHeader";
 import AssignmentStats from "./components/AssignmentStats";
 import AiSummaryPanel from "./components/AiSummaryPanel";
 import SubmissionList from "./components/SubmissionList";
 import SubmissionReviewPanel from "./components/SubmissionReviewPanel";
 import EditAssignmentModal from "./components/EditAssignmentModal";
-import { buildRows, getMemberName } from "./helpers";
+import { buildRows, getStoredAiAnalysis } from "./helpers";
 
 type Props = {
   workspaceId: string;
@@ -38,12 +40,75 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
   const [localGrades, setLocalGrades] = useState<Record<string, LocalGrade>>(
     {},
   );
-  const [aiAnalyses, setAiAnalyses] = useState<Record<string, string>>({});
   const [gradeInput, setGradeInput] = useState("");
   const [feedbackInput, setFeedbackInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [analyzingUserId, setAnalyzingUserId] = useState<string | null>(null);
+  const [analyzingAll, setAnalyzingAll] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<
+    Record<string, GradeResult>
+  >({});
+  const [currentSuggestionId, setCurrentSuggestionId] = useState<
+    string | null
+  >(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [approving, setApproving] = useState(false);
+
+  const runAiAnalysis = useCallback(
+    async (options?: { userId?: string }) => {
+      setAiError(null);
+      if (options?.userId) {
+        setAnalyzingUserId(options.userId);
+      } else {
+        setAnalyzingAll(true);
+      }
+
+      try {
+        const result = await suggestGrades(workspaceId, taskId);
+        setCurrentSuggestionId(result.suggestion_id);
+
+        const bySubmission: Record<string, GradeResult> = {};
+        for (const r of result.results) {
+          bySubmission[r.submission_id] = r;
+        }
+        setAiSuggestions((prev) => ({ ...prev, ...bySubmission }));
+      } catch (err) {
+        setAiError(
+          err instanceof Error
+            ? err.message
+            : "Error al analizar con IA",
+        );
+      } finally {
+        setAnalyzingUserId(null);
+        setAnalyzingAll(false);
+      }
+    },
+    [workspaceId, taskId],
+  );
+
+  const handleApproveAll = async () => {
+    if (!currentSuggestionId) return;
+    setApproving(true);
+    setAiError(null);
+
+    try {
+      await approveSuggestion(currentSuggestionId);
+      setCurrentSuggestionId(null);
+      setAiSuggestions({});
+      const submissionsResult = await getSubmissionsByAssignment(taskId);
+      setSubmissions(submissionsResult);
+    } catch (err) {
+      setAiError(
+        err instanceof Error
+          ? err.message
+          : "Error al aprobar las sugerencias",
+      );
+    } finally {
+      setApproving(false);
+    }
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -84,6 +149,30 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
 
         setMembers(membersResponse);
         setSubmissions(submissionsResponse);
+
+        const storedSuggestions: Record<string, GradeResult> = {};
+        for (const sub of submissionsResponse) {
+          const stored = getStoredAiAnalysis(sub);
+          if (stored) {
+            storedSuggestions[String(sub.id)] = {
+              submission_id: String(sub.id),
+              total_score: stored.total_score,
+              max_score: stored.total_score,
+              feedback_summary: stored.feedback_summary,
+              grading_model: "IA",
+              evaluated_at: stored.evaluated_at,
+              criteria_results: stored.criteria_results.map((c) => ({
+                ...c,
+                max_score: c.score,
+                matched_level: "",
+              })),
+            };
+          }
+        }
+        if (Object.keys(storedSuggestions).length > 0) {
+          setAiSuggestions(storedSuggestions);
+        }
+
         setSelectedUserId(
           (current) => current ?? String(membersResponse[0]?.userId ?? ""),
         );
@@ -124,6 +213,21 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
     setFeedbackInput(local.feedback ?? "");
   }, [selectedRow, localGrades]);
 
+  const aiGradedCount = useMemo(() => {
+    const byUserId: Record<string, boolean> = {};
+    for (const suggestion of Object.values(aiSuggestions)) {
+      for (const submission of submissions) {
+        if (String(submission.id) === suggestion.submission_id) {
+          byUserId[String(submission.userId)] = true;
+        }
+      }
+    }
+    const submittedRows = rows.filter((row) => Boolean(row.submission));
+    return submittedRows.filter((row) =>
+      byUserId[String(row.member.userId)],
+    ).length;
+  }, [aiSuggestions, submissions, rows]);
+
   const stats = useMemo(() => {
     const submitted = rows.filter((row) => Boolean(row.submission)).length;
     const pending = rows.filter((row) => row.status === "pending").length;
@@ -134,18 +238,24 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
   }, [rows]);
 
   const handleAnalyze = () => {
-    if (!selectedRow) return;
-
-    const memberName = getMemberName(selectedRow.member);
-    setAiAnalyses((current) => ({
-      ...current,
-      [String(selectedRow.member.userId)]:
-        `La entrega de ${memberName} responde a la consigna y muestra procedimiento. ` +
-        "Revisa precisión, justificación y pasos intermedios antes de asignar la nota final.",
-    }));
+    if (!selectedRow?.submission) return;
+    runAiAnalysis({ userId: String(selectedRow.member.userId) });
   };
 
-  const handleSaveGrade = () => {
+  const handleAcceptSuggestion = () => {
+    if (!selectedRow?.submission) return;
+    const suggestion =
+      aiSuggestions[String(selectedRow.submission.id)];
+    if (!suggestion) return;
+
+    const local = localGrades[String(selectedRow.member.userId)] ?? {};
+    setGradeInput(String(suggestion.total_score));
+    setFeedbackInput(
+      suggestion.feedback_summary || local.feedback || "",
+    );
+  };
+
+  const handleSaveGrade = async () => {
     if (!selectedRow) return;
 
     const grade = Number(gradeInput);
@@ -154,7 +264,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
     setLocalGrades((current) => ({
       ...current,
       [String(selectedRow.member.userId)]: {
-        grade: Math.max(0, Math.min(100, grade)),
+        grade,
         feedback: feedbackInput,
       },
     }));
@@ -201,7 +311,15 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
           late={stats.late}
         />
 
-        <AiSummaryPanel analyzed={stats.graded} total={stats.submitted} />
+        <AiSummaryPanel
+          analyzed={aiGradedCount}
+          total={stats.submitted}
+          isLoading={analyzingAll}
+          hasSuggestion={Boolean(currentSuggestionId)}
+          onAnalyzeAll={() => runAiAnalysis()}
+          onApproveAll={handleApproveAll}
+          approving={approving}
+        />
 
         <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
           <SubmissionList
@@ -215,10 +333,18 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
           {selectedRow ? (
             <SubmissionReviewPanel
               row={selectedRow}
-              aiAnalysis={aiAnalyses[String(selectedRow.member.userId)]}
+              aiSuggestion={
+                selectedRow.submission
+                  ? aiSuggestions[String(selectedRow.submission.id)]
+                  : undefined
+              }
+              isAnalyzing={
+                analyzingUserId === String(selectedRow.member.userId)
+              }
               grade={gradeInput}
               feedback={feedbackInput}
               onAnalyze={handleAnalyze}
+              onAcceptSuggestion={handleAcceptSuggestion}
               onGradeChange={handleGradeChange}
               onFeedbackChange={handleFeedbackChange}
               onSave={handleSaveGrade}
