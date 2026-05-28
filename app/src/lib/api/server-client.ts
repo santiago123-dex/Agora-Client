@@ -54,6 +54,7 @@ export async function serverApiFetch<T>(
     }
 
     if (!response.ok) {
+        console.error("serverApiFetch error:", response.status, path, data);
         throw new Error(data?.message ?? "Ocurrió un error en la petición");
     }
 

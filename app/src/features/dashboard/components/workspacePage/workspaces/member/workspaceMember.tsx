@@ -361,7 +361,7 @@ export default function WorkspaceMember({ workspace }: Props) {
           onClick={resetSubmitModal}
         >
           <div
-            className="w-full max-w-[570px] rounded-[26px] border border-[#d7d7d7] bg-white px-5 py-5 shadow-[0_28px_80px_rgba(15,23,42,0.18)] sm:px-6 sm:py-6"
+            className="w-full max-w-142.5 rounded-[26px] border border-[#d7d7d7] bg-white px-5 py-5 shadow-[0_28px_80px_rgba(15,23,42,0.18)] sm:px-6 sm:py-6"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
