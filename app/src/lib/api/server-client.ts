@@ -2,10 +2,12 @@ import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 import { refreshSession } from "@/app/src/lib/auth/refresh-session";
 
 const API_URL =
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    process.env.NEXT_PUBLIC_GATEWAY_URL ??
+    process.env.NEXT_PUBLIC_API_URL;
 
 type ServerApiFetchOptions = RequestInit & {
     headers?: HeadersInit;
+    refreshOnUnauthorized?: boolean;
 };
 
 export async function serverApiFetch<T>(
@@ -16,7 +18,7 @@ export async function serverApiFetch<T>(
         throw new Error("API_URL no está configurada");
     }
 
-    const { headers, ...rest } = options;
+    const { headers, refreshOnUnauthorized = true, ...rest } = options;
 
     const makeRequest = async (token: string) => {
         const response = await fetch(`${API_URL}${path}`, {
@@ -42,7 +44,7 @@ export async function serverApiFetch<T>(
 
     let { response, data } = await makeRequest(token);
 
-    if (response.status === 401) {
+    if (response.status === 401 && refreshOnUnauthorized) {
         const refreshed = await refreshSession();
         token = refreshed.access_token;
 

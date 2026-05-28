@@ -65,12 +65,55 @@ const navLinks = [
 ];
 
 type CurrentUser = {
+  fullName?: string;
   firstName?: string;
   lastName?: string;
+  first_name?: string;
+  last_name?: string;
   name?: string;
   email?: string;
   username?: string;
+  profileUnavailable?: boolean;
+  profile?: {
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
 };
+
+
+function normalizeCurrentUser(data: unknown): CurrentUser | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const payload = data as { user?: unknown; data?: unknown };
+  const rawUser =
+    payload.user && typeof payload.user === "object"
+      ? payload.user
+      : payload.data && typeof payload.data === "object"
+        ? payload.data
+        : data;
+
+  const user = rawUser as CurrentUser;
+  const firstName = user.firstName ?? user.first_name ?? user.profile?.firstName;
+  const lastName = user.lastName ?? user.last_name ?? user.profile?.lastName;
+  const name =
+    user.fullName ??
+    user.profile?.fullName ??
+    user.name ??
+    [firstName, lastName].filter(Boolean).join(" ");
+
+  return {
+    ...user,
+    firstName,
+    lastName,
+    email: user.email ?? user.profile?.email,
+    name,
+  };
+}
+
 
 function SidebarUserBlock({
   user,
@@ -82,6 +125,7 @@ function SidebarUserBlock({
   onLogout: () => Promise<void>;
 }) {
   const displayName =
+    user?.fullName ||
     user?.name ||
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     user?.username ||
@@ -91,6 +135,7 @@ function SidebarUserBlock({
 
   const initials = useMemo(() => {
     const source =
+      user?.fullName ||
       user?.name ||
       [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
       user?.email ||
@@ -147,6 +192,7 @@ export default function LayoutDashboard({
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -184,7 +230,7 @@ export default function LayoutDashboard({
           throw new Error(data?.message ?? "No se pudo cargar el usuario");
         }
 
-        setUser(data);
+        setUser(normalizeCurrentUser(data));
       } catch {
         setUser(null);
       } finally {

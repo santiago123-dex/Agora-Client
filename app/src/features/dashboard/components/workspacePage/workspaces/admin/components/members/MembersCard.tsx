@@ -13,13 +13,15 @@ export default function MembersCard({ member }: Props) {
   const showAvatar =
     member.avatarUrl && member.avatarUrl.trim() !== "" && !imageError;
 
-  const name = `${member.firstName}`.trim();
-  const initials = member.fullName
+  const name = `${member.firstName || ""}`.trim() || "Usuario";
+  const fullNameStr = member.fullName || "";
+  const initials = fullNameStr
     .split(" ")
     .filter(Boolean)
     .map((part) => part[0]?.toUpperCase())
     .join("")
-    .slice(0, 2);
+    .slice(0, 2) || "U";
+
 
   return (
     <article className="relative flex h-full min-h-35 flex-col rounded-[1.35rem] border border-[#94B8C4] bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]">
@@ -70,7 +72,7 @@ export default function MembersCard({ member }: Props) {
         </div>
       )}
 
-      <hr className="mt-4 mb-4 text-[#d3d3d3]"/>
+      <hr className="mt-4 mb-4 text-[#d3d3d3]" />
 
       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
         {member.role}

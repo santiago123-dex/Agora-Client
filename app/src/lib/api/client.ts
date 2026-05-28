@@ -1,5 +1,7 @@
 const API_URL =
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    process.env.API_URL ??
+    process.env.NEXT_PUBLIC_GATEWAY_URL ??
+    process.env.NEXT_PUBLIC_API_URL;
 
 type ApiFetchOptions = RequestInit & {
     token?: string;

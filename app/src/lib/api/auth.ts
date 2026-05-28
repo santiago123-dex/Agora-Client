@@ -57,6 +57,13 @@ export async function refreshAccessToken(payload: RefreshTokenPayload) {
 }
 
 export async function login(payload: LoginPayload) {
+    if (typeof window !== "undefined") {
+        return frontendApiFetch<LoginResponse>("/api/auth/login", {
+            method: "POST",
+            body: JSON.stringify(payload),
+        });
+    }
+
     return apiFetch<LoginResponse>("/public/auth/authenticate", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -64,6 +71,13 @@ export async function login(payload: LoginPayload) {
 }
 
 export async function register(payload: RegisterPayload) {
+    if (typeof window !== "undefined") {
+        return frontendApiFetch<void>("/api/auth/register", {
+            method: "POST",
+            body: JSON.stringify(payload),
+        });
+    }
+
     return apiFetch<void>("/users/create", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -82,4 +96,24 @@ export async function logout(payload: LogoutPayload){
         method: "POST",
         body: JSON.stringify(payload),
     });
+}
+
+
+async function frontendApiFetch<T>(path: string, options: RequestInit): Promise<T> {
+    const response = await fetch(path, {
+        ...options,
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers ?? {}),
+        },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(data?.message ?? "Ocurrió un error en la petición");
+    }
+
+    return data as T;
 }
