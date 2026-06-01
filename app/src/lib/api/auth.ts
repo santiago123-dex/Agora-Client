@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { ApiError, apiFetch } from "./client";
 
 export type LoginPayload = {
     identifier: string;
@@ -85,6 +85,13 @@ export async function register(payload: RegisterPayload) {
 }
 
 export async function exchangeGoogleCode(payload: GoogleCodeExchangePayload) {
+    if (typeof window !== "undefined") {
+        return frontendApiFetch<GoogleCodeExchangeResponse>("/api/auth/google/callback", {
+            method: "POST",
+            body: JSON.stringify(payload),
+        });
+    }
+
     return apiFetch<GoogleCodeExchangeResponse>("/public/auth/google/callback", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -98,11 +105,9 @@ export async function logout(payload: LogoutPayload){
     });
 }
 
-
 async function frontendApiFetch<T>(path: string, options: RequestInit): Promise<T> {
     const response = await fetch(path, {
         ...options,
-        credentials: "same-origin",
         headers: {
             "Content-Type": "application/json",
             ...(options.headers ?? {}),
@@ -112,7 +117,11 @@ async function frontendApiFetch<T>(path: string, options: RequestInit): Promise<
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-        throw new Error(data?.message ?? "Ocurrió un error en la petición");
+        throw new ApiError(
+            data?.message ?? "Ocurrió un error en la petición",
+            response.status,
+            data
+        );
     }
 
     return data as T;

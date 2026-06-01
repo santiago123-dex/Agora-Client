@@ -60,3 +60,15 @@ export function createSubmission(payload: CreateSubmissionPayload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function getMySubmissionByAssignment(assignmentId: string | number) {
+  return localFetch<SubmissionResponse | null>(
+    `/api/workspaces/submissions/${assignmentId}/my-submission`,
+  );
+}
+
+export function deleteSubmission(submissionId: string | number) {
+  return localFetch<null>(`/api/workspaces/submissions/${submissionId}`, {
+    method: "DELETE",
+  });
+}

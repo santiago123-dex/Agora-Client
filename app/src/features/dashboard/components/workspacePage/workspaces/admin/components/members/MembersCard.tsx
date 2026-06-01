@@ -13,9 +13,8 @@ export default function MembersCard({ member }: Props) {
   const showAvatar =
     member.avatarUrl && member.avatarUrl.trim() !== "" && !imageError;
 
-  const name = `${member.firstName || ""}`.trim() || "Usuario";
-  const fullNameStr = member.fullName || "";
-  const initials = fullNameStr
+  const name = `${member.firstName}`.trim();
+  const initials = (member.fullName ?? "")
     .split(" ")
     .filter(Boolean)
     .map((part) => part[0]?.toUpperCase())

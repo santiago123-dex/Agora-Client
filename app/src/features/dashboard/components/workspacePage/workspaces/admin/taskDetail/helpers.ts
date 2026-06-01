@@ -96,7 +96,61 @@ export function getStoredGrade(submission?: SubmissionResponse) {
   if (!result) return undefined;
 
   const value = result.grade ?? result.score ?? result.points;
-  return typeof value === "number" ? value : undefined;
+  if (typeof value === "number") return value;
+
+  const ai = result.ai;
+  if (ai && typeof ai === "object") {
+    const aiScore = (ai as Record<string, unknown>).score;
+    if (typeof aiScore === "number") return aiScore;
+  }
+
+  return undefined;
+}
+
+export function getStoredAiAnalysis(
+  submission?: SubmissionResponse,
+):
+  | {
+      total_score: number;
+      feedback_summary: string;
+      criteria_results: Array<{
+        criterion_id: string;
+        criterion_name: string;
+        score: number;
+        feedback: string;
+      }>;
+      evaluated_at: string;
+    }
+  | undefined {
+  const result = submission?.result;
+  if (!result) return undefined;
+
+  const ai = result.ai;
+  if (!ai || typeof ai !== "object") return undefined;
+
+  const aiRecord = ai as Record<string, unknown>;
+  const score = aiRecord.score;
+  if (typeof score !== "number") return undefined;
+
+  const rubricResults = aiRecord.rubricResults;
+  const criteria_results = Array.isArray(rubricResults)
+    ? rubricResults.map((r: unknown) => {
+        const cr = r as Record<string, unknown>;
+        return {
+          criterion_id: String(cr.criterionId ?? ""),
+          criterion_name: String(cr.criterionId ?? ""),
+          score: typeof cr.score === "number" ? cr.score : 0,
+          feedback: String(cr.feedback ?? ""),
+        };
+      })
+    : [];
+
+  return {
+    total_score: score,
+    feedback_summary: String(aiRecord.feedback ?? ""),
+    criteria_results,
+    evaluated_at: String(aiRecord.evaluatedAt ?? ""),
+  };
 }
 
 export function getSubmissionStatus(

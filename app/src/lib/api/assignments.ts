@@ -61,6 +61,12 @@ export function getAssignmentsByWorkspace(workspaceId: string | number) {
   );
 }
 
+export function getAssignmentById(assignmentId: string | number) {
+  return localFetch<AssignmentResponse>(
+    `/api/workspaces/assignments/${assignmentId}`,
+  );
+}
+
 export function updateAssignment(
   assignmentId: string | number,
   payload: CreateAssignmentPayload

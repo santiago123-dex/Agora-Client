@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/app/src/lib/api/server-client";
-import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
+import { ApiError } from "@/app/src/lib/api/client";
 
 export async function GET() {
     const accessToken = await getAccessTokenFromCookies();
@@ -20,12 +20,16 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
-        console.error("No se pudo obtener el usuario actual", error);
+        const status = error instanceof ApiError ? error.status : 500;
 
-        return NextResponse.json({
-            name: "Usuario",
-            email: null,
-            profileUnavailable: true,
-        });
+        return NextResponse.json(
+            {
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "No se pudo obtener el usuario",
+            },
+            { status }
+        );
     }
 }
