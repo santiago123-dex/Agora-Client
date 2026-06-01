@@ -3,9 +3,19 @@ import { serverApiFetch } from "@/app/src/lib/api/server-client";
 import { ApiError } from "@/app/src/lib/api/client";
 
 export async function GET() {
+    const accessToken = await getAccessTokenFromCookies();
+
+    if (!accessToken) {
+        return NextResponse.json(
+            { message: "No hay sesión activa" },
+            { status: 401 }
+        );
+    }
+
     try {
         const data = await serverApiFetch("/users/get-user", {
             method: "GET",
+            refreshOnUnauthorized: false,
         });
 
         return NextResponse.json(data);

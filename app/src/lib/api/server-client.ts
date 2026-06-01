@@ -3,10 +3,12 @@ import { refreshSession } from "@/app/src/lib/auth/refresh-session";
 import { ApiError } from "./client";
 
 const API_URL =
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    process.env.NEXT_PUBLIC_GATEWAY_URL ??
+    process.env.NEXT_PUBLIC_API_URL;
 
 type ServerApiFetchOptions = RequestInit & {
     headers?: HeadersInit;
+    refreshOnUnauthorized?: boolean;
 };
 
 export async function serverApiFetch<T>(
@@ -17,7 +19,7 @@ export async function serverApiFetch<T>(
         throw new ApiError("API_URL no está configurada", 500);
     }
 
-    const { headers, ...rest } = options;
+    const { headers, refreshOnUnauthorized = true, ...rest } = options;
 
     const makeRequest = async (token: string) => {
         const response = await fetch(`${API_URL}${path}`, {
@@ -43,7 +45,7 @@ export async function serverApiFetch<T>(
 
     let { response, data } = await makeRequest(token);
 
-    if (response.status === 401) {
+    if (response.status === 401 && refreshOnUnauthorized) {
         const refreshed = await refreshSession();
         token = refreshed.access_token;
 

@@ -64,7 +64,10 @@ export default function LoginForm() {
                 throw new Error("La respuesta del login no devolvió token");
             }
 
-            await saveSessionInCookies({accessToken, refreshToken});
+            await saveSessionInCookies({
+                accessToken,
+                refreshToken,
+            });
             router.push("/dashboard");
             router.refresh();
             
