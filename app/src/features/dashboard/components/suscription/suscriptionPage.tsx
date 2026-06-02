@@ -1,93 +1,184 @@
-const plans = [
-  {
-    id: "free",
-    title: "Free Plan",
-    price: 0,
-    currency: "USD",
-    period: "/mes",
-    characteristics: [
-      "Administrar espacios de trabajo propios",
-      "Participar en otros espacios de trabajo",
-      "Adjuntar archivos (20 MB máx)",
-      "Acceso general a las funciones de la plataforma (sin IA)",
-    ],
-  },
-  {
-    id: "premium",
-    title: "Premium Plan",
-    price: 20,
-    currency: "USD",
-    period: "/mes",
-    characteristics: [
-      "Acceso a IA para análisis de entregas",
-      "Permite establecer rúbricas personalizadas en cada actividad para calificar con IA",
-      "Calificación y retroalimentación de trabajos usando IA",
-      "Acceso completo a las funcionalidades de Agora",
-      "Adjuntar archivos (50 MB máx)",
-    ],
-  },
-  {
-    id: "enterprise",
-    title: "Enterprise Plan",
-    price: 100,
-    currency: "USD",
-    period: "/mes",
-    characteristics: [
-      "Acceso a nuevos modelos para el análisis de entregas",
-      "Permite establecer rúbricas personalizadas en cada actividad para calificar con IA",
-      "Calificación y retroalimentación usando diferentes modelos de IA",
-      "Acceso completo a las funcionalidades de Agora",
-      "Adjuntar archivos (100 MB máx)",
-      "Posibilidad de unir hasta 6 cuentas al plan",
-    ],
-  },
-] as const;
+"use client";
+
+import { useEffect, useState } from "react";
+import { getProducts } from "@/app/src/lib/api/payment";
+import type { StripeProduct } from "@/app/src/lib/api/payment";
+
+const freePlan = {
+  id: "free",
+  name: "Free Plan",
+  price: 0,
+  currency: "USD",
+  period: "/mes",
+  features: [
+    "Administrar espacios de trabajo propios",
+    "Participar en otros espacios de trabajo",
+    "Adjuntar archivos (20 MB máx)",
+    "Acceso general a las funciones de la plataforma (sin IA)",
+  ],
+};
+
+function parseFeatures(description: string | null): string[] {
+  if (!description) return [];
+  return description
+    .split(";")
+    .map((f) => f.replace(/^-\s*/, "").trim())
+    .filter(Boolean);
+}
+
+type DisplayPlan = {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  period: string;
+  features: string[];
+};
 
 export default function SuscriptionPage() {
+  const [products, setProducts] = useState<StripeProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+
+    getProducts()
+      .then((data) => {
+        if (active) setProducts(data);
+      })
+      .catch((err) => {
+        if (active) setError(err instanceof Error ? err.message : "Error al cargar planes");
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => { active = false; };
+  }, []);
+
+  const paidPlans: DisplayPlan[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: p.defaultPriceObject ? p.defaultPriceObject.unit_amount / 100 : 0,
+    currency: p.defaultPriceObject?.currency?.toUpperCase() ?? "USD",
+    period: p.defaultPriceObject?.recurring?.interval === "year" ? "/año" : "/mes",
+    features: parseFeatures(p.description),
+  }));
+
+  const allPlans: DisplayPlan[] = [freePlan, ...paidPlans];
+
+  if (isLoading) {
+    return (
+      <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
+        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Cargando planes...
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
+        <div className="max-w-md text-center">
+          <p className="mb-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+            No se pudieron cargar los planes
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="px-4 py-6 sm:px-7">
-      <div className="space-y-2 flex flex-col items-center mt-10 mb-10">
-        <h2 className="text-2xl font-semibold text-slate-900">Actualiza tu suscripción</h2>
-        <p className="text-sm text-slate-600">Elige el plan que mejor se adapte a tus necesidades.</p>
-      </div>
+    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 mt-10 flex flex-col items-center space-y-2">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            Actualiza tu suscripción
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Elegí el plan que mejor se adapte a tus necesidades
+          </p>
+        </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {plans.map((plan, index) => {
-          const isMiddle = index === 1;
+        <div className="grid gap-6 lg:grid-cols-3">
+          {allPlans.map((plan) => {
+            const isRecommended = plan.price > 0;
 
-          return (
-            <article
-              key={plan.id}
-              className={`rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isMiddle
-                ? "border-black bg-black text-white hover:opacity-90"
-                : "border-slate-200 bg-white text-slate-900 hover:border-black hover:opacity-90"
+            return (
+              <article
+                key={plan.id}
+                className={`relative flex flex-col rounded-2xl border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                  isRecommended
+                    ? "border-[#275D79] bg-white dark:border-[#3a7fa0] dark:bg-[#141f33]"
+                    : "border-slate-200 bg-white dark:border-[#253245] dark:bg-[#141f33]"
                 }`}
-            >
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">{plan.title}</h3>
-                <p className={`text-3xl font-bold ${isMiddle ? "text-white" : "text-[#275D79]"}`}>
-                  {plan.currency} {plan.price}
-                  <span className={`${isMiddle ? "text-white/70" : "text-slate-500"} text-sm font-medium`}>
-                    {plan.period}
+              >
+                {isRecommended && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#275D79] px-3 py-1 text-xs font-semibold text-white dark:bg-[#3a7fa0]">
+                    Recomendado
                   </span>
-                </p>
-              </div>
+                )}
 
-              <ul className={`mt-4 space-y-2 text-sm ${isMiddle ? "text-white/80" : "text-slate-600"}`}>
-                {plan.characteristics.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span
-                      className={`mt-1 h-2 w-2 rounded-full ${isMiddle ? "bg-white" : "bg-[#275D79]"
-                        }`}
-                    />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          );
-        })}
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    {plan.name}
+                  </h3>
+                  <p className="mt-2">
+                    <span className="text-3xl font-bold text-[#275D79] dark:text-[#3a7fa0]">
+                      {plan.currency} {plan.price}
+                    </span>
+                    <span className="ml-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      {plan.period}
+                    </span>
+                  </p>
+                </div>
 
+                <ul className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-3">
+                      <svg
+                        className="mt-0.5 h-4 w-4 shrink-0 text-[#275D79] dark:text-[#3a7fa0]"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {plan.price > 0 && (
+                  <button
+                    type="button"
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
+                  >
+                    Seleccionar Plan
+                  </button>
+                )}
+              </article>
+            );
+          })}
+        </div>
+
+        {paidPlans.length === 0 && !isLoading && (
+          <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            No hay planes de pago disponibles en este momento.
+          </p>
+        )}
       </div>
     </section>
   );

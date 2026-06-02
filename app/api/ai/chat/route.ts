@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       message: string;
       workspace_id?: string;
+      session_id?: string;
     };
 
     if (!body.message?.trim()) {
@@ -22,12 +23,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const headers: Record<string, string> = {};
+    if (body.session_id) {
+      headers["X-Session-Id"] = body.session_id;
+    }
+
     const result = await serverApiFetch<Record<string, unknown>>("/ai/chat", {
       method: "POST",
       body: JSON.stringify({
         message: body.message,
         workspace_id: body.workspace_id ?? null,
       }),
+      headers,
     });
 
     return NextResponse.json(result);

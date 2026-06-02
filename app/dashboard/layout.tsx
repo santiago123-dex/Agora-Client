@@ -4,8 +4,12 @@ import Image from "next/image";
 import logo from "@/public/images/logo-cropped.png";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
+import { UserContext } from "@/app/src/lib/contexts/UserContext";
+import type { CurrentUser } from "@/app/src/lib/contexts/UserContext";
+import { useTheme } from "@/app/src/lib/hooks/useTheme";
+import AiChatPanel from "@/app/src/features/dashboard/components/ai-chat/AiChatPanel";
 
 const navLinks = [
   {
@@ -64,25 +68,6 @@ const navLinks = [
   },
 ];
 
-type CurrentUser = {
-  fullName?: string;
-  firstName?: string;
-  lastName?: string;
-  first_name?: string;
-  last_name?: string;
-  name?: string;
-  email?: string;
-  username?: string;
-  profileUnavailable?: boolean;
-  profile?: {
-    fullName?: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-  };
-};
-
-
 function normalizeCurrentUser(data: unknown): CurrentUser | null {
   if (!data || typeof data !== "object") {
     return null;
@@ -105,12 +90,17 @@ function normalizeCurrentUser(data: unknown): CurrentUser | null {
     user.name ??
     [firstName, lastName].filter(Boolean).join(" ");
 
+  const profile = (rawUser as Record<string, unknown>).profile as Record<string, unknown> | undefined;
+  const config = profile?.config as Record<string, unknown> | undefined;
+  const theme = (config?.theme as string | undefined) ?? "light";
+
   return {
     ...user,
     firstName,
     lastName,
     email: user.email ?? user.profile?.email,
     name,
+    theme,
   };
 }
 
@@ -192,6 +182,7 @@ export default function LayoutDashboard({
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  useTheme(user?.theme);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -207,40 +198,40 @@ export default function LayoutDashboard({
     };
   }, [isMobileMenuOpen]);
 
-  useEffect(() => {
-    const loadCurrentUser = async () => {
-      try {
-        setIsLoadingUser(true);
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      setIsLoadingUser(true);
 
-        const response = await fetch("/api/auth/me", {
-          method: "GET",
-          cache: "no-store",
-          credentials: "same-origin",
-        });
+      const response = await fetch("/api/auth/me", {
+        method: "GET",
+        cache: "no-store",
+        credentials: "same-origin",
+      });
 
-        const data = await response.json().catch(() => null);
+      const data = await response.json().catch(() => null);
 
-        if(response.status === 401){
-          await clearSessionCookies();
-          router.push("/auth/login");
-          router.refresh();
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(data?.message ?? "No se pudo cargar el usuario");
-        }
-
-        setUser(normalizeCurrentUser(data));
-      } catch {
-        setUser(null);
-      } finally {
-        setIsLoadingUser(false);
+      if (response.status === 401) {
+        await clearSessionCookies();
+        router.push("/auth/login");
+        router.refresh();
+        return;
       }
-    };
 
-    loadCurrentUser();
+      if (!response.ok) {
+        throw new Error(data?.message ?? "No se pudo cargar el usuario");
+      }
+
+      setUser(normalizeCurrentUser(data));
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoadingUser(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCurrentUser();
+  }, [loadCurrentUser]);
 
   const handleLogout = async () => {
     try {
@@ -274,7 +265,8 @@ export default function LayoutDashboard({
     });
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 lg:flex-row">
+    <UserContext.Provider value={{ user, isLoadingUser, refreshUser: loadCurrentUser }}>
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-[#0b1120] lg:flex-row">
       <aside className="hidden bg-[#275D79] lg:flex lg:min-h-screen lg:w-60 lg:shrink-0 lg:flex-col">
         <Link href="/" className="flex h-16 items-center gap-2 border-b border-white/10 px-4">
           <Image src={logo} alt="Logo Agora" className="h-9 w-9 shrink-0 object-contain brightness-1000" />
@@ -295,8 +287,8 @@ export default function LayoutDashboard({
       </aside>
 
       <div className="flex-1">
-        <header className="sticky top-0 z-30 bg-slate-50">
-          <nav className="flex h-14 items-center gap-3 border-b border-[#ededed] px-4 sm:h-16 sm:px-6">
+        <header className="sticky top-0 z-30 bg-slate-50 dark:bg-[#0b1120]">
+          <nav className="flex h-14 items-center gap-3 border-b border-[#ededed] px-4 dark:border-[#1e293b] sm:h-16 sm:px-6">
             <button
               type="button"
               aria-label={isMobileMenuOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
@@ -304,7 +296,7 @@ export default function LayoutDashboard({
               //Esto es para accesibilidad, le dice al lector de pantalla que este boton controla el menu lateral
               aria-controls="mobile-dashboard-menu"
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 lg:hidden"
             >
               {isMobileMenuOpen ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -371,6 +363,9 @@ export default function LayoutDashboard({
           )}
         </div>
       </aside>
+
+      <AiChatPanel />
     </div>
+    </UserContext.Provider>
   );
 }

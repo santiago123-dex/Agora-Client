@@ -53,71 +53,55 @@ export type WorkspaceMemberDetailsResponse = {
   avatarUrl: string | null;
 }
 
-async function localFetch<T>(path: string, options: RequestInit = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-  });
-
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message ?? "Ocurrió un error en la petición");
-  }
-
-  return data as T;
-}
+import { bffFetch } from "./bff-client";
 
 export function getMyWorkspaces() {
-  return localFetch<WorkspaceWithRole[]>("/api/workspaces");
+  return bffFetch<WorkspaceWithRole[]>("/api/workspaces");
 }
 
 export function getWorkspaceById(id: string | number) {
-  return localFetch<WorkspaceWithRole>(`/api/workspaces/${id}`);
+  return bffFetch<WorkspaceWithRole>(`/api/workspaces/${id}`);
 }
 
 export function getWorkspaceInvitationCode(id: string | number) {
-  return localFetch<{ workspaceId: number; code: string }>(
+  return bffFetch<{ workspaceId: number; code: string }>(
     `/api/workspaces/${id}/invitation-code`
   );
 }
 
 export function getWorkspaceMembers(workspaceId: string | number){
-  return localFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members`);
+  return bffFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members`);
 }
 
 export function getWorkspaceMemberCount(workspaceId: string | number) {
-  return localFetch<{ count: number }>(
+  return bffFetch<{ count: number }>(
     `/api/workspaces/${workspaceId}/members/count`
   );
 }
 
 export function createWorkspace(payload: CreateWorkspacePayload) {
-  return localFetch<WorkspaceWithRole>("/api/workspaces", {
+  return bffFetch<WorkspaceWithRole>("/api/workspaces", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export function updateWorkspace(id:string | number, payload:UpdateWorkspacePayload){
-  return localFetch<WorkspaceWithRole>(`/api/workspaces/${id}`, {
+  return bffFetch<WorkspaceWithRole>(`/api/workspaces/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 }
 
 export function joinWorkspace(code: string) {
-  return localFetch<WorkspaceWithRole>("/api/workspaces/join", {
+  return bffFetch<WorkspaceWithRole>("/api/workspaces/join", {
     method: "POST",
     body: JSON.stringify({ code }),
   });
 }
 
 export function deleteWorkspace(id: string | number) {
-  return localFetch<void>(`/api/workspaces/${id}`, {
+  return bffFetch<void>(`/api/workspaces/${id}`, {
     method: "DELETE",
   });
 }

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fbfd;
   --foreground: #020617;
@@ -10,12 +12,18 @@
     "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
 }
 
+.dark {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  transition: background-color 0.3s ease;
 }
 
 body {
@@ -24,6 +32,54 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark select option {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+/* ── Global overrides: cards, surfaces ── */
+.dark :where(.bg-white) {
+  background-color: #141f33;
+}
+.dark :where(.bg-\[\#F7F7F8\]) {
+  background-color: #0b1120;
+}
+.dark :where(.bg-slate-50) {
+  background-color: #0a1424;
+}
+
+/* ── Global overrides: borders ── */
+.dark :where(.border-slate-200) {
+  border-color: #253245;
+}
+
+/* ── Global overrides: text ── */
+.dark :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: #e2e8f0;
+}
+.dark :where(.text-slate-600, .text-slate-500) {
+  color: #8896a6;
+}
+
+/* ── Global overrides: shadows ── */
+.dark :where(.shadow-sm, .shadow) {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+.dark :where(.shadow-md) {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+.dark :where(.shadow-lg) {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Hover states in dark ── */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: #1a2740;
 }
 
 @layer base {

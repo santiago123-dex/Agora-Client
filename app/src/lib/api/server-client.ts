@@ -2,9 +2,7 @@ import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 import { refreshSession } from "@/app/src/lib/auth/refresh-session";
 import { ApiError } from "./client";
 
-const API_URL =
-    process.env.NEXT_PUBLIC_GATEWAY_URL ??
-    process.env.NEXT_PUBLIC_API_URL;
+import { GATEWAY_URL } from "./config";
 
 type ServerApiFetchOptions = RequestInit & {
     headers?: HeadersInit;
@@ -15,14 +13,14 @@ export async function serverApiFetch<T>(
     path: string,
     options: ServerApiFetchOptions = {}
 ): Promise<T> {
-    if (!API_URL) {
-        throw new ApiError("API_URL no está configurada", 500);
+    if (!GATEWAY_URL) {
+        throw new ApiError("GATEWAY_URL no está configurada", 500);
     }
 
     const { headers, refreshOnUnauthorized = true, ...rest } = options;
 
     const makeRequest = async (token: string) => {
-        const response = await fetch(`${API_URL}${path}`, {
+        const response = await fetch(`${GATEWAY_URL}${path}`, {
             ...rest,
             headers: {
                 "Content-Type": "application/json",

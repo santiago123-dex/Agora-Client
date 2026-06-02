@@ -1,4 +1,4 @@
-import { ApiError, apiFetch } from "./client";
+import { bffFetch } from "./bff-client";
 
 export type LoginPayload = {
     identifier: string;
@@ -49,80 +49,23 @@ export type RefreshTokenResponse = {
     expires_in: number;
 };
 
-export async function refreshAccessToken(payload: RefreshTokenPayload) {
-    return apiFetch<RefreshTokenResponse>("/public/auth/refresh", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
-}
-
 export async function login(payload: LoginPayload) {
-    if (typeof window !== "undefined") {
-        return frontendApiFetch<LoginResponse>("/api/auth/login", {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
-    }
-
-    return apiFetch<LoginResponse>("/public/auth/authenticate", {
+    return bffFetch<LoginResponse>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
     });
 }
 
 export async function register(payload: RegisterPayload) {
-    if (typeof window !== "undefined") {
-        return frontendApiFetch<void>("/api/auth/register", {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
-    }
-
-    return apiFetch<void>("/users/create", {
+    return bffFetch<void>("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(payload),
     });
 }
 
 export async function exchangeGoogleCode(payload: GoogleCodeExchangePayload) {
-    if (typeof window !== "undefined") {
-        return frontendApiFetch<GoogleCodeExchangeResponse>("/api/auth/google/callback", {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
-    }
-
-    return apiFetch<GoogleCodeExchangeResponse>("/public/auth/google/callback", {
+    return bffFetch<GoogleCodeExchangeResponse>("/api/auth/google/callback", {
         method: "POST",
         body: JSON.stringify(payload),
     });
-}
-
-export async function logout(payload: LogoutPayload){
-    return apiFetch<void>("/public/auth/logout", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
-}
-
-async function frontendApiFetch<T>(path: string, options: RequestInit): Promise<T> {
-    const response = await fetch(path, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers ?? {}),
-        },
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-        throw new ApiError(
-            data?.message ?? "Ocurrió un error en la petición",
-            response.status,
-            data
-        );
-    }
-
-    return data as T;
 }

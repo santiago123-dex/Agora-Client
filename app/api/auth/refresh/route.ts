@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { refreshAccessToken } from "@/app/src/lib/api/auth";
+import { serverRefreshAccessToken } from "@/app/src/lib/api/auth-server";
 import { authCookieOptions } from "@/app/src/lib/auth/cookie-options";
 
 export async function POST() {
@@ -16,7 +16,7 @@ export async function POST() {
     }
 
     try {
-        const response = await refreshAccessToken({
+        const response = await serverRefreshAccessToken({
             refresh_token: refreshToken,
         });
 

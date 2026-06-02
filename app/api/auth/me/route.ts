@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/app/src/lib/api/server-client";
 import { ApiError } from "@/app/src/lib/api/client";
+import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 
 export async function GET() {
     const accessToken = await getAccessTokenFromCookies();
