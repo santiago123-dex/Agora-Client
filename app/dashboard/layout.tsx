@@ -178,6 +178,7 @@ export default function LayoutDashboard({
   const router = useRouter();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAiOpen, setIsAiOpen] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -286,7 +287,7 @@ export default function LayoutDashboard({
         </div>
       </aside>
 
-      <div className="flex-1">
+      <div className={`flex-1 transition-all duration-300 ${isAiOpen ? 'mr-0 sm:mr-[420px]' : ''}`}>
         <header className="sticky top-0 z-30 bg-slate-50 dark:bg-[#0b1120]">
           <nav className="flex h-14 items-center gap-3 border-b border-[#ededed] px-4 dark:border-[#1e293b] sm:h-16 sm:px-6">
             <button
@@ -313,6 +314,53 @@ export default function LayoutDashboard({
             </button>
 
             <span className="text-[18px] font-semibold text-[#275D79] sm:hidden">Agora</span>
+
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const root = document.documentElement;
+                  root.classList.toggle("dark");
+                  localStorage.setItem("theme", root.classList.contains("dark") ? "dark" : "light");
+                }}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                aria-label="Cambiar tema"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="dark:hidden">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:inline">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2" />
+                  <path d="M12 20v2" />
+                  <path d="m4.93 4.93 1.41 1.41" />
+                  <path d="m17.66 17.66 1.41 1.41" />
+                  <path d="M2 12h2" />
+                  <path d="M20 12h2" />
+                  <path d="m6.34 17.66-1.41 1.41" />
+                  <path d="m19.07 4.93-1.41 1.41" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAiOpen((prev) => !prev)}
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition ${
+                  isAiOpen
+                    ? "border-[#275D79] bg-[#275D79] text-white dark:border-[#3a7fa0] dark:bg-[#3a7fa0]"
+                    : "border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                }`}
+                aria-label={isAiOpen ? "Cerrar asistente" : "Abrir asistente"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="M2 14h2" />
+                  <path d="M20 14h2" />
+                  <path d="M15 13v2" />
+                  <path d="M9 13v2" />
+                </svg>
+              </button>
+            </div>
           </nav>
         </header>
 
@@ -364,7 +412,7 @@ export default function LayoutDashboard({
         </div>
       </aside>
 
-      <AiChatPanel />
+      <AiChatPanel isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
     </UserContext.Provider>
   );

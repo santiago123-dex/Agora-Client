@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/app/src/lib/api/server-client";
-
-function getErrorStatus(error: unknown) {
-  if (error instanceof Error && error.message === "No hay sesión activa") {
-    return 401;
-  }
-  return 400;
-}
+import { ApiError } from "@/app/src/lib/api/client";
 
 export async function POST(request: Request) {
   try {
@@ -39,14 +33,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    return NextResponse.json(
-      {
-        message:
-          error instanceof Error
-            ? error.message
-            : "No se pudo comunicar con el asistente",
-      },
-      { status: getErrorStatus(error) },
-    );
+    const status =
+      error instanceof ApiError
+        ? error.status
+        : error instanceof Error && error.message === "No hay sesión activa"
+          ? 401
+          : 400;
+
+    const message = error instanceof Error ? error.message : "Error desconocido";
+
+    console.error(`[AI Chat] status=${status} error=${message}`, error instanceof ApiError ? error.data : "");
+
+    return NextResponse.json({ message, status, detail: error instanceof ApiError ? error.data : null }, { status });
   }
 }

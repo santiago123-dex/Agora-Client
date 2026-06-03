@@ -35,6 +35,11 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/*ocultar el scorll del textarea*/
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
 .dark select option {
   background-color: #1e293b;
   color: #e2e8f0;
