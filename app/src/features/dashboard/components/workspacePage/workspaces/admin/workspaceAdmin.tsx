@@ -1,18 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Copy, FileText, Pencil, Trash2, Users } from "lucide-react";
+import useSWR from "swr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
 import { deleteWorkspace, updateWorkspace } from "@/app/src/lib/api/workspaces";
 import type { AdminWorkspace, WorkspaceAdminTask } from "../../data/workspace";
-import CreateTaskModal from "./components/CreateTaskModal";
 import TaskGrid from "./components/TaskGrid";
 import { useWorkspaceAssignments } from "./hooks/useWorkspaceAssignments";
 import MembersGrid from "./components/members/MembersGrid";
 import { useWorkspaceMembers } from "./hooks/useWorkspaceMembers";
+
+const CreateTaskModal = dynamic(
+  () => import("./components/CreateTaskModal"),
+  { ssr: false },
+);
 
 type Props = {
   workspace: AdminWorkspace;
@@ -62,9 +68,6 @@ export default function WorkspaceAdmin({ workspace }: Props) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
-  const [submissionCounts, setSubmissionCounts] = useState<Record<string, number>>(
-    {},
-  );
 
   // primero ejecuta el useWorkspaceAssignment para traer los datos del los estados donde vienen las tareas
   const {
@@ -80,41 +83,29 @@ export default function WorkspaceAdmin({ workspace }: Props) {
 
   const totalTasks = assignmentTasks.length;
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    let isActive = true;
-
-    async function loadSubmissionCounts() {
-      if (assignmentTasks.length === 0) {
-        setSubmissionCounts({});
-        return;
-      }
-
-      const counts = await Promise.all(
-        assignmentTasks.map(async (task) => {
+  const taskIds = assignmentTasks.map((t) => t.id).sort().join(",");
+  const { data: submissionCounts = {} } = useSWR(
+    taskIds ? ["submission-counts", workspace.id, taskIds] : null,
+    async ([, , idsStr]) => {
+      if (!idsStr) return {};
+      const ids = idsStr.split(",").filter(Boolean);
+      const entries = await Promise.all(
+        ids.map(async (id) => {
           try {
-            const submissions = await getSubmissionsByAssignment(task.id);
-            return [task.id, submissions.length] as const;
+            const submissions = await getSubmissionsByAssignment(id);
+            return [id, submissions.length] as [string, number];
           } catch {
-            return [task.id, task.doneCount] as const;
+            return [id, 0] as [string, number];
           }
         }),
       );
+      return Object.fromEntries(entries);
+    },
+  );
 
-      if (isActive) {
-        setSubmissionCounts(Object.fromEntries(counts));
-      }
-    }
-
-    loadSubmissionCounts();
-
-    return () => {
-      isActive = false;
-    };
-  }, [assignmentTasks]);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const openEditModal = () => {
     setEditTitle(editedWorkspace.title);
@@ -187,7 +178,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
 
   // funciona para manejar que pasa DESPUES de crear una tarea
   const handleTaskCreated = (task: WorkspaceAdminTask) => {
-    setAssignmentTasks((currentTasks) => [task, ...currentTasks]);
+    setAssignmentTasks((currentTasks) => [task, ...(currentTasks ?? [])]);
     setOpenModalCreateTask(false);
     router.refresh();
   };

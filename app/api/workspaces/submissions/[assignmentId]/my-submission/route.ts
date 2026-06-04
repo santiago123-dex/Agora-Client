@@ -14,14 +14,15 @@ export async function GET(_request: Request, { params }: Props) {
   try {
     const { assignmentId } = await params;
 
-    const user = await serverApiFetch<CurrentUserResponse>("/users/get-user", {
-      method: "GET",
-    });
-
-    const submissions = await serverApiFetch<SubmissionResponse[]>(
-      `/workspaces/submission/assignment/${assignmentId}`,
-      { method: "GET" },
-    );
+    const [user, submissions] = await Promise.all([
+      serverApiFetch<CurrentUserResponse>("/users/get-user", {
+        method: "GET",
+      }),
+      serverApiFetch<SubmissionResponse[]>(
+        `/workspaces/submission/assignment/${assignmentId}`,
+        { method: "GET" },
+      ),
+    ]);
 
     const mySubmission = submissions.find(
       (s) => String(s.userId) === String(user.id),

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CalendarDays, Check, Clock, FileText, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Clock, FileText, Paperclip, Send, Upload, X } from "lucide-react";
 import { getAssignmentById, type AssignmentResponse } from "@/app/src/lib/api/assignments";
 import { getMySubmissionByAssignment, createSubmission, deleteSubmission, type SubmissionResponse, type CreateSubmissionPayload } from "@/app/src/lib/api/submissions";
 
@@ -33,6 +33,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -81,11 +82,18 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
       const payload: CreateSubmissionPayload = {
         assignmentId: Number(assignment.id),
         content: { text: deliveryText.trim() },
-        files: { attachments: [] },
+        files: {
+          attachments: selectedFiles.map((file) => ({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          })),
+        },
       };
 
       const result = await createSubmission(payload);
       setSubmission(result);
+      setSelectedFiles([]);
       setShowCancelConfirm(false);
       router.refresh();
     } catch (err) {
@@ -103,6 +111,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
       await deleteSubmission(submission.id);
       setSubmission(null);
       setDeliveryText("");
+      setSelectedFiles([]);
       setShowCancelConfirm(false);
       router.refresh();
     } catch (err) {
@@ -282,15 +291,38 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
               <>
                 <p className="mt-1 text-sm text-slate-500">{showCancelConfirm ? "Modifica tu respuesta y vuelve a enviar." : "Escribe tu respuesta para esta tarea."}</p>
 
-                <div className="mt-4 space-y-4">
-                  <textarea
-                    value={deliveryText}
-                    onChange={(e) => setDeliveryText(e.target.value)}
-                    disabled={isSubmitting}
-                    placeholder="Escribe tu respuesta aquí..."
-                    rows={6}
-                    className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10"
-                  />
+                  <div className="mt-4 space-y-4">
+                    <textarea
+                      value={deliveryText}
+                      onChange={(e) => setDeliveryText(e.target.value)}
+                      disabled={isSubmitting}
+                      placeholder="Escribe tu respuesta aquí..."
+                      rows={6}
+                      className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10"
+                    />
+
+                    <div>
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-sky-300 px-4 py-3 text-sm text-slate-500 transition hover:bg-sky-50">
+                        <Upload className="h-5 w-5" />
+                        Adjuntar archivos
+                        <input
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => setSelectedFiles(Array.from(e.target.files ?? []))}
+                        />
+                      </label>
+                      {selectedFiles.length > 0 ? (
+                        <ul className="mt-2 space-y-1">
+                          {selectedFiles.map((file) => (
+                            <li key={`${file.name}-${file.size}`} className="flex items-center gap-2 text-xs text-slate-500">
+                              <Paperclip className="h-3 w-3" />
+                              {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
 
                   <div className="flex flex-wrap gap-3">
                     <button

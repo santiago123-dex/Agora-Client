@@ -21,7 +21,7 @@ function StatBlock({ block }: { block: AiBlock }) {
 }
 
 function TableBlock({ block }: { block: AiBlock }) {
-  const headers = (block.headers ?? []) as string[];
+  const headers = (block.columns ?? block.headers ?? []) as string[];
   const rows = (block.rows ?? []) as string[][];
   if (!headers.length) return null;
 
@@ -54,9 +54,9 @@ function CardBlock({ block }: { block: AiBlock }) {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#253245] dark:bg-[#0a1424]">
-      {block.title && (
+      {block.title ? (
         <p className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">{block.title}</p>
-      )}
+      ) : null}
       <div className="space-y-1">
         {fields.map((f, i) => (
           <div key={i} className="flex justify-between text-xs">
@@ -78,9 +78,9 @@ function ChartBlock({ block }: { block: AiBlock }) {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#253245] dark:bg-[#0a1424]">
-      {block.title && (
+      {block.title ? (
         <p className="mb-3 text-xs font-semibold text-slate-700 dark:text-slate-300">{block.title}</p>
-      )}
+      ) : null}
       <div className="flex items-end gap-2" style={{ height: 80 }}>
         {labels.map((label, i) => {
           const h = (values[i] / max) * 100;

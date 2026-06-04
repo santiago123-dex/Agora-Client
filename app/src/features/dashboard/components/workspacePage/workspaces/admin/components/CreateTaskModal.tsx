@@ -52,7 +52,7 @@ export default function CreateTaskModal({
   const [allowLateSubmissions, setAllowLateSubmissions] = useState(true);
   const [maxFileSizeMb, setMaxFileSizeMb] = useState("50");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [rubrics, setRubrics] = useState<RubricFormItem[]>([
+  const [rubrics, setRubrics] = useState<RubricFormItem[]>(() => [
     createEmptyRubric(),
     createEmptyRubric(),
   ]);

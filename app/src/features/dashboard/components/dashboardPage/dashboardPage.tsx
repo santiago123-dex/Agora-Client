@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import DashboardHeader from "./DashboardHeader/dashboardHeader";
+import DashboardStats from "./DashboardStats/dashboardStats";
 import CreatedWorkspaceSection from "./WorkspaceSection/CreatedWorkspaceSection/createdWorkspaceSection";
 import JoinedWorkspaceSection from "./WorkspaceSection/JoinedWorkspaceSection/joinedWorkspaceSection";
 import PendingTasksPanel from "./DashboardSidebardPanels/PendingTasksPanel/pendingTasksPanel";
@@ -51,6 +52,10 @@ export default function DashboardPage() {
       <DashboardHeader />
 
       <section className="px-4 pb-10 sm:px-7">
+        <div className="mb-8">
+          <DashboardStats />
+        </div>
+
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.7fr)_20rem] xl:gap-10 [@media(min-width:1450px)]:grid-cols-[minmax(0,1.7fr)_30rem] [@media(min-width:1450px)]:gap-8">
           <div className="space-y-10">
             <section className="space-y-5">

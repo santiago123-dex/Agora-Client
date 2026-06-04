@@ -19,12 +19,26 @@ import {
   getSubmissionText,
 } from "../helpers";
 
+// Valor corregido por el profesor para un criterio de la rúbrica.
+// teacher_score y teacher_feedback reemplazan lo que sugirió la IA originalmente.
+// Si un criterio no tiene override, se usa el valor original de la IA.
+type CriterionOverrideValue = {
+  teacher_score: number;
+  teacher_feedback: string;
+};
+
 type Props = {
   row: MemberSubmissionRow;
   aiSuggestion?: GradeResult;
   isAnalyzing: boolean;
   grade: string;
   feedback: string;
+  // Diccionario de overrides activos para el submission actual (key = criterion_id).
+  // Se pasa desde AssignmentAdminDetail, filtrado por submission_id.
+  overrides?: Record<string, CriterionOverrideValue>;
+  // Callback cuando el profesor edita un score o feedback en los inputs del criterio.
+  // El padre (AssignmentAdminDetail) lo recibe y lo guarda en el estado global de overrides.
+  onOverrideChange?: (criterionId: string, field: "teacher_score" | "teacher_feedback", value: string) => void;
   onAnalyze: () => void;
   onAcceptSuggestion: () => void;
   onGradeChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -32,12 +46,17 @@ type Props = {
   onSave: () => void;
 };
 
+const ANALYZE_PROMPT = 'Haz clic en "Analizar" para que la IA evalúe esta entrega.';
+const NO_SUBMISSION_TEXT = "No hay entrega para analizar todavía.";
+
 export default function SubmissionReviewPanel({
   row,
   aiSuggestion,
   isAnalyzing,
   grade,
   feedback,
+  overrides,
+  onOverrideChange,
   onAnalyze,
   onAcceptSuggestion,
   onGradeChange,
@@ -157,27 +176,74 @@ export default function SubmissionReviewPanel({
                     {aiSuggestion.grading_model}
                   </span>
                 </div>
-                {aiSuggestion.criteria_results.map((c) => (
-                  <div
-                    key={c.criterion_id}
-                    className="mb-2 rounded-lg bg-white p-3"
-                  >
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">
-                        {c.criterion_name}
-                      </span>
-                      <span className="text-xs font-medium text-[#275D79]">
-                        {c.score} / {c.max_score}
+                {/* Cada criterio de la rúbrica es un bloque editable.
+                    Si onOverrideChange existe (el padre habilita overrides):
+                    - El score se muestra como input numérico
+                    - El feedback se muestra como textarea
+                    - Si el profesor modificó el valor, el fondo se vuelve ámbar
+                    Si no hay overrides habilitados, se muestra como texto estático. */}
+                {aiSuggestion.criteria_results.map((c) => {
+                  // ov = overrideValue si el profesor ya editó este criterio
+                  const ov = overrides?.[c.criterion_id];
+                  // Muestra el valor overrideado si existe, sino el original de la IA
+                  const displayScore = ov?.teacher_score ?? c.score;
+                  const displayFeedback = ov?.teacher_feedback ?? c.feedback;
+                  // true si el profesor modificó este criterio (cambia el estilo a ámbar)
+                  const isModified = ov != null;
+
+                  return (
+                    <div
+                      key={c.criterion_id}
+                      className={`mb-2 rounded-lg p-3 ${isModified ? "border border-amber-200 bg-amber-50" : "bg-white"}`}
+                    >
+                      <div className="mb-1 flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700">
+                          {c.criterion_name}
+                        </span>
+                        {onOverrideChange ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              step={0.5}
+                              value={displayScore}
+                              onChange={(e) => onOverrideChange(c.criterion_id, "teacher_score", e.target.value)}
+                              className={`w-16 rounded border px-1.5 py-0.5 text-xs text-right outline-none ${
+                                isModified
+                                  ? "border-amber-300 bg-amber-100 font-semibold text-amber-800"
+                                  : "border-slate-200 bg-slate-50 text-slate-700"
+                              }`}
+                            />
+                            <span className="text-xs text-slate-400">/ {c.max_score}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs font-medium text-[#275D79]">
+                            {c.score} / {c.max_score}
+                          </span>
+                        )}
+                      </div>
+                      {onOverrideChange ? (
+                        <textarea
+                          value={displayFeedback}
+                          onChange={(e) => onOverrideChange(c.criterion_id, "teacher_feedback", e.target.value)}
+                          rows={2}
+                          className={`mt-1 w-full resize-none rounded px-2 py-1 text-xs leading-5 outline-none ${
+                            isModified
+                              ? "border border-amber-300 bg-amber-100 text-amber-800"
+                              : "border border-transparent bg-transparent text-slate-600 hover:border-slate-200 focus:border-slate-300"
+                          }`}
+                        />
+                      ) : (
+                        <p className="text-xs leading-5 text-slate-600">
+                          {c.feedback}
+                        </p>
+                      )}
+                      <span className="mt-1 inline-block rounded-md bg-[#D8E7EC] px-2 py-0.5 text-[10px] font-medium text-[#275D79]">
+                        {c.matched_level}
                       </span>
                     </div>
-                    <p className="text-xs leading-5 text-slate-600">
-                      {c.feedback}
-                    </p>
-                    <span className="mt-1 inline-block rounded-md bg-[#D8E7EC] px-2 py-0.5 text-[10px] font-medium text-[#275D79]">
-                      {c.matched_level}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
                 <p className="mt-3 text-xs leading-5 text-slate-500 italic">
                   {aiSuggestion.feedback_summary}
                 </p>
@@ -233,9 +299,9 @@ export default function SubmissionReviewPanel({
                   Analizando entrega con IA...
                 </div>
               ) : canGrade ? (
-                'Haz clic en "Analizar" para que la IA evalúe esta entrega.'
+                ANALYZE_PROMPT
               ) : (
-                "No hay entrega para analizar todavía."
+                NO_SUBMISSION_TEXT
               )}
             </div>
           )}

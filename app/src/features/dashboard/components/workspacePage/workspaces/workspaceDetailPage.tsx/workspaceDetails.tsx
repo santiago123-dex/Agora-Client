@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { getWorkspaceById, getWorkspaceInvitationCode } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "../../data/workspace-api";
 import WorkspaceAdmin from "../admin/workspaceAdmin";
@@ -12,46 +12,29 @@ type WorkspaceDetailsProps = {
 };
 
 export default function WorkspaceDetails({ workspaceId }: WorkspaceDetailsProps) {
-  const [workspace, setWorkspace] = useState<AdminWorkspace | MemberWorkspace | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadWorkspace() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const [response, invitation] = await Promise.all([
-          getWorkspaceById(workspaceId),
-          getWorkspaceInvitationCode(workspaceId),
-        ]);
-
-        setWorkspace(
-          workspaceToCard({
-            ...response,
-            data: {
-              ...(response.data ?? {}),
-              code: invitation.code,
-            },
-          })
-        );
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "No se pudo cargar el workspace");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadWorkspace();
-  }, [workspaceId]);
+  const { data: workspace, error, isLoading } = useSWR(
+    workspaceId ? ["workspace", workspaceId] : null,
+    async ([, id]) => {
+      const [response, invitation] = await Promise.all([
+        getWorkspaceById(id),
+        getWorkspaceInvitationCode(id),
+      ]);
+      return workspaceToCard({
+        ...response,
+        data: {
+          ...(response.data ?? {}),
+          code: invitation.code,
+        },
+      });
+    },
+  );
 
   if (isLoading) {
     return <div className="p-7 text-sm text-slate-500">Cargando workspace...</div>;
   }
 
   if (error) {
-    return <div className="p-7 text-sm text-red-600">{error}</div>;
+    return <div className="p-7 text-sm text-red-600">{error instanceof Error ? error.message : "Error al cargar el workspace"}</div>;
   }
 
   if (!workspace) {

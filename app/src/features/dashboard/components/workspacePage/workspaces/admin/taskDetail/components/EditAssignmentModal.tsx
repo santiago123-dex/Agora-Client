@@ -97,20 +97,20 @@ export default function  EditAssignmentModal({
 }: Props) {
   const [name, setName] = useState(assignment.name);
   const [description, setDescription] = useState(assignment.description ?? "");
-  const [dueDate, setDueDate] = useState(toDatetimeLocal(assignment.dueDate));
+  const [dueDate, setDueDate] = useState(() => toDatetimeLocal(assignment.dueDate));
   const [status, setStatus] = useState<AssignmentStatus>(assignment.status);
   const [allowLateSubmissions, setAllowLateSubmissions] = useState(
-    getInitialAllowLate(assignment),
+    () => getInitialAllowLate(assignment),
   );
   const [maxFileSizeMb, setMaxFileSizeMb] = useState(
-    getInitialMaxFileSize(assignment),
+    () => getInitialMaxFileSize(assignment),
   );
   const [attachmentNames, setAttachmentNames] = useState<string[]>(
-    getInitialAttachmentNames(assignment),
+    () => getInitialAttachmentNames(assignment),
   );
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [rubrics, setRubrics] = useState<RubricFormItem[]>(
-    getInitialRubrics(assignment),
+    () => getInitialRubrics(assignment),
   );
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);

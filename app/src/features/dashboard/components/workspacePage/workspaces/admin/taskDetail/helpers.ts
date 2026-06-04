@@ -21,14 +21,15 @@ export function getMemberName(member: WorkspaceMemberDetailsResponse) {
 export function getInitials(name: string) {
   return name
     .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase())
+    .flatMap((part) => (part ? [part[0]?.toUpperCase()] : []))
     .join("")
     .slice(0, 2);
 }
 
 export function getSubmissionText(submission?: SubmissionResponse) {
-  const content = submission?.content;
+  if (!submission) return "Este estudiante todavía no ha enviado respuesta.";
+
+  const content = submission.content;
 
   if (!content) return "Este estudiante todavía no ha enviado respuesta.";
 
@@ -73,7 +74,9 @@ function mapSubmissionFile(value: unknown, index: number): SubmissionFileView {
 }
 
 export function getSubmissionFiles(submission?: SubmissionResponse): SubmissionFileView[] {
-  const files = submission?.files;
+  if (!submission) return [];
+
+  const files = submission.files;
 
   if (!files) return [];
 
@@ -91,7 +94,9 @@ export function getSubmissionFiles(submission?: SubmissionResponse): SubmissionF
 }
 
 export function getStoredGrade(submission?: SubmissionResponse) {
-  const result = submission?.result;
+  if (!submission) return undefined;
+
+  const result = submission.result;
 
   if (!result) return undefined;
 
@@ -122,7 +127,9 @@ export function getStoredAiAnalysis(
       evaluated_at: string;
     }
   | undefined {
-  const result = submission?.result;
+  if (!submission) return undefined;
+
+  const result = submission.result;
   if (!result) return undefined;
 
   const ai = result.ai;
@@ -174,6 +181,8 @@ export function buildRows(
   dueDate: string,
   localGrades: Record<string, { grade?: number; feedback?: string }>,
 ): MemberSubmissionRow[] {
+  if (members.length === 0) return [];
+
   const submissionsByUserId = new Map(
     submissions.map((submission) => [String(submission.userId), submission]),
   );

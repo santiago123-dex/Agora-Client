@@ -16,8 +16,7 @@ export default function MembersCard({ member }: Props) {
   const name = `${member.firstName}`.trim();
   const initials = (member.fullName ?? "")
     .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase())
+    .flatMap((part) => (part ? [part[0]?.toUpperCase()] : []))
     .join("")
     .slice(0, 2) || "U";
 

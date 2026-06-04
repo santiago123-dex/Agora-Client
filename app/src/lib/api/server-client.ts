@@ -30,9 +30,7 @@ export async function serverApiFetch<T>(
             cache: "no-store",
         });
 
-        const data = await response.json().catch(() => null);
-
-        return { response, data };
+        return response;
     };
 
     let token = await getAccessTokenFromCookies();
@@ -41,24 +39,22 @@ export async function serverApiFetch<T>(
         throw new ApiError("No hay sesión activa", 401);
     }
 
-    let { response, data } = await makeRequest(token);
+    let response = await makeRequest(token);
 
     if (response.status === 401 && refreshOnUnauthorized) {
         const refreshed = await refreshSession();
-        token = refreshed.access_token;
-
-        const retry = await makeRequest(token);
-        response = retry.response;
-        data = retry.data;
+        response = await makeRequest(refreshed.access_token);
     }
 
     if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
         throw new ApiError(
-            data?.message ?? "Ocurrió un error en la petición",
+            errorData?.message ?? "Ocurrió un error en la petición",
             response.status,
-            data
+            errorData
         );
     }
 
+    const data = await response.json().catch(() => null);
     return data as T;
 }

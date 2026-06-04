@@ -13,20 +13,20 @@ export async function bffFetch<T>(
     },
   });
 
-  const data = await response.json().catch(() => null);
-
   if (!response.ok) {
     if (response.status === 401 && typeof window !== "undefined") {
       await clearSessionCookies().catch(() => null);
       window.location.href = "/auth/login";
     }
 
+    const errorData = await response.json().catch(() => null);
     throw new ApiError(
-      data?.message ?? "Ocurrió un error en la petición",
+      errorData?.message ?? "Ocurrió un error en la petición",
       response.status,
-      data,
+      errorData,
     );
   }
 
+  const data = await response.json().catch(() => null);
   return data as T;
 }

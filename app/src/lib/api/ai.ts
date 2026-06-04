@@ -4,6 +4,7 @@ export type AiBlock = {
   title?: string;
   description?: string;
   headers?: string[];
+  columns?: string[];
   rows?: string[][];
   [key: string]: unknown;
 };
@@ -68,6 +69,26 @@ export function suggestGrades(workspaceId: string, assignmentId: string) {
   });
 }
 
+/**
+ * Override para un criterio individual de la rúbrica.
+ * Cuando el profesor corrige manualmente la nota o feedback que sugirió la IA,
+ * se crea un CriterionOverride que se envía al backend al aprobar.
+ *
+ * Campos:
+ * - submission_id: ID de la entrega del estudiante (int32 para el proto/gRPC)
+ * - criterion_id:  ID del criterio de la rúbrica que se está overrideando
+ * - original_score: Puntaje que asignó originalmente la IA (se guarda para auditoría)
+ * - teacher_score:  Puntaje corregido por el profesor
+ * - teacher_feedback: Feedback corregido por el profesor
+ */
+export type CriterionOverride = {
+  submission_id: number;
+  criterion_id: string;
+  original_score: number;
+  teacher_score: number;
+  teacher_feedback: string;
+};
+
 export type ApproveSuggestionResponse = {
   suggestion_id: string;
   results: {
@@ -80,9 +101,23 @@ export type ApproveSuggestionResponse = {
   }[];
 };
 
-export function approveSuggestion(suggestionId: string) {
+/**
+ * Aprueba (persiste) las sugerencias de calificación generadas por la IA.
+ * El endpoint es POST /api/ai/approve-suggestion → BFF → Gateway → Agent.
+ *
+ * @param suggestionId - ID del conjunto de sugerencias a aprobar (devuelto por suggestGrades)
+ * @param overrides    - Lista opcional de correcciones manuales del profesor sobre criterios individuales.
+ *                       Si se envía, el backend aplica los overrides ANTES de persistir.
+ *                       Si no se envía o está vacío, se aprueban las sugerencias tal cual.
+ */
+export function approveSuggestion(suggestionId: string, overrides?: CriterionOverride[]) {
   return bffFetch<ApproveSuggestionResponse>("/api/ai/approve-suggestion", {
     method: "POST",
-    body: JSON.stringify({ suggestion_id: suggestionId }),
+    body: JSON.stringify({
+      suggestion_id: suggestionId,
+      // Solo incluye "overrides" si hay al menos uno. Si está vacío o undefined,
+      // el backend recibe exactamente lo mismo que antes (backward compatible).
+      ...(overrides?.length ? { overrides } : {}),
+    }),
   });
 }

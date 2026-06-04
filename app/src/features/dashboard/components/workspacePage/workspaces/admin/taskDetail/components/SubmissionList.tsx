@@ -22,7 +22,7 @@ export default function SubmissionList({ rows, selectedUserId, onSelect }: Props
         <h2 className="font-bold text-slate-950">Entregas</h2>
       </div>
 
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-100 [content-visibility:auto] [contain-intrinsic-size:60px]">
         {rows.map((row) => {
           const name = getMemberName(row.member);
           const grade = row.localGrade ?? getStoredGrade(row.submission);

@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
+import useSWR from "swr";
 import {
   createWorkspace,
   getMyWorkspaces,
@@ -32,16 +33,13 @@ export default function WorkspacesPage() {
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [description, setDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
-  const [workspaces, setWorkspaces] = useState<WorkspaceCard[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const loadWorkspaces = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
+  const { data: workspaces = [], error: swrError, isLoading, mutate } = useSWR(
+    "my-workspaces",
+    async () => {
       const response = await getMyWorkspaces();
       const cards = response.map(workspaceToCard);
 
@@ -85,19 +83,9 @@ export default function WorkspacesPage() {
         }),
       );
 
-      setWorkspaces(cardsWithMemberCount);
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "No se pudieron cargar los workspaces"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadWorkspaces();
-  }, []);
+      return cardsWithMemberCount;
+    },
+  );
 
   const handleCreateWorkspace = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -115,7 +103,7 @@ export default function WorkspacesPage() {
       setDescription("");
       setSelectedColor(colors[0]);
       setOpenModalCreate(false);
-      await loadWorkspaces();
+      await mutate();
       setShowCreatedWorkspaces(true);
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo crear el workspace");
@@ -132,7 +120,7 @@ export default function WorkspacesPage() {
     try {
       await joinWorkspace(joinCode.trim());
       setJoinCode("");
-      await loadWorkspaces();
+      await mutate();
       setShowCreatedWorkspaces(false);
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo unir al workspace");
@@ -143,22 +131,41 @@ export default function WorkspacesPage() {
 
   const workspacesToDisplay = useMemo(
     () =>
-      workspaces.filter((workspace) =>
-        showCreatedWorkspaces
-          ? workspace.roleLabel === "admin"
-          : workspace.roleLabel === "member"
-      ),
-    [showCreatedWorkspaces, workspaces]
+      workspaces
+        .filter((workspace) =>
+          showCreatedWorkspaces
+            ? workspace.roleLabel === "admin"
+            : workspace.roleLabel === "member"
+        )
+        .filter((workspace) =>
+          searchQuery
+            ? workspace.title.toLowerCase().includes(searchQuery.toLowerCase())
+            : true
+        ),
+    [showCreatedWorkspaces, workspaces, searchQuery]
   );
 
   return (
     <section className="px-4 py-6 pb-10 sm:px-7">
       <div className="space-y-6">
-        {error ? (
+        {error || swrError ? (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
+            {error ?? swrError?.message}
           </div>
         ) : null}
+
+        <div className="flex flex-col gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar por nombre..."
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15"
+            />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">

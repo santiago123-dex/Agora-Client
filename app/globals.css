@@ -35,7 +35,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/*ocultar el scorll del textarea*/
 textarea::-webkit-scrollbar {
   display: none;
 }
@@ -45,7 +44,7 @@ textarea::-webkit-scrollbar {
   color: #e2e8f0;
 }
 
-/* ── Global overrides: cards, surfaces ── */
+/* ── Dashboard dark overrides (scoped via :where for low specificity) ── */
 .dark :where(.bg-white) {
   background-color: #141f33;
 }
@@ -55,21 +54,15 @@ textarea::-webkit-scrollbar {
 .dark :where(.bg-slate-50) {
   background-color: #0a1424;
 }
-
-/* ── Global overrides: borders ── */
 .dark :where(.border-slate-200) {
   border-color: #253245;
 }
-
-/* ── Global overrides: text ── */
 .dark :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
   color: #e2e8f0;
 }
 .dark :where(.text-slate-600, .text-slate-500) {
   color: #8896a6;
 }
-
-/* ── Global overrides: shadows ── */
 .dark :where(.shadow-sm, .shadow) {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 }
@@ -79,12 +72,146 @@ textarea::-webkit-scrollbar {
 .dark :where(.shadow-lg) {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
 }
-
-/* ── Hover states in dark ── */
 .dark .hover\:bg-slate-50:hover,
 .dark .hover\:bg-slate-100:hover,
 .dark .hover\:bg-gray-100:hover {
   background-color: #1a2740;
+}
+
+/* ── Landing page dark overrides ── */
+/* The landing page root has .landing-page, giving us a scope with higher specificity */
+.dark .landing-page {
+  background-color: #0b1120;
+}
+.dark .landing-page .bg-white {
+  background-color: #1a2740;
+}
+.dark .landing-page .bg-\[\#EBF3F6\] {
+  background-color: #0d1a2e;
+}
+.dark .landing-page .bg-slate-50 {
+  background-color: #0f172a;
+}
+.dark .landing-page .bg-\[\#eaf3f8\] {
+  background-color: #1a2740;
+}
+.dark .landing-page .bg-\[\#f3f8fb\] {
+  background-color: #0d1a2e;
+}
+.dark .landing-page .border-\[\#eaeaea\] {
+  border-color: #1e293b;
+}
+.dark .landing-page .border-neutral-200 {
+  border-color: #253245;
+}
+.dark .landing-page .border-neutral-100 {
+  border-color: #1e293b;
+}
+.dark .landing-page .text-gray-400 {
+  color: #8896a6;
+}
+.dark .landing-page .text-gray-500 {
+  color: #94a3b8;
+}
+.dark .landing-page .text-gray-300 {
+  color: #64748b;
+}
+.dark .landing-page .hover\:bg-\[\#eaf3f8\]:hover {
+  background-color: #1a2740;
+}
+.dark .landing-page .shadow-\[0_24px_80px_rgba\(15\,23\,42\,0\.14\)\] {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Navbar glass effect ── */
+.landing-header {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(243, 248, 251, 0.82) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+.dark .landing-header {
+  background: linear-gradient(
+    90deg,
+    rgba(11, 17, 32, 0.9) 0%,
+    rgba(20, 31, 51, 0.85) 100%
+  );
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ── Mesh gradient hero background ── */
+.mesh-gradient {
+  background: linear-gradient(135deg, #f3f8fb 0%, #dceef5 50%, #e8f4f8 100%);
+  background-size: 200% 200%;
+  animation: meshShift 12s ease infinite;
+}
+.dark .mesh-gradient {
+  background: linear-gradient(135deg, #0b1120 0%, #141f33 50%, #1a2740 100%);
+}
+@keyframes meshShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Floating particles ── */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #275D79;
+  opacity: 0.15;
+  animation: float 6s ease-in-out infinite;
+}
+.particle:nth-child(2) {
+  width: 8px; height: 8px;
+  top: 15%; left: 10%;
+  animation-delay: -2s;
+  animation-duration: 8s;
+}
+.particle:nth-child(3) {
+  width: 5px; height: 5px;
+  top: 60%; left: 80%;
+  animation-delay: -4s;
+  animation-duration: 7s;
+}
+.particle:nth-child(4) {
+  width: 10px; height: 10px;
+  top: 30%; left: 70%;
+  animation-delay: -1s;
+  animation-duration: 9s;
+}
+.particle:nth-child(5) {
+  width: 6px; height: 6px;
+  top: 75%; left: 25%;
+  animation-delay: -3s;
+  animation-duration: 6.5s;
+}
+.particle:nth-child(6) {
+  width: 7px; height: 7px;
+  top: 45%; left: 5%;
+  animation-delay: -5s;
+  animation-duration: 8.5s;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.15; }
+  50% { transform: translateY(-30px) scale(1.4); opacity: 0.35; }
+}
+
+/* ── Scroll-reveal animations ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @layer base {

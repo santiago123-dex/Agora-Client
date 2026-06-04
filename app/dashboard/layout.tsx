@@ -5,11 +5,18 @@ import logo from "@/public/images/logo-cropped.png";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
 import { UserContext } from "@/app/src/lib/contexts/UserContext";
 import type { CurrentUser } from "@/app/src/lib/contexts/UserContext";
 import { useTheme } from "@/app/src/lib/hooks/useTheme";
-import AiChatPanel from "@/app/src/features/dashboard/components/ai-chat/AiChatPanel";
+import NotificationBell from "@/app/src/features/dashboard/components/dashboardPage/NotificationBell/notificationBell";
+import FirstTimeModal from "@/app/src/features/dashboard/components/onboarding/FirstTimeModal";
+
+const AiChatPanel = dynamic(
+  () => import("@/app/src/features/dashboard/components/ai-chat/AiChatPanel"),
+  { ssr: false },
+);
 
 const navLinks = [
   {
@@ -31,6 +38,51 @@ const navLinks = [
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 7v14" />
         <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Analíticas",
+    href: "/dashboard/analytics",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 3v18h18" />
+        <path d="m19 9-5 5-4-4-3 3" />
+      </svg>
+    ),
+  },
+  {
+    label: "Calendario",
+    href: "/dashboard/calendar",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 2v4" />
+        <path d="M16 2v4" />
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M3 10h18" />
+      </svg>
+    ),
+  },
+  {
+    label: "Gradebook",
+    href: "/dashboard/gradebook",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M16 13H8" />
+        <path d="M16 17H8" />
+        <path d="M10 9H8" />
+      </svg>
+    ),
+  },
+  {
+    label: "Notificaciones",
+    href: "/dashboard/notifications",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
       </svg>
     ),
   },
@@ -321,7 +373,11 @@ export default function LayoutDashboard({
                 onClick={() => {
                   const root = document.documentElement;
                   root.classList.toggle("dark");
-                  localStorage.setItem("theme", root.classList.contains("dark") ? "dark" : "light");
+                  try {
+                    localStorage.setItem("theme:v1", root.classList.contains("dark") ? "dark" : "light");
+                  } catch {
+                    // localStorage not available
+                  }
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                 aria-label="Cambiar tema"
@@ -341,6 +397,7 @@ export default function LayoutDashboard({
                   <path d="m19.07 4.93-1.41 1.41" />
                 </svg>
               </button>
+              <NotificationBell />
               <button
                 type="button"
                 onClick={() => setIsAiOpen((prev) => !prev)}
@@ -413,6 +470,7 @@ export default function LayoutDashboard({
       </aside>
 
       <AiChatPanel isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+      <FirstTimeModal />
     </div>
     </UserContext.Provider>
   );

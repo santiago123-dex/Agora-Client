@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+const THEME_KEY = "theme:v1";
+
 function applyTheme(theme: string) {
   const root = document.documentElement;
   if (theme === "dark") {
@@ -11,9 +13,26 @@ function applyTheme(theme: string) {
   }
 }
 
+function migrateTheme(): string | null {
+  try {
+    const oldValue = localStorage.getItem("theme");
+    if (oldValue === "dark" || oldValue === "light") {
+      localStorage.setItem(THEME_KEY, oldValue);
+      localStorage.removeItem("theme");
+      return oldValue;
+    }
+  } catch {}
+
+  try {
+    return localStorage.getItem(THEME_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function useTheme(theme: string | undefined) {
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
+    const stored = migrateTheme();
     if (stored === "dark" || stored === "light") {
       applyTheme(stored);
     }
@@ -22,6 +41,10 @@ export function useTheme(theme: string | undefined) {
   useEffect(() => {
     if (!theme) return;
     applyTheme(theme);
-    localStorage.setItem("theme", theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // localStorage not available
+    }
   }, [theme]);
 }

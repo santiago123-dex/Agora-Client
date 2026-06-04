@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/app/src/lib/api/payment";
+import { useCallback, useState } from "react";
+import useSWR from "swr";
+import { createCheckoutSession, getProducts } from "@/app/src/lib/api/payment";
 import type { StripeProduct } from "@/app/src/lib/api/payment";
 
 const freePlan = {
@@ -36,32 +37,38 @@ type DisplayPlan = {
 };
 
 export default function SuscriptionPage() {
-  const [products, setProducts] = useState<StripeProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: products = [], error, isLoading } = useSWR(
+    "products",
+    () => getProducts(),
+  );
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    setIsLoading(true);
+  const handleSelectPlan = useCallback(async (productId: string) => {
+    setProcessingId(productId);
 
-    getProducts()
-      .then((data) => {
-        if (active) setProducts(data);
-      })
-      .catch((err) => {
-        if (active) setError(err instanceof Error ? err.message : "Error al cargar planes");
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+    try {
+      const origin = window.location.origin;
+      const successUrl = `${origin}/dashboard/suscription?success=true`;
+      const cancelUrl = `${origin}/dashboard/suscription?canceled=true`;
 
-    return () => { active = false; };
+      const { url } = await createCheckoutSession(productId, successUrl, cancelUrl);
+
+      if (!url) {
+        throw new Error("Error al crear la sesión de pago");
+      }
+
+      window.location.href = url;
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : "Error al iniciar el pago");
+      setProcessingId(null);
+    }
   }, []);
 
   const paidPlans: DisplayPlan[] = products.map((p) => ({
     id: p.id,
     name: p.name,
-    price: p.defaultPriceObject ? p.defaultPriceObject.unit_amount / 100 : 0,
+    price: p.defaultPriceObject ? p.defaultPriceObject.unitAmount / 100 : 0,
     currency: p.defaultPriceObject?.currency?.toUpperCase() ?? "USD",
     period: p.defaultPriceObject?.recurring?.interval === "year" ? "/año" : "/mes",
     features: parseFeatures(p.description),
@@ -83,14 +90,17 @@ export default function SuscriptionPage() {
     );
   }
 
-  if (error) {
+  const displayError = fetchError ?? (error instanceof Error ? error.message : null);
+  const isPaymentError = fetchError !== null;
+
+  if (displayError) {
     return (
       <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
         <div className="max-w-md text-center">
           <p className="mb-2 text-sm font-medium text-slate-900 dark:text-slate-100">
-            No se pudieron cargar los planes
+            {isPaymentError ? "Error al iniciar el pago" : "No se pudieron cargar los planes"}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{error}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{displayError}</p>
         </div>
       </section>
     );
@@ -164,9 +174,21 @@ export default function SuscriptionPage() {
                 {plan.price > 0 && (
                   <button
                     type="button"
-                    className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
+                    disabled={processingId === plan.id}
+                    onClick={() => handleSelectPlan(plan.id)}
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
                   >
-                    Seleccionar Plan
+                    {processingId === plan.id ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Redirigiendo al pago...
+                      </span>
+                    ) : (
+                      "Seleccionar Plan"
+                    )}
                   </button>
                 )}
               </article>

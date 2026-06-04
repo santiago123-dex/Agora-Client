@@ -2,7 +2,7 @@ import { bffFetch } from "./bff-client";
 
 export type StripePrice = {
   id: string;
-  unit_amount: number;
+  unitAmount: number;
   currency: string;
   recurring?: {
     interval: string;
@@ -23,4 +23,19 @@ export type StripeProduct = {
 
 export function getProducts() {
   return bffFetch<StripeProduct[]>("/api/payment/products");
+}
+
+export function getPaymentLink(productId: string) {
+  return bffFetch<{ url: string }>(`/api/payment/pay-product/${productId}`);
+}
+
+export function createCheckoutSession(
+  productId: string,
+  successUrl: string,
+  cancelUrl: string,
+) {
+  return bffFetch<{ url: string }>("/api/payment/checkout", {
+    method: "POST",
+    body: JSON.stringify({ productId, successUrl, cancelUrl }),
+  });
 }
