@@ -158,7 +158,7 @@ export default function AiChatPanel({
 
   return (
     <aside
-      className={`fixed right-0 top-0 z-40 flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all duration-300 sm:w-[420px] dark:border-[#253245] dark:bg-[#141f33] ${
+      className={`fixed right-0 top-0 z-40 flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all duration-300 lg:w-[420px] dark:border-[#253245] dark:bg-[#141f33] ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >

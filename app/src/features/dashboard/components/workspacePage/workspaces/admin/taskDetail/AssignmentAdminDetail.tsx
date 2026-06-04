@@ -102,6 +102,18 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
   >(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [approving, setApproving] = useState(false);
+  const [listVisible, setListVisible] = useState(true);
+  const [userToggledList, setUserToggledList] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1280px)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (!userToggledList) setListVisible(e.matches);
+    };
+    handler(mq);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [userToggledList]);
   // ── Overrides (correcciones manuales del profesor sobre criterios de la IA) ──
   //
   // overrides es un diccionario key = "${submissionId}:${criterionId}"
@@ -427,44 +439,64 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
           approving={approving}
         />
 
-        <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-          <SubmissionList
-            rows={rows}
-            selectedUserId={
-              selectedRow ? String(selectedRow.member.userId) : undefined
-            }
-            onSelect={(userId) => {
-              setSelectedUserId(userId);
-              const local = localGrades[userId] ?? {};
-              setGradeInput(typeof local.grade === "number" ? String(local.grade) : "");
-              setFeedbackInput(local.feedback ?? "");
-            }}
-          />
-
-          {selectedRow ? (
-            <SubmissionReviewPanel
-              row={selectedRow}
-              aiSuggestion={
-                selectedRow.submission
-                  ? aiSuggestions[String(selectedRow.submission.id)]
-                  : undefined
+        <div className={`grid gap-5 ${listVisible ? 'lg:grid-cols-[360px_minmax(0,1fr)]' : ''}`}>
+          {listVisible && (
+            <SubmissionList
+              rows={rows}
+              selectedUserId={
+                selectedRow ? String(selectedRow.member.userId) : undefined
               }
-              isAnalyzing={
-                analyzingUserId === String(selectedRow.member.userId)
-              }
-              grade={gradeInput}
-              feedback={feedbackInput}
-              overrides={selectedOverrides}
-              onOverrideChange={handleSubmissionOverrideChange}
-              onAnalyze={handleAnalyze}
-              onAcceptSuggestion={handleAcceptSuggestion}
-              onGradeChange={handleGradeChange}
-              onFeedbackChange={handleFeedbackChange}
-              onSave={handleSaveGrade}
+              onSelect={(userId) => {
+                setSelectedUserId(userId);
+                const local = localGrades[userId] ?? {};
+                setGradeInput(typeof local.grade === "number" ? String(local.grade) : "");
+                setFeedbackInput(local.feedback ?? "");
+              }}
             />
-          ) : (
-            noMembersState
           )}
+
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setUserToggledList(true); setListVisible((prev) => !prev); }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {listVisible
+                    ? <><path d="m9 18 6-6-6-6"/></>
+                    : <><path d="m15 18-6-6 6-6"/></>
+                  }
+                </svg>
+                {listVisible ? "Ocultar lista" : "Mostrar lista"}
+              </button>
+            </div>
+
+            {selectedRow ? (
+              <SubmissionReviewPanel
+                row={selectedRow}
+                aiSuggestion={
+                  selectedRow.submission
+                    ? aiSuggestions[String(selectedRow.submission.id)]
+                    : undefined
+                }
+                isAnalyzing={
+                  analyzingUserId === String(selectedRow.member.userId)
+                }
+                grade={gradeInput}
+                feedback={feedbackInput}
+                overrides={selectedOverrides}
+                onOverrideChange={handleSubmissionOverrideChange}
+                onAnalyze={handleAnalyze}
+                onAcceptSuggestion={handleAcceptSuggestion}
+                onGradeChange={handleGradeChange}
+                onFeedbackChange={handleFeedbackChange}
+                onSave={handleSaveGrade}
+              />
+            ) : (
+              noMembersState
+            )}
+          </div>
         </div>
 
         <EditAssignmentModal

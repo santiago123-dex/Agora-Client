@@ -4,7 +4,7 @@ import Image from "next/image";
 import logo from "@/public/images/logo-cropped.png";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
 import { UserContext } from "@/app/src/lib/contexts/UserContext";
@@ -231,9 +231,21 @@ export default function LayoutDashboard({
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const autoCollapsedRef = useRef(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    if (isAiOpen && !autoCollapsedRef.current) {
+      setSidebarCollapsed(true);
+      autoCollapsedRef.current = true;
+    }
+    if (!isAiOpen) {
+      autoCollapsedRef.current = false;
+    }
+  }, [isAiOpen]);
 
   useTheme(user?.theme);
 
@@ -320,7 +332,7 @@ export default function LayoutDashboard({
   return (
     <UserContext.Provider value={{ user, isLoadingUser, refreshUser: loadCurrentUser }}>
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-[#0b1120] lg:flex-row">
-      <aside className="hidden bg-[#275D79] lg:flex lg:min-h-screen lg:w-60 lg:shrink-0 lg:flex-col">
+      <aside className={`hidden bg-[#275D79] lg:flex lg:min-h-screen lg:flex-col transition-all duration-300 ${sidebarCollapsed ? 'lg:w-0 lg:overflow-hidden lg:shrink-0' : 'lg:w-60 lg:shrink-0'}`}>
         <Link href="/" className="flex h-16 items-center gap-2 border-b border-white/10 px-4">
           <Image src={logo} alt="Logo Agora" className="h-9 w-9 shrink-0 object-contain brightness-1000" />
           <h2 className="text-lg font-semibold text-white">Agora</h2>
@@ -339,7 +351,7 @@ export default function LayoutDashboard({
         </div>
       </aside>
 
-      <div className={`flex-1 transition-all duration-300 ${isAiOpen ? 'mr-0 sm:mr-[420px]' : ''}`}>
+      <div className={`flex-1 min-w-0 transition-all duration-300 ${isAiOpen ? 'lg:mr-[420px]' : ''}`}>
         <header className="sticky top-0 z-30 bg-slate-50 dark:bg-[#0b1120]">
           <nav className="flex h-14 items-center gap-3 border-b border-[#ededed] px-4 dark:border-[#1e293b] sm:h-16 sm:px-6">
             <button
@@ -361,6 +373,27 @@ export default function LayoutDashboard({
                   <path d="M4 12h16" />
                   <path d="M4 6h16" />
                   <path d="M4 18h16" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const willExpand = sidebarCollapsed;
+                setSidebarCollapsed(!sidebarCollapsed);
+                if (willExpand && isAiOpen) setIsAiOpen(false);
+              }}
+              className="hidden h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 lg:inline-flex"
+              aria-label={sidebarCollapsed ? "Expandir menú lateral" : "Colapsar menú lateral"}
+            >
+              {sidebarCollapsed ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m15 18-6-6 6-6" />
                 </svg>
               )}
             </button>
