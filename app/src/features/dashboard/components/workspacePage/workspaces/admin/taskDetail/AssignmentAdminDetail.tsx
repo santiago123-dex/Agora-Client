@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAssignmentsByWorkspace } from "@/app/src/lib/api/assignments";
 import type { AssignmentResponse } from "@/app/src/lib/api/assignments";
@@ -12,11 +12,13 @@ import { getWorkspaceMembers } from "@/app/src/lib/api/workspaces";
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
 import { suggestGrades, approveSuggestion } from "@/app/src/lib/api/ai";
 import type { GradeResult, CriterionOverride } from "@/app/src/lib/api/ai";
+import { Download, ChevronUp, ChevronDown, Check } from "lucide-react";
 import AssignmentHeader from "./components/AssignmentHeader";
 import AssignmentStats from "./components/AssignmentStats";
 import AiSummaryPanel from "./components/AiSummaryPanel";
 import SubmissionList from "./components/SubmissionList";
 import { buildRows, getMemberName, getStoredAiAnalysis, getStoredGrade } from "./helpers";
+import { useGrading } from "@/app/src/lib/contexts/GradingContext";
 
 const SubmissionReviewPanel = dynamic(
   () => import("./components/SubmissionReviewPanel"),
@@ -94,16 +96,12 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [analyzingUserId, setAnalyzingUserId] = useState<string | null>(null);
   const [analyzingAll, setAnalyzingAll] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<
-    Record<string, GradeResult>
-  >({});
-  const [currentSuggestionId, setCurrentSuggestionId] = useState<
-    string | null
-  >(null);
-  const [aiError, setAiError] = useState<string | null>(null);
-  const [approving, setApproving] = useState(false);
   const [listVisible, setListVisible] = useState(true);
   const [userToggledList, setUserToggledList] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const { mutate } = useSWRConfig();
+
+  const { aiSuggestions, currentSuggestionId, aiError, approving, setAiSuggestions, setCurrentSuggestionId, setAiError, setApproving} = useGrading();
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1280px)");
@@ -196,6 +194,9 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
       setAiSuggestions({});
       setOverrides({});
       await mutateSubmissions();
+      setToast("Calificaciones guardadas");
+      mutate("notification-bell");
+      setTimeout(() => setToast(null), 2500);
     } catch (err) {
       setAiError(
         err instanceof Error
@@ -399,6 +400,12 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
 
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7">
+      {toast ? (
+        <div className="fixed right-4 top-4 z-[9999] flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg animate-in fade-in slide-in-from-top-2">
+          <Check size={16} />
+          {toast}
+        </div>
+      ) : null}
       <div className="mx-auto max-w-6xl space-y-6">
         <AssignmentHeader
           assignment={assignment}
@@ -420,11 +427,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
             onClick={handleExportCsv}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+            <Download size={16} />
             Exportar CSV
           </button>
         </div>
@@ -462,12 +465,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
                 onClick={() => { setUserToggledList(true); setListVisible((prev) => !prev); }}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  {listVisible
-                    ? <><path d="m9 18 6-6-6-6"/></>
-                    : <><path d="m15 18-6-6 6-6"/></>
-                  }
-                </svg>
+                {listVisible ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 {listVisible ? "Ocultar lista" : "Mostrar lista"}
               </button>
             </div>

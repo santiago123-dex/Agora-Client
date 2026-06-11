@@ -115,9 +115,17 @@ export function approveSuggestion(suggestionId: string, overrides?: CriterionOve
     method: "POST",
     body: JSON.stringify({
       suggestion_id: suggestionId,
-      // Solo incluye "overrides" si hay al menos uno. Si está vacío o undefined,
-      // el backend recibe exactamente lo mismo que antes (backward compatible).
       ...(overrides?.length ? { overrides } : {}),
     }),
+  }).then(async (response) => {
+    try {
+      const { createNotification } = await import("./notifications");
+      const count = response.results?.length ?? 0;
+      await createNotification(
+        "Calificaciones aprobadas",
+        `${count} estudiante${count !== 1 ? "s" : ""} fue${count !== 1 ? "ron" : ""} calificado${count !== 1 ? "s" : ""}`,
+      );
+    } catch { /* fire-and-forget */ }
+    return response;
   });
 }

@@ -83,6 +83,15 @@ export function createWorkspace(payload: CreateWorkspacePayload) {
   return bffFetch<WorkspaceWithRole>("/api/workspaces", {
     method: "POST",
     body: JSON.stringify(payload),
+  }).then(async (workspace) => {
+    try {
+      const { createNotification } = await import("./notifications");
+      await createNotification(
+        "Espacio creado",
+        `"${workspace.name}" fue creado exitosamente`,
+      );
+    } catch { /* fire-and-forget */ }
+    return workspace;
   });
 }
 
@@ -97,6 +106,15 @@ export function joinWorkspace(code: string) {
   return bffFetch<WorkspaceWithRole>("/api/workspaces/join", {
     method: "POST",
     body: JSON.stringify({ code }),
+  }).then(async (workspace) => {
+    try {
+      const { createNotification } = await import("./notifications");
+      await createNotification(
+        "Nuevo miembro",
+        `Te uniste a "${workspace.name}"`,
+      );
+    } catch { /* fire-and-forget */ }
+    return workspace;
   });
 }
 

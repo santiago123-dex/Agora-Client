@@ -3,12 +3,12 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { ArrowLeft, Copy, FileText, Pencil, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Check, Copy, FileText, ListChecks, Pencil, Plus, Trash2, Users } from "lucide-react";
 import useSWR from "swr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
 import { deleteWorkspace, updateWorkspace } from "@/app/src/lib/api/workspaces";
+import ModalWrapper from "@/app/src/components/ui/ModalWrapper";
 import type { AdminWorkspace, WorkspaceAdminTask } from "../../data/workspace";
 import TaskGrid from "./components/TaskGrid";
 import { useWorkspaceAssignments } from "./hooks/useWorkspaceAssignments";
@@ -354,7 +354,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               onClick={() => setOpenModalCreateTask(true)}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(39,93,121,0.28)] transition hover:bg-[#1f4a61] sm:w-auto"
             >
-              <span className="text-lg leading-none">+</span>
+              <Plus className="h-4 w-4" aria-hidden />
               Nueva Tarea
             </button>
           ) : null}
@@ -363,9 +363,25 @@ export default function WorkspaceAdmin({ workspace }: Props) {
         {tab === "tareas" ? (
           <div className="mt-8 space-y-10">
             {isLoadingAssignments ? (
-              <p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-                Cargando tareas guardadas...
-              </p>
+              <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex h-full min-h-60 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  >
+                    <div className="h-11 w-11 rounded-full bg-slate-200" />
+                    <div className="mt-4 space-y-2">
+                      <div className="h-5 w-3/4 rounded bg-slate-200" />
+                      <div className="h-4 w-full rounded bg-slate-200" />
+                    </div>
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+                      <div className="h-4 w-24 rounded bg-slate-200" />
+                      <div className="h-4 w-12 rounded bg-slate-200" />
+                    </div>
+                    <div className="mt-4 h-9 w-full rounded-lg bg-slate-200" />
+                  </div>
+                ))}
+              </div>
             ) : null}
 
             {assignmentsError ? (
@@ -375,7 +391,8 @@ export default function WorkspaceAdmin({ workspace }: Props) {
             ) : null}
 
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
+                <ListChecks className="h-5 w-5 text-amber-500" aria-hidden />
                 Actividades por calificar
               </h2>
               <TaskGrid
@@ -387,7 +404,8 @@ export default function WorkspaceAdmin({ workspace }: Props) {
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
+                <ListChecks className="h-5 w-5 text-emerald-500" aria-hidden />
                 Actividades calificadas
               </h2>
               <TaskGrid
@@ -409,189 +427,160 @@ export default function WorkspaceAdmin({ workspace }: Props) {
         )}
       </div>
 
-      {isMounted && isDeleteModalOpen
-        ? createPortal(
-            <div className="fixed inset-0 z-9999 flex min-h-screen items-center justify-center bg-black/40 px-4 py-6">
-              <button
-                type="button"
-                aria-label="Cerrar"
-                className="absolute inset-0"
-                onClick={closeDeleteModal}
+      <ModalWrapper open={isMounted && isDeleteModalOpen} onClose={closeDeleteModal}>
+        <div className="flex flex-col items-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+            <Trash2 className="h-6 w-6 text-red-600" aria-hidden />
+          </div>
+
+          <h2 className="mt-4 text-center text-xl font-semibold text-slate-900 dark:text-slate-100">
+            ¿Eliminar este espacio?
+          </h2>
+
+          <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
+            Vas a eliminar{" "}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
+              {editedWorkspace.title}
+            </span>
+            . Se borrarán miembros, tareas y entregas. Esta acción no se
+            puede deshacer.
+          </p>
+
+          {deleteError ? (
+            <p className="mt-4 w-full rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+              {deleteError}
+            </p>
+          ) : null}
+
+          <div className="mt-6 flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={closeDeleteModal}
+              disabled={isDeleting}
+              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-[#1a2740]"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmDeleteWorkspace}
+              disabled={isDeleting}
+              className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {isDeleting ? "Eliminando..." : "Sí, eliminar espacio"}
+            </button>
+          </div>
+        </div>
+      </ModalWrapper>
+
+      <ModalWrapper open={isMounted && isEditing} onClose={() => setIsEditing(false)} className="max-w-2xl" title="Editar espacio">
+        <form onSubmit={handleEditWorkspace}>
+          <div className="rounded-3xl border border-slate-300 px-5 py-5 sm:px-7 dark:border-[#253245]">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#253245] dark:bg-[#0a1424]">
+              <div
+                className="h-16 w-full"
+                style={{ backgroundColor: editColor }}
               />
 
-              <div
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="delete-workspace-title"
-                className="relative flex w-full max-w-md flex-col items-center rounded-2xl bg-white p-6 shadow-2xl"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                  <Trash2 className="h-6 w-6 text-red-600" aria-hidden />
-                </div>
+              <div className="px-3 py-2">
+                <h3 className="text-lg font-semibold dark:text-slate-100">
+                  {editTitle || "Nombre del espacio"}
+                </h3>
 
-                <h2
-                  id="delete-workspace-title"
-                  className="mt-4 text-center text-xl font-semibold text-slate-900"
-                >
-                  ¿Eliminar este espacio?
-                </h2>
-
-                <p className="mt-2 text-center text-sm text-slate-600">
-                  Vas a eliminar{" "}
-                  <span className="font-semibold text-slate-900">
-                    {editedWorkspace.title}
-                  </span>
-                  . Se borrarán miembros, tareas y entregas. Esta acción no se
-                  puede deshacer.
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  {editDescription ||
+                    "Descripción del espacio de trabajo"}
                 </p>
-
-                {deleteError ? (
-                  <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                    {deleteError}
-                  </p>
-                ) : null}
-
-                <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={closeDeleteModal}
-                    disabled={isDeleting}
-                    className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={confirmDeleteWorkspace}
-                    disabled={isDeleting}
-                    className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? "Eliminando..." : "Sí, eliminar espacio"}
-                  </button>
-                </div>
               </div>
-            </div>,
-            document.body,
-          )
-        : null}
+            </div>
 
-      {isMounted && isEditing
-        ? createPortal(
-            <div className="fixed inset-0 z-9999 flex min-h-screen items-center justify-center bg-black/40 px-4 py-6">
-              <form
-                onSubmit={handleEditWorkspace}
-                className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-4 text-slate-900 shadow-2xl sm:p-6"
-              >
-                <div className="relative mb-4 flex items-center justify-center">
+            <div className="mt-5 flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                  Nombre del espacio
+                </label>
+
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(event) => setEditTitle(event.target.value)}
+                  placeholder="Nombre del espacio"
+                  required
+                  minLength={3}
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                  Descripción
+                </label>
+
+                <textarea
+                  value={editDescription}
+                  onChange={(event) =>
+                    setEditDescription(event.target.value)
+                  }
+                  rows={4}
+                  placeholder="Escribe la descripción para tu espacio de trabajo"
+                  required
+                  className="mt-2 h-24 w-full resize-none rounded-lg border border-slate-200 bg-slate-100 px-3 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <p className="mb-3 text-sm font-medium text-slate-800 dark:text-slate-200">
+                Color del espacio
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                {colors.map((color) => (
                   <button
+                    key={color}
                     type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="absolute left-0 rounded-full p-2 hover:bg-gray-100"
+                    onClick={() => setEditColor(color)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition hover:scale-110 ${
+                      editColor === color
+                        ? "border-slate-600 ring-2 ring-slate-600/25"
+                        : "border-transparent"
+                    }`}
+                    style={{ backgroundColor: color }}
                   >
-                    <ArrowLeft className="h-6 w-6 text-black" />
+                    {editColor === color ? (
+                      <Check className="h-4 w-4 text-white drop-shadow-sm" />
+                    ) : null}
                   </button>
+                ))}
+              </div>
+            </div>
 
-                  <h2 className="text-center text-xl font-semibold">
-                    Editar espacio
-                  </h2>
-                </div>
+            {editError ? (
+              <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+                {editError}
+              </p>
+            ) : null}
 
-                <div className="rounded-xl border border-gray-300 p-4">
-                  <div className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
-                    <div
-                      className="h-16 w-full"
-                      style={{ backgroundColor: editColor }}
-                    />
+            <div className="mt-6 flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end dark:border-[#253245]">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-[#1a2740]"
+              >
+                Cancelar
+              </button>
 
-                    <div className="px-3 py-2">
-                      <h3 className="text-lg font-semibold">
-                        {editTitle || "Nombre del espacio"}
-                      </h3>
-
-                      <p className="text-sm text-slate-600">
-                        {editDescription ||
-                          "Descripción del espacio de trabajo"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Nombre del espacio
-                    </label>
-
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(event) => setEditTitle(event.target.value)}
-                      placeholder="Nombre del espacio"
-                      required
-                      minLength={3}
-                      className="w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 focus:outline-none"
-                    />
-
-                    <label className="mt-2 text-sm font-medium text-slate-700">
-                      Descripción
-                    </label>
-
-                    <textarea
-                      value={editDescription}
-                      onChange={(event) =>
-                        setEditDescription(event.target.value)
-                      }
-                      rows={4}
-                      placeholder="Escribe la descripción para tu espacio de trabajo"
-                      required
-                      className="h-24 w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 outline-none"
-                    />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap items-center gap-3">
-                    {colors.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setEditColor(color)}
-                        className={`h-8 w-8 rounded-md border-2 ${
-                          editColor === color
-                            ? "border-blue-500"
-                            : "border-transparent"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-
-                  {editError ? (
-                    <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                      {editError}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-5 flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(false)}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    >
-                      Cancelar
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={isSavingEdit}
-                      className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f4a61]"
-                    >
-                      {isSavingEdit ? "Guardando..." : "Guardar cambios"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>,
-            document.body,
-          )
-        : null}
+              <button
+                type="submit"
+                disabled={isSavingEdit}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Pencil className="h-4 w-4" aria-hidden />
+                {isSavingEdit ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </ModalWrapper>
 
       {isMounted ? (
         <CreateTaskModal

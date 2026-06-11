@@ -42,11 +42,17 @@ export default function LandingPage() {
             <NavbarLanding />
             <main className="mx-auto flex w-full flex-col">
                 <HeroSection />
+                <div className="meander-divider" />
                 <ScrollReveal><FeatureSection /></ScrollReveal>
+                <div className="meander-divider" />
                 <ScrollReveal><ProcessSection /></ScrollReveal>
+                <div className="meander-divider" />
                 <ScrollReveal><DemoSections /></ScrollReveal>
+                <div className="meander-divider" />
                 <ScrollReveal><PricingSection /></ScrollReveal>
+                <div className="meander-divider" />
                 <ScrollReveal><TestimonialsSection /></ScrollReveal>
+                <div className="meander-divider" />
                 <ScrollReveal><ContactSection /></ScrollReveal>
                 <ScrollReveal><CtaSection /></ScrollReveal>
             </main>

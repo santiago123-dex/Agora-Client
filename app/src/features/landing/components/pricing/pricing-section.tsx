@@ -1,6 +1,10 @@
-import Link from "next/link";
+"use client";
 
-const plans = [
+import { useState } from "react";
+import Link from "next/link";
+import { Check } from "lucide-react";
+
+const monthlyPlans = [
     {
         name: "Gratuito",
         price: "$0",
@@ -52,17 +56,45 @@ const plans = [
     },
 ];
 
+const annualPlans = monthlyPlans.map((plan) => {
+    if (plan.name === "Pro") {
+        return { ...plan, price: "$7", period: "/mes, facturado anual" };
+    }
+    return plan;
+});
+
 export default function PricingSection() {
+    const [isAnnual, setIsAnnual] = useState(false);
+    const plans = isAnnual ? annualPlans : monthlyPlans;
+
     return (
         <section id="precios" className="bg-white py-24">
             <div className="mx-auto max-w-6xl px-6">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 className="text-4xl font-semibold text-slate-950">
+                    <h2 className="serif text-4xl tracking-tight text-slate-950">
                         Planes para cada necesidad
                     </h2>
                     <p className="mt-3 text-xl text-gray-400">
                         Empezá gratis, escalá cuando lo necesites.
                     </p>
+
+                    <div className="mt-8 flex items-center justify-center gap-3">
+                        <span className={`text-sm font-medium transition-colors duration-200 ${!isAnnual ? "text-slate-950" : "text-slate-400"}`}>
+                            Mensual
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setIsAnnual(!isAnnual)}
+                            className={`relative h-6 w-11 rounded-full transition-colors duration-300 ${isAnnual ? "bg-[#275D79]" : "bg-slate-300"}`}
+                            aria-label={isAnnual ? "Cambiar a mensual" : "Cambiar a anual"}
+                        >
+                            <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${isAnnual ? "translate-x-5" : "translate-x-0"}`} />
+                        </button>
+                        <span className={`text-sm font-medium transition-colors duration-200 ${isAnnual ? "text-slate-950" : "text-slate-400"}`}>
+                            Anual
+                            <span className="ml-1 text-xs font-semibold text-[#275D79]">−22%</span>
+                        </span>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -105,20 +137,7 @@ export default function PricingSection() {
                                         key={feature}
                                         className="flex items-start gap-3 text-sm text-slate-600"
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="#275D79"
-                                            strokeWidth="2.5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="mt-0.5 shrink-0"
-                                        >
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
+                                        <Check size={16} className="mt-0.5 shrink-0 text-[#275D79]" strokeWidth={2.5} />
                                         {feature}
                                     </li>
                                 ))}

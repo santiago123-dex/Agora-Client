@@ -1,12 +1,13 @@
+import { BookOpen, FlaskConical, FileText, Globe } from "lucide-react";
 import StepBadge from "./stepBadge";
 
 const totalSteps = 5;
 
 const workspaces = [
-  { id: 1, name: "Matemáticas Avanzadas", emoji: "📖", students: 32, tasks: 12, progress: 78, status: "Activo", color: "#EAB308" },
-  { id: 2, name: "Laboratorio de Física", emoji: "🔬", students: 22, tasks: 8, progress: 65, status: "Activo", color: "#2563EB" },
-  { id: 3, name: "Literatura", emoji: "📝", students: 31, tasks: 5, progress: 91, status: "Activo", color: "#84CC16" },
-  { id: 4, name: "Historia Universal", emoji: "🌍", students: 28, tasks: 10, progress: 72, status: "Pausado", color: "#10B981" },
+  { id: 1, name: "Matemáticas Avanzadas", icon: <BookOpen size={20} />, students: 32, tasks: 12, progress: 78, status: "Activo", color: "#EAB308" },
+  { id: 2, name: "Laboratorio de Física", icon: <FlaskConical size={20} />, students: 22, tasks: 8, progress: 65, status: "Activo", color: "#2563EB" },
+  { id: 3, name: "Literatura", icon: <FileText size={20} />, students: 31, tasks: 5, progress: 91, status: "Activo", color: "#84CC16" },
+  { id: 4, name: "Historia Universal", icon: <Globe size={20} />, students: 28, tasks: 10, progress: 72, status: "Pausado", color: "#10B981" },
 ];
 
 export default function DemoWorkspacesPage() {
@@ -31,7 +32,7 @@ export default function DemoWorkspacesPage() {
               </div>
             )}
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f8fb] text-lg dark:bg-[#0d1a2e]">{ws.emoji}</div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f8fb] text-lg dark:bg-[#0d1a2e]">{ws.icon}</div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-100">{ws.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{ws.students} estudiantes · {ws.tasks} tareas</p>

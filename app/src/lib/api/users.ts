@@ -45,3 +45,13 @@ export function updateUser(payload: {
     body: JSON.stringify(payload),
   });
 }
+
+export function changePassword(payload: {
+  currentPassword: string;
+  newPassword: string;
+}) {
+  return bffFetch<void>("/api/users/change-password", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}

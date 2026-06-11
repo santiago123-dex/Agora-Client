@@ -1,3 +1,4 @@
+import { Info, TriangleAlert, CircleX } from "lucide-react";
 import type { AiBlock } from "@/app/src/lib/api/ai";
 
 function StatBlock({ block }: { block: AiBlock }) {
@@ -110,15 +111,15 @@ function AlertBlock({ block }: { block: AiBlock }) {
     warning: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400",
     error: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400",
   };
-  const icons: Record<string, string> = {
-    info: "ℹ️",
-    warning: "⚠️",
-    error: "❌",
+  const iconMap: Record<string, React.ReactNode> = {
+    info: <Info size={14} className="shrink-0 mt-0.5" />,
+    warning: <TriangleAlert size={14} className="shrink-0 mt-0.5" />,
+    error: <CircleX size={14} className="shrink-0 mt-0.5" />,
   };
 
   return (
     <div className={`flex items-start gap-2 rounded-xl border px-3 py-2 text-xs ${colors[severity] ?? colors.info}`}>
-      <span>{icons[severity] ?? icons.info}</span>
+      {iconMap[severity] ?? iconMap.info}
       <span>{message}</span>
     </div>
   );

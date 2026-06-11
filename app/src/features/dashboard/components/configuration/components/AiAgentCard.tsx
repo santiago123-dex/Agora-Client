@@ -1,3 +1,5 @@
+import { Bot, Sparkles, FileText, Gauge } from "lucide-react";
+
 type Props = {
   agenticMode: boolean;
   retroStyle: string;
@@ -18,6 +20,12 @@ const exigencyOptions = [
   { value: "moderated", label: "Moderado" },
   { value: "strict", label: "Estricto" },
 ];
+
+const previews: Record<string, string> = {
+  brief: "Tu código funciona correctamente. La estructura es clara. Sugiero agregar validación de errores.",
+  detailed: "Buen trabajo con la separación de responsabilidades en capas. La función `handleSubmit` procesa correctamente el formulario. Considera añadir tipos más estrictos en los parámetros para mejorar la maintainabilidad. En la línea 42, la validación del email podría beneficiarse de una expresión regular más robusta.",
+  full: "## Resumen\nCódigo funcional con buena organización.\n\n## Fortalezas\n- Separación clara de responsabilidades\n- Manejo correcto de estados de carga y error\n\n## Áreas de mejora\n1. **Tipado**: Los parámetros de `handleSubmit` deberían ser explícitos\n2. **Validación**: Mejorar regex de email en línea 42\n3. **Tests**: Faltan casos borde para entradas vacías\n\n## Puntaje sugerido: 85/100",
+};
 
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -44,14 +52,7 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 8V4H8" />
-            <rect width="16" height="12" x="4" y="8" rx="2" />
-            <path d="M2 14h2" />
-            <path d="M20 14h2" />
-            <path d="M15 13v2" />
-            <path d="M9 13v2" />
-          </svg>
+          <Bot size={20} />
         </span>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Agente IA</h2>
@@ -70,11 +71,14 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Estilo de retroalimentación</span>
+            <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <FileText size={14} />
+              Estilo de retroalimentación
+            </span>
             <select
               value={retroStyle}
               onChange={(e) => onSelect("retroStyle", e.target.value)}
-              className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
             >
               {retroOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -82,11 +86,14 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
             </select>
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Nivel de exigencia</span>
+            <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <Gauge size={14} />
+              Nivel de exigencia
+            </span>
             <select
               value={exigencyLevel}
               onChange={(e) => onSelect("exigencyLevel", e.target.value)}
-              className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
             >
               {exigencyOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -94,6 +101,18 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
             </select>
           </label>
         </div>
+
+        {agenticMode && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              <Sparkles size={14} />
+              Vista previa de retroalimentación
+            </div>
+            <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+              {previews[retroStyle] ?? previews.detailed}
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center justify-between rounded-xl bg-amber-50 px-4 py-3 dark:bg-amber-950/40">
           <div>

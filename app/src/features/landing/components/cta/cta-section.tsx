@@ -5,8 +5,8 @@ export default function CtaSection() {
     <section className="bg-[#275D79] py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto mb-8 max-w-4xl text-center">
-          <h2 className="mb-3 text-4xl font-bold text-white">
-            Listo para transformar tu forma de ensenar?
+          <h2 className="serif mb-3 text-4xl tracking-tight text-white">
+            Listo para transformar tu forma de ense&ntilde;ar?
           </h2>
           <p className="text-gray-300">
             Unete a miles de profesores que ya estan usando Agora para

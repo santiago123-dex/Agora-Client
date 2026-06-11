@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
 
 const steps = [
     { id: "1", title: "Dashboard", description: "Panel principal con estadísticas de todos tus espacios." },
@@ -39,8 +40,8 @@ export default function DemoSections() {
         >
             <div className="mx-auto max-w-6xl px-6">
                 <div className="mx-auto mb-10 max-w-3xl text-center">
-                    <h2 className="text-4xl font-semibold text-slate-950 dark:text-slate-100">
-                        Así funciona Agora
+                    <h2 className="serif text-4xl tracking-tight text-slate-950 dark:text-slate-100">
+                        As&iacute; funciona Agora
                     </h2>
                     <p className="mt-3 text-xl text-gray-400">
                         Recorré la plataforma paso a paso. Todo funciona de verdad.
@@ -57,10 +58,7 @@ export default function DemoSections() {
                                 <div className="h-3 w-3 rounded-full bg-emerald-400" />
                             </div>
                             <div className="mx-auto flex max-w-md flex-1 items-center justify-center rounded-lg bg-white px-3 py-1.5 text-xs text-slate-400 shadow-sm dark:bg-[#1a2740] dark:text-slate-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
+                                <Clock size={12} className="mr-1.5" />
                                 app.agora.app/{step.id === "1" ? "dashboard" : `demo?step=${step.id}`}
                             </div>
                         </div>
@@ -94,7 +92,7 @@ export default function DemoSections() {
                             className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-200 text-slate-500 transition-colors hover:border-[#275D79] hover:text-[#275D79] dark:border-slate-600 dark:text-slate-400 dark:hover:border-[#3a7fa0] dark:hover:text-[#3a7fa0]"
                             aria-label="Anterior"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                            <ChevronLeft size={16} strokeWidth={2.5} />
                         </button>
 
                         <div className="flex items-center gap-2">
@@ -117,7 +115,7 @@ export default function DemoSections() {
                             className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-200 text-slate-500 transition-colors hover:border-[#275D79] hover:text-[#275D79] dark:border-slate-600 dark:text-slate-400 dark:hover:border-[#3a7fa0] dark:hover:text-[#3a7fa0]"
                             aria-label="Siguiente"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                            <ChevronRight size={16} strokeWidth={2.5} />
                         </button>
                     </div>
 

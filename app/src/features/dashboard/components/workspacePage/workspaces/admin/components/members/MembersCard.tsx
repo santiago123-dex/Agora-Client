@@ -1,4 +1,5 @@
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
+import { EllipsisVertical } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
@@ -22,7 +23,7 @@ export default function MembersCard({ member }: Props) {
 
 
   return (
-    <article className="relative flex h-full min-h-35 flex-col rounded-[1.35rem] border border-[#94B8C4] bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]">
+    <article className="relative flex h-full min-h-35 flex-col rounded-2xl border border-[#94B8C4] bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/*Si exite avatarUrl y el string no esta vacio muestra el avatar, si no muestra las iniciales*/}
@@ -48,14 +49,7 @@ export default function MembersCard({ member }: Props) {
           className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           onClick={() => setOpenMenu((prev) => !prev)}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <path d="M12 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 9a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 9a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
-          </svg>
+          <EllipsisVertical className="h-5 w-5" aria-hidden />
         </button>
       </div>
 
@@ -70,9 +64,7 @@ export default function MembersCard({ member }: Props) {
         </div>
       )}
 
-      <hr className="mt-4 mb-4 text-[#d3d3d3]" />
-
-      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+      <span className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
         {member.role}
       </span>
     </article>

@@ -2,7 +2,10 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import {
+  Search, Plus, Check, Pin, PinOff, Loader2, UserPlus, Copy,
+  Layers, Users,
+} from "lucide-react";
 import useSWR from "swr";
 import {
   createWorkspace,
@@ -11,6 +14,8 @@ import {
   joinWorkspace,
 } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "../data/workspace-api";
+import { usePinnedWorkspaces } from "@/app/src/lib/hooks/usePinnedWorkspaces";
+import ModalWrapper from "@/app/src/components/ui/ModalWrapper";
 import type { AdminWorkspace, MemberWorkspace } from "../data/workspace";
 
 const colors = [
@@ -24,11 +29,35 @@ const colors = [
   "#EC4899",
 ];
 
+type Tab = "created" | "member";
 type WorkspaceCard = AdminWorkspace | MemberWorkspace;
 
+function CardSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#253245] dark:bg-[#0f1a2e]">
+      <div className="h-14 bg-slate-200 dark:bg-slate-700" />
+      <div className="space-y-2.5 px-4 py-4">
+        <div className="h-4 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-3 w-1/2 rounded bg-slate-100 dark:bg-slate-700" />
+        <div className="h-3 w-1/4 rounded bg-slate-100 dark:bg-slate-700" />
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="col-span-full flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-14 dark:border-[#253245] dark:bg-[#0f1a2e]">
+      <Layers size={32} className="text-slate-300 dark:text-slate-600" />
+      <p className="text-sm text-slate-500 dark:text-slate-400">{message}</p>
+    </div>
+  );
+}
+
 export default function WorkspacesPage() {
-  const [showCreatedWorkspaces, setShowCreatedWorkspaces] = useState(true);
+  const [tab, setTab] = useState<Tab>("created");
   const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [openModalJoin, setOpenModalJoin] = useState(false);
   const [nombre, setNombre] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [description, setDescription] = useState("");
@@ -36,6 +65,7 @@ export default function WorkspacesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isPinned, togglePin, pinLimitReached } = usePinnedWorkspaces();
 
   const { data: workspaces = [], error: swrError, isLoading, mutate } = useSWR(
     "my-workspaces",
@@ -104,7 +134,7 @@ export default function WorkspacesPage() {
       setSelectedColor(colors[0]);
       setOpenModalCreate(false);
       await mutate();
-      setShowCreatedWorkspaces(true);
+      setTab("created");
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo crear el workspace");
     } finally {
@@ -121,7 +151,7 @@ export default function WorkspacesPage() {
       await joinWorkspace(joinCode.trim());
       setJoinCode("");
       await mutate();
-      setShowCreatedWorkspaces(false);
+      setTab("member");
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo unir al workspace");
     } finally {
@@ -133,7 +163,7 @@ export default function WorkspacesPage() {
     () =>
       workspaces
         .filter((workspace) =>
-          showCreatedWorkspaces
+          tab === "created"
             ? workspace.roleLabel === "admin"
             : workspace.roleLabel === "member"
         )
@@ -142,19 +172,33 @@ export default function WorkspacesPage() {
             ? workspace.title.toLowerCase().includes(searchQuery.toLowerCase())
             : true
         ),
-    [showCreatedWorkspaces, workspaces, searchQuery]
+    [tab, workspaces, searchQuery]
   );
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "created", label: "Creados" },
+    { key: "member", label: "Donde participo" },
+  ];
 
   return (
     <section className="px-4 py-6 pb-10 sm:px-7">
-      <div className="space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Mis Espacios</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Administra y organiza tus espacios de trabajo
+          </p>
+        </div>
+
         {error || swrError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
             {error ?? swrError?.message}
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3">
+        {/* Search + Tabs + Create button */}
+        <div className="flex flex-col gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -162,162 +206,133 @@ export default function WorkspacesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por nombre..."
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:ring-[#275D79]/40"
             />
           </div>
-        </div>
 
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label={
-                showCreatedWorkspaces ? "Mis espacios" : "Espacios donde soy miembro"
-              }
-              aria-pressed={showCreatedWorkspaces}
-              onClick={() => setShowCreatedWorkspaces((prev) => !prev)}
-              className={`relative flex h-6 w-11 items-center rounded-full px-1 shadow-sm transition-colors ${
-                showCreatedWorkspaces
-                  ? "justify-start bg-[#0E6174]"
-                  : "justify-end bg-slate-300"
-              }`}
-            >
-              <span className="h-4 w-4 rounded-full bg-white shadow-sm transition-transform" />
-            </button>
-            <span className="text-sm font-medium text-slate-700">
-              {showCreatedWorkspaces ? "Mis espacios" : "Espacios donde soy miembro"}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setOpenModalCreate(true)}
-            type="button"
-            className="inline-flex w-fit items-center gap-2 self-start rounded-md bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm md:self-auto"
-          >
-            <span className="text-base leading-none">+</span>
-            Crear Espacio
-          </button>
-
-          {openModalCreate && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-6">
-              <form
-                onSubmit={handleCreateWorkspace}
-                className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-4 shadow-lg sm:p-6"
-              >
-                <div className="relative mb-4 flex items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setOpenModalCreate(false)}
-                    className="absolute left-0 rounded-full p-2 hover:bg-gray-100"
-                  >
-                    <ArrowLeft className="h-6 w-6 text-black" />
-                  </button>
-                  <h2 className="text-center text-xl font-medium">Crear espacio</h2>
-                </div>
-                <div className="rounded-xl border border-gray-400 p-4">
-                  <div className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
-                    <div className="h-16 w-full" style={{ backgroundColor: selectedColor }} />
-                    <div className="px-3 py-2">
-                      <h3 className="text-lg font-semibold">
-                        {nombre || "Nombre del espacio"}
-                      </h3>
-                      <p className="mb-2">
-                        {description || "Descripción del espacio de trabajo"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-2">
-                    <label>Nombre del espacio</label>
-                    <input
-                      type="text"
-                      value={nombre}
-                      onChange={(event) => setNombre(event.target.value)}
-                      placeholder="Nombre del espacio"
-                      required
-                      minLength={3}
-                      className="w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 focus:outline-none"
-                    />
-                    <label>Descripción</label>
-                    <textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      rows={4}
-                      placeholder="Escribe la descripcion para tu espacio de trabajo"
-                      required
-                      className="h-20 w-full rounded-lg border border-gray-300 bg-[#eee] px-3 py-2 outline-none"
-                    />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap items-center gap-3">
-                    {colors.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setSelectedColor(color)}
-                        className={`h-8 w-8 rounded-md border-2 ${
-                          selectedColor === color ? "border-blue-500" : "border-transparent"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-
-                  <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-                    El código de invitación se generará automáticamente al crear el espacio.
-                  </p>
-
-                  <div className="mt-4 flex justify-start gap-2">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex items-center justify-center gap-2 rounded border border-[#275D79] bg-[#275D79] px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                      {isSubmitting ? "Creando..." : "Crear Espacio"}
-                    </button>
-                  </div>
-                </div>
-              </form>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-[#1a2639]">
+              {tabs.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    tab === t.key
+                      ? "bg-white text-slate-900 shadow-sm dark:bg-[#0f1a2e] dark:text-slate-100"
+                      : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
-          )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setOpenModalJoin(true); setError(null); setJoinCode(""); }}
+                type="button"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <UserPlus size={16} />
+                Unirse
+              </button>
+              <button
+                onClick={() => setOpenModalCreate(true)}
+                type="button"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1f4a61]"
+              >
+                <Plus size={16} />
+                Crear
+              </button>
+            </div>
+          </div>
         </div>
 
-        {!showCreatedWorkspaces ? (
-          <form
-            onSubmit={handleJoinWorkspace}
-            className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-4 sm:flex-row sm:items-end"
-          >
-            <label className="flex-1 text-sm font-medium text-slate-700">
-              Código de invitación
-              <input
-                type="text"
-                value={joinCode}
-                onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-                placeholder="Ej: HJK302P7"
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none focus:border-[#275D79]"
-                required
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Uniendo..." : "Unirse"}
-            </button>
-          </form>
-        ) : null}
+        {/* Join modal */}
+        <ModalWrapper
+          open={openModalJoin}
+          onClose={() => { setOpenModalJoin(false); setError(null); }}
+        >
+          <form onSubmit={handleJoinWorkspace}>
+            <div className="flex flex-col items-center gap-4 rounded-xl bg-slate-50 px-4 py-8 dark:bg-[#0a1424]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#275D79]/10 text-[#275D79] dark:bg-[#275D79]/20">
+                <UserPlus size={28} />
+              </div>
+              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+                Ingresá el código de invitación que te compartió el administrador del espacio.
+              </p>
+            </div>
 
+            <div className="mt-6">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Código de invitación
+              </label>
+              <div className="relative mt-1.5">
+                <Copy size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  placeholder="Ej: HJK302P7"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm tracking-[0.15em] text-slate-900 outline-none transition placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:ring-[#275D79]/40"
+                  autoFocus
+                  required
+                />
+              </div>
+            </div>
+
+            {joinCode.length >= 6 && (
+              <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
+                <Check size={14} />
+                Código válido. Presioná &quot;Unirse&quot; para continuar.
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+                {error}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenModalJoin(false);
+                  setError(null);
+                }}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || joinCode.length < 4}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+                {isSubmitting ? "Uniendo..." : "Unirse"}
+              </button>
+            </div>
+          </form>
+        </ModalWrapper>
+
+        {/* Workspace grid */}
         <div className="grid gap-5 xl:grid-cols-2">
           {isLoading ? (
-            <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
-              Cargando workspaces...
-            </p>
+            <>
+              <CardSkeleton />
+              <CardSkeleton />
+            </>
           ) : workspacesToDisplay.length === 0 ? (
-            <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
-              No tienes workspaces en esta sección.
-            </p>
+            <EmptyState
+              message={
+                tab === "created"
+                  ? "Aún no has creado espacios de trabajo."
+                  : "Aún no participas en otros espacios."
+              }
+            />
           ) : (
             workspacesToDisplay.map((workspace) => {
               const totalMembers =
@@ -325,55 +340,163 @@ export default function WorkspacesPage() {
                   ? workspace.adminStats?.members
                   : workspace.memberStats?.members;
 
+              const pinned = isPinned(workspace.id);
+
               return (
-              <Link
-                href={`/dashboard/workspace/${workspace.id}?from=workspace`}
-                key={workspace.id}
-              >
-                <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
-                  <div
-                    className="flex min-h-17 items-end justify-between gap-3 px-3 pb-3"
-                    style={{ backgroundColor: workspace.accentColor }}
-                  >
-                    <span className="rounded-sm bg-white/18 px-2 py-0.5 text-[0.62rem] font-medium text-white backdrop-blur-sm">
-                      {workspace.roleLabel}
-                    </span>
-
-                    {workspace.statusLabel ? (
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[0.62rem] font-medium ${
-                          workspace.statusVariant === "done"
-                            ? "bg-white text-[#1A936F]"
-                            : "bg-white text-slate-700"
-                        }`}
-                      >
-                        {workspace.statusVariant === "done" ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="m20 6-11 11-5-5" />
-                          </svg>
-                        ) : null}
-                        {workspace.statusLabel}
+              <div key={workspace.id} className="group relative">
+                <Link
+                  href={`/dashboard/workspace/${workspace.id}?from=workspace`}
+                >
+                  <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#275D79]/10 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-[#275D79]/20">
+                    <div
+                      className="flex min-h-14 items-end justify-between gap-3 px-4 pb-3"
+                      style={{ backgroundColor: workspace.accentColor }}
+                    >
+                      <span className="rounded-md bg-white/18 px-2 py-0.5 text-[0.65rem] font-medium text-white backdrop-blur-sm">
+                        {workspace.roleLabel === "admin" ? "creado" : "miembro"}
                       </span>
-                    ) : (
-                      <span />
-                    )}
-                  </div>
 
-                  <div className="space-y-1 px-4 py-4 [@media(min-width:1450px)]:py-7">
-                    <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-950">
-                      {workspace.title}
-                    </h3>
-                    <p className="text-sm text-slate-500">{workspace.secondaryLabel}</p>
-                    <p className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                      {totalMembers ?? 0} miembros
-                    </p>
-                  </div>
-                </article>
-              </Link>
+                      {workspace.statusLabel ? (
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.65rem] font-medium ${
+                            workspace.statusVariant === "done"
+                              ? "bg-white text-emerald-700"
+                              : "bg-white/80 text-slate-700"
+                          }`}
+                        >
+                          {workspace.statusVariant === "done" ? (
+                            <Check size={11} />
+                          ) : null}
+                          {workspace.statusLabel}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-1.5 px-4 py-4">
+                      <h3 className="text-base font-semibold text-slate-950 dark:text-slate-100">
+                        {workspace.title}
+                      </h3>
+                      <p className="line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                        {workspace.secondaryLabel || "Sin descripción"}
+                      </p>
+                      <div className="flex items-center gap-3 pt-1.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <Users size={12} />
+                          {totalMembers ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => togglePin(workspace.id)}
+                  className={`absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white ${
+                    pinned
+                      ? "text-[#275D79] opacity-100"
+                      : "text-slate-400 opacity-0 group-hover:opacity-100 hover:opacity-100"
+                  } dark:bg-slate-700/80 dark:hover:bg-slate-700`}
+                  title={pinned ? "Desfijar" : pinLimitReached ? "Máximo 4 fijados" : "Fijar en dashboard"}
+                >
+                  {pinned ? <PinOff size={14} /> : <Pin size={14} />}
+                </button>
+              </div>
               );
             })
           )}
         </div>
+
+        {/* Create modal */}
+        <ModalWrapper
+          open={openModalCreate}
+          onClose={() => setOpenModalCreate(false)}
+        >
+          <form onSubmit={handleCreateWorkspace}>
+            {/* Preview */}
+            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-[#253245]">
+              <div className="h-14 w-full" style={{ backgroundColor: selectedColor }} />
+              <div className="px-4 py-3">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  {nombre || "Nombre del espacio"}
+                </h3>
+                <p className="line-clamp-1 text-sm text-slate-500 dark:text-slate-400">
+                  {description || "Descripción del espacio de trabajo"}
+                </p>
+              </div>
+            </div>
+
+            {/* Form fields */}
+            <div className="mt-5 space-y-4">
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Nombre</span>
+                <input
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Mi espacio"
+                  required
+                  minLength={3}
+                  className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Descripción</span>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Describe el propósito de este espacio"
+                  required
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Color de identificación</span>
+                <div className="mt-1.5 flex flex-wrap gap-2.5">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setSelectedColor(color)}
+                      className={`relative h-8 w-8 rounded-full transition hover:scale-110 ${
+                        selectedColor === color ? "ring-2 ring-[#275D79] ring-offset-2 dark:ring-offset-[#0f1a2e]" : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                    >
+                      {selectedColor === color && (
+                        <Check size={14} className="absolute inset-0 m-auto text-white drop-shadow-sm" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </label>
+            </div>
+
+            <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-[#0a1424] dark:text-slate-400">
+              El código de invitación se generará automáticamente al crear el espacio.
+            </p>
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setOpenModalCreate(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                {isSubmitting ? "Creando..." : "Crear Espacio"}
+              </button>
+            </div>
+          </form>
+        </ModalWrapper>
       </div>
     </section>
   );

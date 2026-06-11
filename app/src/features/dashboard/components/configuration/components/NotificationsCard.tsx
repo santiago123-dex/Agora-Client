@@ -1,3 +1,5 @@
+import { Bell } from "lucide-react";
+
 type Props = {
   newSubmission: boolean;
   newGrading: boolean;
@@ -40,10 +42,7 @@ export default function NotificationsCard({ newSubmission, newGrading, submissio
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-          </svg>
+          <Bell size={20} />
         </span>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Notificaciones</h2>

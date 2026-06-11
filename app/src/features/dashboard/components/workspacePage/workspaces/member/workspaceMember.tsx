@@ -137,9 +137,24 @@ export default function WorkspaceMember({ workspace }: Props) {
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl">
         {isLoadingMemberTasks ? (
-          <p className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-            Cargando tareas guardadas...
-          </p>
+          <div className="grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex h-full w-full max-w-md animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
+                <div className="h-10 w-10 rounded-xl bg-slate-200" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-5 w-3/4 rounded bg-slate-200" />
+                  <div className="h-4 w-full rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 pt-3">
+                  <div className="h-4 w-32 rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 h-10 w-full rounded-xl bg-slate-200" />
+              </div>
+            ))}
+          </div>
         ) : null}
 
         {memberTasksError ? (
@@ -157,7 +172,7 @@ export default function WorkspaceMember({ workspace }: Props) {
             tasks.map((task) => (
               <article
                 key={task.id}
-                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[#c0c0c0] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]"
+                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]"
               >
                 <div className="p-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">

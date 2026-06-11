@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import StepBadge from "./stepBadge";
 
 const totalSteps = 5;
@@ -35,10 +36,10 @@ const recentActivity = [
 function SectionHeader({ title }: { title: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <h3 className="text-[1.35rem] font-semibold tracking-[-0.02em] text-slate-950">{title}</h3>
+      <h3 className="serif text-[1.35rem] tracking-tight text-slate-950">{title}</h3>
       <Link href="/dashboard/workspace" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-[#275D79]">
         Ver todos
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        <ArrowRight size={16} />
       </Link>
     </div>
   );
@@ -75,7 +76,7 @@ export default function DemoDashboardPage() {
                 <Link key={ws.id} href={`/dashboard/workspace/${ws.id}`}>
                   <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
                     <div className="flex h-16 items-end px-3 pb-3" style={{ backgroundColor: ws.color }}>
-                      <span className="rounded-md bg-white/18 px-2 py-1 text-[0.68rem] font-medium text-white backdrop-blur-sm">{ws.role}</span>
+                      <span className="rounded-md bg-white/20 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{ws.role}</span>
                     </div>
                     <div className="space-y-1 px-4 py-4 [@media(min-width:1450px)]:py-7">
                       <h4 className="text-lg font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">{ws.title}</h4>
@@ -95,7 +96,7 @@ export default function DemoDashboardPage() {
                 <Link key={ws.id} href={`/dashboard/workspace/${ws.id}`}>
                   <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
                     <div className="flex h-16 items-end px-3 pb-3" style={{ backgroundColor: ws.color }}>
-                      <span className="rounded-md bg-white/18 px-2 py-1 text-[0.68rem] font-medium text-white backdrop-blur-sm">{ws.role}</span>
+                      <span className="rounded-md bg-white/20 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{ws.role}</span>
                     </div>
                     <div className="space-y-1 px-4 py-4 [@media(min-width:1450px)]:py-7">
                       <h4 className="text-lg font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">{ws.title}</h4>
@@ -110,7 +111,7 @@ export default function DemoDashboardPage() {
         </div>
 
         <aside className="space-y-8 xl:pt-[2.85rem]">
-          <section className="rounded-[22px] border border-slate-200 bg-white px-4 py-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
+          <section className="rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-sm dark:border-slate-700 dark:bg-[#141f33]">
             <div className="mb-4 space-y-1">
               <h3 className="text-[1.35rem] font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">Tareas por entregar</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">3 tareas pendientes</p>
@@ -128,7 +129,7 @@ export default function DemoDashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-[22px] border border-slate-200 bg-white px-4 py-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
+          <section className="rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-sm dark:border-slate-700 dark:bg-[#141f33]">
             <div className="mb-4 space-y-1">
               <h3 className="text-[1.35rem] font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">Actividad Reciente</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">Últimas novedades</p>

@@ -2,21 +2,20 @@
 
 import { Bell } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-
-type Notification = {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
-  read: boolean;
-};
-
-const empty: Notification[] = [];
+import useSWR from "swr";
+import { getNotifications } from "@/app/src/lib/api/notifications";
+import type { NotificationData } from "@/app/src/lib/api/notifications";
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications] = useState<Notification[]>(empty);
   const ref = useRef<HTMLDivElement>(null);
+
+  const { data } = useSWR("notification-bell", getNotifications, {
+    refreshInterval: 30000,
+  });
+
+  const notifications = data?.notifications ?? [];
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -27,8 +26,6 @@ export default function NotificationBell() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div ref={ref} className="relative">
@@ -61,7 +58,7 @@ export default function NotificationBell() {
             </div>
           ) : (
             <div className="max-h-80 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-700">
-              {notifications.map((n) => (
+              {notifications.map((n: NotificationData) => (
                 <button
                   key={n.id}
                   type="button"

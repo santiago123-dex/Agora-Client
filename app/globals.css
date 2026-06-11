@@ -2,14 +2,23 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ── Design tokens (Tailwind v4 @theme) ── */
+@theme {
+  --color-brand: #275D79;
+  --color-brand-light: #3A8BAA;
+  --color-brand-dark: #1C465C;
+  --color-warm: #D4A373;
+  --color-warm-light: #E8D5B7;
+  --color-earth: #A67C52;
+  --color-surface-warm: #FDFBF7;
+  --font-serif-display: "DM Serif Display", serif;
+  --font-sans-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
+}
+
 :root {
-  --background: #f8fbfd;
-  --foreground: #020617;
-  --font-sans:
-    "Segoe UI", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui,
-    sans-serif;
-  --font-mono:
-    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
+  --background: #FDFBF7;
+  --foreground: #1A1A2E;
 }
 
 .dark {
@@ -31,7 +40,7 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-inter), var(--font-sans-body);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -44,7 +53,13 @@ textarea::-webkit-scrollbar {
   color: #e2e8f0;
 }
 
-/* ── Dashboard dark overrides (scoped via :where for low specificity) ── */
+/* ── Serif display utility ── */
+.serif {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+}
+
+/* ── Dashboard dark overrides ── */
 .dark :where(.bg-white) {
   background-color: #141f33;
 }
@@ -79,7 +94,6 @@ textarea::-webkit-scrollbar {
 }
 
 /* ── Landing page dark overrides ── */
-/* The landing page root has .landing-page, giving us a scope with higher specificity */
 .dark .landing-page {
   background-color: #0b1120;
 }
@@ -98,8 +112,26 @@ textarea::-webkit-scrollbar {
 .dark .landing-page .bg-\[\#f3f8fb\] {
   background-color: #0d1a2e;
 }
+.dark .landing-page .bg-\[\#f5f0ea\] {
+  background-color: #0f172a;
+}
+.dark .landing-page .bg-\[\#edf5f8\] {
+  background-color: #0d1a2e;
+}
+.dark .landing-page .bg-\[\#2f6787\] {
+  background-color: #3A8BAA;
+}
 .dark .landing-page .border-\[\#eaeaea\] {
   border-color: #1e293b;
+}
+.dark .landing-page .border-\[\#e2dcd3\] {
+  border-color: #253245;
+}
+.dark .landing-page .border-\[\#e2dcd3\]\/70 {
+  border-color: rgba(37, 50, 69, 0.7);
+}
+.dark .landing-page .border-\[\#cfe0ea\] {
+  border-color: #253245;
 }
 .dark .landing-page .border-neutral-200 {
   border-color: #253245;
@@ -116,38 +148,37 @@ textarea::-webkit-scrollbar {
 .dark .landing-page .text-gray-300 {
   color: #64748b;
 }
+.dark .landing-page .text-\[\#275D79\] {
+  color: #7BB8D4;
+}
 .dark .landing-page .hover\:bg-\[\#eaf3f8\]:hover {
   background-color: #1a2740;
 }
 .dark .landing-page .shadow-\[0_24px_80px_rgba\(15\,23\,42\,0\.14\)\] {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
 }
-
-/* ── Navbar glass effect ── */
-.landing-header {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(243, 248, 251, 0.82) 100%
-  );
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+.dark .landing-page .shadow-\[0_24px_80px_rgba\(167\,139\,110\,0\.12\)\] {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
 }
-.dark .landing-header {
-  background: linear-gradient(
-    90deg,
-    rgba(11, 17, 32, 0.9) 0%,
-    rgba(20, 31, 51, 0.85) 100%
-  );
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+.dark .landing-page .hover\:bg-\[\#1f4a61\]:hover {
+  background-color: #3A8BAA;
+}
+.dark .landing-page .hover\:border-\[\#275D79\]:hover {
+  border-color: #3a7fa0;
+}
+.dark .landing-page .hover\:text-\[\#275D79\]:hover {
+  color: #7BB8D4;
+}
+.dark .landing-page .focus\:border-\[\#275D79\]:focus {
+  border-color: #3a7fa0;
+}
+.dark .landing-page .focus\:ring-\[\#275D79\]\/15:focus {
+  --tw-ring-color: rgba(58, 139, 170, 0.15);
 }
 
 /* ── Mesh gradient hero background ── */
 .mesh-gradient {
-  background: linear-gradient(135deg, #f3f8fb 0%, #dceef5 50%, #e8f4f8 100%);
+  background: linear-gradient(135deg, #FDFBF7 0%, #f0ebe3 50%, #e8e0d5 100%);
   background-size: 200% 200%;
   animation: meshShift 12s ease infinite;
 }
@@ -160,47 +191,68 @@ textarea::-webkit-scrollbar {
   100% { background-position: 0% 50%; }
 }
 
-/* ── Floating particles ── */
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: #275D79;
-  opacity: 0.15;
-  animation: float 6s ease-in-out infinite;
+/* ── Navbar glass effect ── */
+.landing-header {
+  background: linear-gradient(
+    90deg,
+    rgba(253, 251, 247, 0.88) 0%,
+    rgba(245, 240, 234, 0.82) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(226, 220, 211, 0.5);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
 }
-.particle:nth-child(2) {
-  width: 8px; height: 8px;
-  top: 15%; left: 10%;
-  animation-delay: -2s;
-  animation-duration: 8s;
+.dark .landing-header {
+  background: linear-gradient(
+    90deg,
+    rgba(11, 17, 32, 0.9) 0%,
+    rgba(20, 31, 51, 0.85) 100%
+  );
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
 }
-.particle:nth-child(3) {
-  width: 5px; height: 5px;
-  top: 60%; left: 80%;
-  animation-delay: -4s;
-  animation-duration: 7s;
+
+/* ── Greek key meander pattern (signature element) ── */
+.meander {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'%3E%3Cpath d='M0 2h8v8H6V4H2v6H0zM12 2h8v8h-2V4h-4v6h-2zM24 2h8v8h-2V4h-4v6h-2zM36 2h4v8h-2V4h-2z' fill='%23275D79' opacity='0.12'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+  height: 12px;
 }
-.particle:nth-child(4) {
-  width: 10px; height: 10px;
-  top: 30%; left: 70%;
-  animation-delay: -1s;
-  animation-duration: 9s;
+.dark .meander {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'%3E%3Cpath d='M0 2h8v8H6V4H2v6H0zM12 2h8v8h-2V4h-4v6h-2zM24 2h8v8h-2V4h-4v6h-2zM36 2h4v8h-2V4h-2z' fill='%233A8BAA' opacity='0.2'/%3E%3C/svg%3E");
 }
-.particle:nth-child(5) {
-  width: 6px; height: 6px;
-  top: 75%; left: 25%;
-  animation-delay: -3s;
-  animation-duration: 6.5s;
+
+/* ── Signature Greek key as a decorative divider ── */
+.meander-divider {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='8' viewBox='0 0 48 8'%3E%3Cpath d='M0 0h6v6H4V2H2v4H0zM8 0h6v6h-2V2h-2v4H8zM16 0h6v6h-2V2h-2v4h-2zM24 0h6v6h-2V2h-2v4h-2zM32 0h6v6h-2V2h-2v4h-2zM40 0h6v6h-2V2h-2v4h-2z' fill='%23275D79' opacity='0.15'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+  height: 8px;
+  width: 100%;
 }
-.particle:nth-child(6) {
-  width: 7px; height: 7px;
-  top: 45%; left: 5%;
-  animation-delay: -5s;
-  animation-duration: 8.5s;
+.dark .meander-divider {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='8' viewBox='0 0 48 8'%3E%3Cpath d='M0 0h6v6H4V2H2v4H0zM8 0h6v6h-2V2h-2v4H8zM16 0h6v6h-2V2h-2v4h-2zM24 0h6v6h-2V2h-2v4h-2zM32 0h6v6h-2V2h-2v4h-2zM40 0h6v6h-2V2h-2v4h-2z' fill='%233A8BAA' opacity='0.25'/%3E%3C/svg%3E");
 }
-@keyframes float {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 0.15; }
-  50% { transform: translateY(-30px) scale(1.4); opacity: 0.35; }
+
+/* ── Gradient text animation ── */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease-in-out infinite;
+}
+
+/* ── Stagger card entrance ── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-card-in {
+  animation: card-in 0.5s ease-out both;
 }
 
 /* ── Scroll-reveal animations ── */
@@ -212,6 +264,15 @@ textarea::-webkit-scrollbar {
 .scroll-reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ── Page fade-in transition ── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page-in {
+  animation: fade-in 0.3s ease-out both;
 }
 
 @layer base {

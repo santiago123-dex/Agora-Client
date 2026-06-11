@@ -1,10 +1,12 @@
 "use client";
 
+import { Loader2, Save } from "lucide-react";
 import { useUserConfig } from "./hooks/useUserConfig";
 import PersonalInfoCard from "./components/PersonalInfoCard";
 import AiAgentCard from "./components/AiAgentCard";
 import NotificationsCard from "./components/NotificationsCard";
 import ThemeCard from "./components/ThemeCard";
+import PasswordCard from "./components/PasswordCard";
 
 export default function ConfigurationPage() {
   const {
@@ -22,10 +24,7 @@ export default function ConfigurationPage() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] dark:bg-[#0b1120]">
         <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-          <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
+          <Loader2 size={16} className="animate-spin" />
           Cargando configuración...
         </div>
       </div>
@@ -85,6 +84,8 @@ export default function ConfigurationPage() {
             onChange={updateConfig}
           />
 
+          <PasswordCard />
+
           <ThemeCard
             theme={form.config.theme}
             onChange={(v) => updateConfig("theme", v)}
@@ -98,19 +99,12 @@ export default function ConfigurationPage() {
             >
               {isSaving ? (
                 <>
-                  <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <Loader2 size={16} className="animate-spin" />
                   Guardando...
                 </>
               ) : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                  </svg>
+                  <Save size={16} />
                   Guardar Cambios
                 </>
               )}

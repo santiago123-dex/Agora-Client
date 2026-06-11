@@ -1,3 +1,8 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { MessageSquareQuote } from "lucide-react";
+
 const testimonials = [
     {
         quote: "Agora me ahorra horas de corrección cada semana. La IA entiende el contexto de las respuestas y me da sugerencias muy precisas.",
@@ -20,11 +25,34 @@ const testimonials = [
 ];
 
 export default function TestimonialsSection() {
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const goTo = useCallback((i: number) => {
+        setActiveIndex((i + testimonials.length) % testimonials.length);
+    }, []);
+
+    const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+
+    useEffect(() => {
+        if (isPaused) return;
+        timerRef.current = setInterval(next, 5000);
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, [isPaused, next]);
+
+    const t = testimonials[activeIndex];
+
     return (
-        <section id="testimonios" className="bg-[#EBF3F6] py-24">
+        <section
+            id="testimonios"
+            className="bg-[#EBF3F6] py-24"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
             <div className="mx-auto max-w-6xl px-6">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 className="text-4xl font-semibold text-slate-950">
+                    <h2 className="serif text-4xl tracking-tight text-slate-950">
                         Lo que dicen los educadores
                     </h2>
                     <p className="mt-3 text-xl text-gray-500">
@@ -32,47 +60,58 @@ export default function TestimonialsSection() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                    {testimonials.map((t) => (
-                        <div
-                            key={t.name}
-                            className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="32"
-                                height="32"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="#275D79"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mb-4 opacity-40"
+                <div className="mx-auto max-w-2xl">
+                    <div className="relative min-h-[320px]">
+                        {testimonials.map((testimonial, i) => (
+                            <div
+                                key={testimonial.name}
+                                className={`absolute inset-0 flex flex-col rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-500 ease-in-out ${
+                                    i === activeIndex
+                                        ? "opacity-100 translate-x-0"
+                                        : i < activeIndex
+                                            ? "opacity-0 -translate-x-8"
+                                            : "opacity-0 translate-x-8"
+                                }`}
+                                aria-hidden={i !== activeIndex}
                             >
-                                <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
-                                <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
-                            </svg>
+                                <MessageSquareQuote size={32} className="mb-4 text-[#275D79] opacity-40" />
 
-                            <blockquote className="flex-1 text-base leading-7 text-slate-600">
-                                &ldquo;{t.quote}&rdquo;
-                            </blockquote>
+                                <blockquote className="flex-1 text-base leading-7 text-slate-600">
+                                    &ldquo;{testimonial.quote}&rdquo;
+                                </blockquote>
 
-                            <div className="mt-6 flex items-center gap-3 border-t border-neutral-100 pt-6">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#275D79] text-sm font-semibold text-white">
-                                    {t.avatar}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-slate-950">
-                                        {t.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        {t.role}
-                                    </p>
+                                <div className="mt-6 flex items-center gap-3 border-t border-neutral-100 pt-6">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#275D79] text-sm font-semibold text-white">
+                                        {testimonial.avatar}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-950">
+                                            {testimonial.name}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            {testimonial.role}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+
+                    <div className="mt-8 flex items-center justify-center gap-3">
+                        {testimonials.map((_, i) => (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => goTo(i)}
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                    i === activeIndex
+                                        ? "w-6 bg-[#275D79]"
+                                        : "w-2 bg-slate-300 hover:bg-slate-400"
+                                }`}
+                                aria-label={`Ver testimonio ${i + 1}`}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
