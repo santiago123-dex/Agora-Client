@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import {
-    exchangeGoogleCode,
-    type GoogleCodeExchangePayload,
-} from "@/app/src/lib/api/auth";
+import { serverExchangeGoogleCode } from "@/app/src/lib/api/auth-server";
+import type { GoogleCodeExchangePayload } from "@/app/src/lib/api/auth";
 
 export async function POST(request: Request) {
     try {
         const body = (await request.json()) as GoogleCodeExchangePayload;
-        const response = await exchangeGoogleCode(body);
+        const response = await serverExchangeGoogleCode(body);
 
         return NextResponse.json(response);
     } catch (error) {

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { logout } from "@/app/src/lib/api/auth";
+import { serverLogout } from "@/app/src/lib/api/auth-server";
 import { authCookieOptions } from "@/app/src/lib/auth/cookie-options";
 
 export async function POST() {
@@ -9,7 +9,7 @@ export async function POST() {
 
     try {
         if (refreshToken) {
-            await logout({
+            await serverLogout({
                 refresh_token: refreshToken,
             });
         }

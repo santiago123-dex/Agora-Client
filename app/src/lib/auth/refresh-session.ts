@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { refreshAccessToken } from "@/app/src/lib/api/auth";
+import { serverRefreshAccessToken } from "@/app/src/lib/api/auth-server";
 import { authCookieOptions } from "@/app/src/lib/auth/cookie-options";
 
 export async function refreshSession() {
@@ -11,7 +11,7 @@ export async function refreshSession() {
     }
 
     try {
-        const response = await refreshAccessToken({
+        const response = await serverRefreshAccessToken({
             refresh_token: refreshToken,
         });
 

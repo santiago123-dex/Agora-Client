@@ -19,6 +19,29 @@ type Props = {
   }>;
 };
 
+export async function GET(_request: Request, { params }: Props) {
+  try {
+    const { assignmentId } = await params;
+
+    const assignment = await serverApiFetch<AssignmentResponse>(
+      `/workspaces/assignments/${assignmentId}`,
+      { method: "GET" },
+    );
+
+    return NextResponse.json(assignment);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "No se pudo obtener la tarea",
+      },
+      { status: getErrorStatus(error) },
+    );
+  }
+}
+
 export async function PUT(request: Request, { params }: Props) {
   try {
     const { assignmentId } = await params;

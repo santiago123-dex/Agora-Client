@@ -1,5 +1,4 @@
-const API_URL =
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+import { GATEWAY_URL } from "./config";
 
 export class ApiError extends Error {
     constructor(
@@ -22,14 +21,14 @@ export async function apiFetch<T>(
     options: ApiFetchOptions = {}
     //T es el tipo de dato que se espera recibir
 ): Promise<T> {
-    if (!API_URL) {
-        throw new Error("API_URL no está configurada");
+    if (!GATEWAY_URL) {
+        throw new Error("GATEWAY_URL no está configurada");
     }
 
     const { token, headers, ...rest } = options;
 
     //Se crea la peticion, se le pasa la url y las opciones, guardamos la respuesta en response
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${GATEWAY_URL}${path}`, {
         //rest son todas las opciones que se le pasan a fetch, como method, body, etc
         ...rest,
         headers: {
