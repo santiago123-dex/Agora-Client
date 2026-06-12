@@ -1,7 +1,8 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   Bot,
   CheckCircle,
+  Eye,
   FileText,
   Loader2,
   RefreshCw,
@@ -18,6 +19,7 @@ import {
   getSubmissionFiles,
   getSubmissionText,
 } from "../helpers";
+import DocumentPreviewModal, { type PreviewFile } from "@/app/src/components/ui/DocumentPreviewModal";
 
 // Valor corregido por el profesor para un criterio de la rúbrica.
 // teacher_score y teacher_feedback reemplazan lo que sugirió la IA originalmente.
@@ -63,6 +65,10 @@ export default function SubmissionReviewPanel({
   onFeedbackChange,
   onSave,
 }: Props) {
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+
   const name = getMemberName(row.member);
   const files = getSubmissionFiles(row.submission);
   const storedGrade = row.localGrade ?? getStoredGrade(row.submission);
@@ -97,32 +103,46 @@ export default function SubmissionReviewPanel({
 
           {files.length > 0 ? (
             <div className="mt-3 flex flex-wrap gap-2">
-              {files.map((file) => {
-                const content = (
-                  <>
-                    <FileText className="h-3.5 w-3.5" />
-                    {file.name}
-                  </>
-                );
-
-                return file.href ? (
-                  <a
-                    key={file.name}
-                    href={file.href}
-                    download={file.name}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79]"
-                  >
-                    {content}
-                  </a>
-                ) : (
-                  <span
-                    key={file.name}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
-                  >
-                    {content}
-                  </span>
-                );
-              })}
+              {files.map((file) => (
+                <div key={file.name} className="inline-flex items-center gap-1">
+                  {file.href || file.mediaId ? (
+                    <>
+                      <a
+                        href={file.href ?? `/api/media/${file.mediaId}/file`}
+                        download={file.name}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79]"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {file.name}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const id = file.mediaId ?? file.href?.replace("/api/media/", "").replace("/file", "") ?? "";
+                          if (id) {
+                            setPreviewFiles([{
+                              name: file.name,
+                              mediaId: id,
+                              mimeType: file.mimeType ?? "application/octet-stream",
+                            }]);
+                            setPreviewIndex(0);
+                            setPreviewOpen(true);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-medium text-[#275D79] transition hover:bg-[#EEF5F7]"
+                        title="Vista previa"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">
+                      <FileText className="h-3.5 w-3.5" />
+                      {file.name}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           ) : null}
         </div>
@@ -350,6 +370,13 @@ export default function SubmissionReviewPanel({
           </button>
         </div>
       </div>
+
+      <DocumentPreviewModal
+        files={previewFiles}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        initialIndex={previewIndex}
+      />
     </section>
   );
 }

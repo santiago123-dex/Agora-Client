@@ -12,7 +12,8 @@ import { getWorkspaceMembers } from "@/app/src/lib/api/workspaces";
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
 import { suggestGrades, approveSuggestion } from "@/app/src/lib/api/ai";
 import type { GradeResult, CriterionOverride } from "@/app/src/lib/api/ai";
-import { Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Download, ChevronUp, ChevronDown } from "lucide-react";
 import AssignmentHeader from "./components/AssignmentHeader";
 import AssignmentStats from "./components/AssignmentStats";
 import AiSummaryPanel from "./components/AiSummaryPanel";
@@ -98,7 +99,6 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [listVisible, setListVisible] = useState(true);
   const [userToggledList, setUserToggledList] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const { mutate } = useSWRConfig();
 
   const { aiSuggestions, currentSuggestionId, aiError, approving, setAiSuggestions, setCurrentSuggestionId, setAiError, setApproving} = useGrading();
@@ -164,12 +164,11 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
           bySubmission[r.submission_id] = r;
         }
         setAiSuggestions((prev) => ({ ...prev, ...bySubmission }));
+        toast.success("Análisis completado");
       } catch (err) {
-        setAiError(
-          err instanceof Error
-            ? err.message
-            : "Error al analizar con IA",
-        );
+        const msg = err instanceof Error ? err.message : "Error al analizar con IA";
+        setAiError(msg);
+        toast.error(msg);
       } finally {
         setAnalyzingUserId(null);
         setAnalyzingAll(false);
@@ -194,15 +193,12 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
       setAiSuggestions({});
       setOverrides({});
       await mutateSubmissions();
-      setToast("Calificaciones guardadas");
+      toast.success("Calificaciones guardadas");
       mutate("notification-bell");
-      setTimeout(() => setToast(null), 2500);
-    } catch (err) {
-      setAiError(
-        err instanceof Error
-          ? err.message
-          : "Error al aprobar las sugerencias",
-      );
+    } catch {
+      const msg = "Error al guardar calificaciones";
+      setAiError(msg);
+      toast.error(msg);
     } finally {
       setApproving(false);
     }
@@ -376,6 +372,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
         feedback: feedbackInput,
       },
     }));
+    toast.success("Calificación guardada localmente");
   };
 
   const handleGradeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -400,12 +397,6 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
 
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7">
-      {toast ? (
-        <div className="fixed right-4 top-4 z-[9999] flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg animate-in fade-in slide-in-from-top-2">
-          <Check size={16} />
-          {toast}
-        </div>
-      ) : null}
       <div className="mx-auto max-w-6xl space-y-6">
         <AssignmentHeader
           assignment={assignment}
