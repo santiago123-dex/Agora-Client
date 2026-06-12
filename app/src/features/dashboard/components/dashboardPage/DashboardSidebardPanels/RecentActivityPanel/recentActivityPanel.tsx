@@ -63,7 +63,7 @@ export default function RecentActivityPanel() {
         <div className="px-5 py-5 sm:px-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="serif text-base tracking-tight text-slate-950">Actividad Reciente</h3>
+              <h3 className="text-base font-semibold tracking-tight text-slate-950">Actividad Reciente</h3>
               <p className="mt-0.5 text-sm text-slate-500">No disponible</p>
             </div>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-red-100 text-red-600">
@@ -85,7 +85,7 @@ export default function RecentActivityPanel() {
         <div className="px-5 py-5 sm:px-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="serif text-base tracking-tight text-slate-950">Actividad Reciente</h3>
+              <h3 className="text-base font-semibold tracking-tight text-slate-950">Actividad Reciente</h3>
               <p className="mt-0.5 text-sm text-slate-500">Sin novedades</p>
             </div>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
@@ -106,7 +106,7 @@ export default function RecentActivityPanel() {
       <div className="px-5 py-5 sm:px-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="serif text-base tracking-tight text-slate-950">Actividad Reciente</h3>
+          <h3 className="text-base font-semibold tracking-tight text-slate-950">Actividad Reciente</h3>
           <p className="mt-0.5 text-sm text-slate-500">Últimas novedades</p>
         </div>
         <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700">

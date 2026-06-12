@@ -41,7 +41,7 @@ export default function PendingTasksPanel() {
         <div className="px-5 py-5 sm:px-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="serif text-base tracking-tight text-slate-950">Tareas por entregar</h3>
+              <h3 className="text-base font-semibold tracking-tight text-slate-950">Tareas por entregar</h3>
               <p className="mt-0.5 text-sm text-slate-500">No disponible</p>
             </div>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-red-100 text-red-600">
@@ -63,7 +63,7 @@ export default function PendingTasksPanel() {
         <div className="px-5 py-5 sm:px-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="serif text-base tracking-tight text-slate-950">Tareas por entregar</h3>
+              <h3 className="text-base font-semibold tracking-tight text-slate-950">Tareas por entregar</h3>
               <p className="mt-0.5 text-sm text-slate-500">Al día</p>
             </div>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
@@ -84,7 +84,7 @@ export default function PendingTasksPanel() {
       <div className="px-5 py-5 sm:px-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <h3 className="serif text-base tracking-tight text-slate-950">Tareas por entregar</h3>
+            <h3 className="text-base font-semibold tracking-tight text-slate-950">Tareas por entregar</h3>
             <p className="mt-0.5 text-sm text-slate-500">{tasks.length} pendientes</p>
           </div>
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
