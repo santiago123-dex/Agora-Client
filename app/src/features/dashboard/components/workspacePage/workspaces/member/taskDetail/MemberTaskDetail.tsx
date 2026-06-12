@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CalendarDays, Check, Clock, FileText, Paperclip, Send, Upload, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Clock, Download, Eye, FileText, Paperclip, Send, Upload, X } from "lucide-react";
 import { getAssignmentById, type AssignmentResponse } from "@/app/src/lib/api/assignments";
 import { getMySubmissionByAssignment, createSubmission, deleteSubmission, type SubmissionResponse, type CreateSubmissionPayload } from "@/app/src/lib/api/submissions";
+import { uploadFile, getMediaFileUrl } from "@/app/src/lib/api/media";
+import DocumentPreviewModal, { type PreviewFile } from "@/app/src/components/ui/DocumentPreviewModal";
 
 type Props = {
   workspaceId: string;
@@ -34,6 +36,10 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -79,15 +85,26 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
     setSubmitError(null);
 
     try {
+      setIsUploadingFiles(true);
+      const attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const result = await uploadFile(file);
+          return {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            mediaId: result.media.id,
+            dataUrl: `/api/media/${result.media.id}/file`,
+          };
+        }),
+      );
+      setIsUploadingFiles(false);
+
       const payload: CreateSubmissionPayload = {
         assignmentId: Number(assignment.id),
         content: { text: deliveryText.trim() },
         files: {
-          attachments: selectedFiles.map((file) => ({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-          })),
+          attachments,
         },
       };
 
@@ -100,6 +117,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
       setSubmitError(err instanceof Error ? err.message : "No se pudo enviar la entrega");
     } finally {
       setIsSubmitting(false);
+      setIsUploadingFiles(false);
     }
   };
 
@@ -123,6 +141,11 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
 
   const rubricCriteria = assignment?.rubric?.criteria as Array<{ name: string; weight: number; description?: string }> | undefined;
   const settings = assignment?.settings as Record<string, unknown> | undefined;
+  const assignmentAttachments = useMemo(() => {
+    const raw = settings?.attachments;
+    if (!Array.isArray(raw)) return [];
+    return raw as Array<{ name: string; mediaId: string; type?: string }>;
+  }, [settings]);
 
   if (isLoading) {
     return (
@@ -194,6 +217,42 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
               {settings.maxFileSizeMb ? ` · Tamaño máximo: ${settings.maxFileSizeMb} MB` : null}
             </div>
           ) : null}
+
+          {assignmentAttachments.length > 0 ? (
+            <div className="mt-4">
+              <h3 className="text-xs font-semibold text-slate-700">Archivos de la tarea</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {assignmentAttachments.map((file) => (
+                  <div key={file.mediaId} className="inline-flex items-center gap-1">
+                    <a
+                      href={getMediaFileUrl(file.mediaId)}
+                      download={file.name}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79]"
+                    >
+                      <Paperclip className="h-3.5 w-3.5" />
+                      {file.name}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewFiles([{
+                          name: file.name,
+                          mediaId: file.mediaId,
+                          mimeType: file.type ?? "application/octet-stream",
+                        }]);
+                        setPreviewIndex(0);
+                        setPreviewOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-medium text-[#275D79] transition hover:bg-[#EEF5F7]"
+                      title="Vista previa"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {isGraded && submission?.result ? (
@@ -238,16 +297,39 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
               </div>
             ) : null}
 
-            {submission?.files?.attachments && Array.isArray(submission.files.attachments) && (submission.files.attachments as Array<{ name: string; size: number }>).length > 0 ? (
+            {submission?.files?.attachments && Array.isArray(submission.files.attachments) && (submission.files.attachments as Array<Record<string, unknown>>).length > 0 ? (
               <div className="mt-3">
                 <p className="text-xs font-medium text-blue-600">Archivos adjuntos</p>
                 <div className="mt-1 space-y-1">
-                  {(submission.files.attachments as Array<{ name: string; size: number }>).map((file) => (
-                    <div key={file.name} className="flex items-center gap-2 text-xs text-slate-600">
-                      <Paperclip className="h-3 w-3" />
-                      {file.name}
-                    </div>
-                  ))}
+                  {(submission.files.attachments as Array<Record<string, unknown>>).map((file) => {
+                    const name = file.name as string;
+                    const mediaId = file.mediaId as string | undefined;
+                    const dataUrl = file.dataUrl as string | undefined;
+                    return (
+                      <div key={name} className="flex items-center gap-2 text-xs text-slate-600">
+                        <Paperclip className="h-3 w-3" />
+                        <span className="truncate">{name}</span>
+                        {(mediaId || dataUrl) ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPreviewFiles([{
+                                name,
+                                mediaId: mediaId ?? dataUrl!.replace("/api/media/", "").replace("/file", ""),
+                                mimeType: (file.type as string) ?? "application/octet-stream",
+                              }]);
+                              setPreviewIndex(0);
+                              setPreviewOpen(true);
+                            }}
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-blue-200 px-2 py-0.5 text-[10px] font-medium text-blue-600 transition hover:bg-blue-50"
+                          >
+                            <Eye className="h-3 w-3" />
+                            Vista previa
+                          </button>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
@@ -332,7 +414,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                       className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
                     >
                       <Send className="h-4 w-4" />
-                      {isSubmitting ? "Enviando..." : "Enviar entrega"}
+                      {isUploadingFiles ? "Subiendo archivos..." : isSubmitting ? "Enviando..." : "Enviar entrega"}
                     </button>
                     {showCancelConfirm ? (
                       <button
@@ -355,6 +437,13 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
           </div>
         ) : null}
       </div>
+
+      <DocumentPreviewModal
+        files={previewFiles}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        initialIndex={previewIndex}
+      />
     </section>
   );
 }
