@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Inter } from "next/font/google";
+import { Inter, DM_Serif_Display } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,7 +26,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`h-full antialiased ${inter.variable} ${dmSerifDisplay.variable}`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{ duration: 3000 }}
+        />
+      </body>
     </html>
   );
 }

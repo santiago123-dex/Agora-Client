@@ -85,7 +85,11 @@ export function createWorkspace(payload: CreateWorkspacePayload) {
     body: JSON.stringify(payload),
   }).then(async (workspace) => {
     try {
-      const { createNotification } = await import("./notifications");
+      const [{ toast }, { createNotification }] = await Promise.all([
+        import("sonner"),
+        import("./notifications"),
+      ]);
+      toast.success(`"${workspace.name}" creado`);
       await createNotification(
         "Espacio creado",
         `"${workspace.name}" fue creado exitosamente`,
