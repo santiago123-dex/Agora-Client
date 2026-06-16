@@ -16,13 +16,17 @@ export async function GET(_request: Request, { params }: Props) {
         const { workspaceId } = await params;
 
 
-        // Traer todos los workspaces del usuario
-        const memberships = await serverApiFetch<WorkspaceMemberResponse[]>(
+        const membershipsPromise = serverApiFetch<WorkspaceMemberResponse[]>(
             "/workspaces/member/user",
             { method: "GET" }
         );
+        const membersPromise = serverApiFetch<WorkspaceMemberDetailsResponse[]>(
+            `/workspaces/member/workspace/${workspaceId}/details`,
+            { method: "GET" }
+        );
 
-        // Verificar que el usuario pertenezca al workspace actual
+        const memberships = await membershipsPromise;
+
         const membership = memberships.find(
             (item) => String(item.workspaceId) === String(workspaceId)
         );
@@ -41,10 +45,7 @@ export async function GET(_request: Request, { params }: Props) {
             );
         }
 
-        const members = await serverApiFetch<WorkspaceMemberDetailsResponse[]>(
-            `/workspaces/member/workspace/${workspaceId}/details`,
-            { method: "GET" }
-        );
+        const members = await membersPromise;
 
         return NextResponse.json(members);
     } catch (error) {

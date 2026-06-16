@@ -1,6 +1,3 @@
-
-
-
 type SaveSessionParams = {
     accessToken: string;
     refreshToken?: string;

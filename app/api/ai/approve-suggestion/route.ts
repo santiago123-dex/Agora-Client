@@ -1,0 +1,18 @@
+import { NextResponse } from "next/server";
+import { serverApiFetch } from "@/app/src/lib/api/server-client";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const result = await serverApiFetch("/ai/approve-suggestion", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json({
+      suggestion_id: "mock",
+      results: [],
+    });
+  }
+}

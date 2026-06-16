@@ -23,40 +23,36 @@ export type SubmissionResponse = {
   result: Record<string, unknown> | null;
 };
 
-async function localFetch<T>(path: string, options: RequestInit = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-  });
-
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message ?? "Ocurrió un error en la petición");
-  }
-
-  return data as T;
-}
+import { bffFetch } from "./bff-client";
 
 export function getSubmissionsByAssignment(assignmentId: string | number) {
-  return localFetch<SubmissionResponse[]>(
+  return bffFetch<SubmissionResponse[]>(
     `/api/workspaces/submissions?assignmentId=${assignmentId}`,
   );
 }
 
 
 export function getMySubmissionsByWorkspace(workspaceId: string | number) {
-  return localFetch<SubmissionResponse[]>(
+  return bffFetch<SubmissionResponse[]>(
     `/api/workspaces/submissions?workspaceId=${workspaceId}`,
   );
 }
 
 export function createSubmission(payload: CreateSubmissionPayload) {
-  return localFetch<SubmissionResponse>("/api/workspaces/submissions", {
+  return bffFetch<SubmissionResponse>("/api/workspaces/submissions", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export function getMySubmissionByAssignment(assignmentId: string | number) {
+  return bffFetch<SubmissionResponse | null>(
+    `/api/workspaces/submissions/${assignmentId}/my-submission`,
+  );
+}
+
+export function deleteSubmission(submissionId: string | number) {
+  return bffFetch<null>(`/api/workspaces/submissions/${submissionId}`, {
+    method: "DELETE",
   });
 }

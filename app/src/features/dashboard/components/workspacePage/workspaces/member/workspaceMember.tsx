@@ -1,25 +1,18 @@
 "use client";
 
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   CalendarDays,
   Check,
-  CircleX,
   Clock,
   Copy,
   FileText,
-  Paperclip,
-  Send,
-  Upload,
-  X,
 } from "lucide-react";
 
-import type { MemberWorkspace, WorkspaceMemberTask } from "../../data/workspace";
-import { useRouter, useSearchParams } from "next/navigation";
+import type { MemberWorkspace } from "../../data/workspace";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { createSubmission } from "@/app/src/lib/api/submissions";
-import type { SubmissionFilePayload } from "@/app/src/lib/api/submissions";
 import { useWorkspaceMemberAssignments } from "./hooks/useWorkspaceMemberAssignments";
 
 type Props = {
@@ -28,19 +21,7 @@ type Props = {
 
 export default function WorkspaceMember({ workspace }: Props) {
 
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
-  const [submit, setSubmit] = useState(false);
-  //guarda los datos de la tarea que el usuario hizo click
-  const [selectedTask, setSelectedTask] = useState<WorkspaceMemberTask | null>(null);
-  //Guarda lo que se escribe en el textarea del modal 
-  const [deliveryText, setDeliveryText] = useState("");
-  //Guarda los archivos seleccionados por el usuario, empieza vacio
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const [isSubmittingDelivery, setIsSubmittingDelivery] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  //Referencia al input de archivos
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const stats = workspace.memberStats;
   const code = workspace.inviteCode ?? "-";
@@ -48,29 +29,8 @@ export default function WorkspaceMember({ workspace }: Props) {
     memberTasks,
     isLoadingMemberTasks,
     memberTasksError,
-    setMemberTasks,
   } = useWorkspaceMemberAssignments(workspace.id, workspace.memberTask ?? []);
   const tasks = memberTasks;
-
-  //Verificamos si el usuario agrego texto o archivo para habilitar el boton de enviar
-  const hasDeliveryContent =
-    deliveryText.trim().length > 0 || attachedFiles.length > 0;
-
-  // UseMemo se usa para guardar un calculo
-  //Se ejecuta cada que attachedFiles cambia, osea si se agrega un nuevo archivo o se elimina uno
-  const attachedFilesLabel = useMemo(
-    () =>
-      attachedFiles.map((file) => ({
-        name: file.name,
-        size:
-          //compara para usar el condicional
-          file.size >= 1024 * 1024
-          //si es mayor a 1MB, pasa por aca
-            ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            : `${Math.max(1, Math.round(file.size / 1024))} KB`,
-      })),
-    [attachedFiles]
-  );
 
   const handleCopyCode = async () => {
     try {
@@ -82,114 +42,9 @@ export default function WorkspaceMember({ workspace }: Props) {
     }
   };
 
-  const resetSubmitModal = () => {
-    if (isSubmittingDelivery) return;
-
-    setSubmit(false);
-    setSelectedTask(null);
-    setDeliveryText("");
-    setAttachedFiles([]);
-    setSubmitError(null);
-  };
-
-  // Cada que cambie el input de archivos, se ejecuta esta funcion
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    //Convierte el input en un array, event.target.files es un FileList que trae los archivos seleccionados
-    const files = Array.from(event.target.files ?? []);
-    //Si no hay archivos, no hace nada
-    if (files.length === 0) return;
-
-
-    //Agrega los archivos al estado
-    //el prev es el estado anterior de attachedFiles
-    setAttachedFiles((prev) => {
-      //Crea un set con los archivos existentes, para evitar duplicados
-      const existing = new Set(prev.map((file) => `${file.name}-${file.size}`));
-      //Filtra los archivos que no existen
-      const nextFiles = files.filter(
-        (file) => !existing.has(`${file.name}-${file.size}`)
-      );
-      return [...prev, ...nextFiles];
-    });
-
-    //Limpia el input
-    event.target.value = "";
-  };
-
-  const fileToPayload = (file: File) =>
-    new Promise<SubmissionFilePayload>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        resolve({
-          name: file.name,
-          size: file.size,
-          type: file.type || "application/octet-stream",
-          dataUrl: typeof reader.result === "string" ? reader.result : undefined,
-        });
-      };
-
-      reader.onerror = () => reject(new Error(`No se pudo leer ${file.name}`));
-      reader.readAsDataURL(file);
-    });
-
-  const handleSubmitDelivery = async () => {
-    if (!selectedTask || !hasDeliveryContent || isSubmittingDelivery) return;
-
-    setIsSubmittingDelivery(true);
-    setSubmitError(null);
-
-    try {
-      const filesPayload = await Promise.all(attachedFiles.map(fileToPayload));
-
-      await createSubmission({
-        assignmentId: Number(selectedTask.id),
-        content: {
-          text: deliveryText.trim(),
-        },
-        files: {
-          attachments: filesPayload,
-        },
-      });
-
-      setMemberTasks((currentTasks) =>
-        currentTasks.map((task) =>
-          task.id === selectedTask.id
-            ? {
-                ...task,
-                taskState: "submitted",
-                actionLabel: undefined,
-                gradeLabel: "Entregada",
-              }
-            : task,
-        ),
-      );
-
-      setSubmit(false);
-      setSelectedTask(null);
-      setDeliveryText("");
-      setAttachedFiles([]);
-      router.refresh();
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : "No se pudo enviar la entrega",
-      );
-    } finally {
-      setIsSubmittingDelivery(false);
-    }
-  };
-
-  // Elimina un archivo del estado
-  const removeFile = (fileName: string) => {
-    setAttachedFiles((prev) => prev.filter((file) => file.name !== fileName));
-  };
-
-  //Obtiene los parametros de la busqueda, para saber desde donde viene el usuario
   const searchParams = useSearchParams();
-  //Obtiene el parametro "from" 
   const from = searchParams.get("from");
 
-  //Define la ruta a la que se debe volver
   const backHref =
     from === "dashboard" ? "/dashboard" : "/dashboard/workspace";
 
@@ -273,7 +128,7 @@ export default function WorkspaceMember({ workspace }: Props) {
         <div className="mt-6 inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto">
           <button
             type="button"
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none`}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none"
           >
             <FileText className="h-4 w-4" aria-hidden />
             Tareas
@@ -282,9 +137,24 @@ export default function WorkspaceMember({ workspace }: Props) {
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl">
         {isLoadingMemberTasks ? (
-          <p className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-            Cargando tareas guardadas...
-          </p>
+          <div className="grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex h-full w-full max-w-md animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
+                <div className="h-10 w-10 rounded-xl bg-slate-200" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-5 w-3/4 rounded bg-slate-200" />
+                  <div className="h-4 w-full rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 pt-3">
+                  <div className="h-4 w-32 rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 h-10 w-full rounded-xl bg-slate-200" />
+              </div>
+            ))}
+          </div>
         ) : null}
 
         {memberTasksError ? (
@@ -302,7 +172,7 @@ export default function WorkspaceMember({ workspace }: Props) {
             tasks.map((task) => (
               <article
                 key={task.id}
-                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[#c0c0c0] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]"
+                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]"
               >
                 <div className="p-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
@@ -327,165 +197,28 @@ export default function WorkspaceMember({ workspace }: Props) {
                   </div>
                 </div>
 
-                {task.actionLabel ? (
-                  <div className="mt-auto px-5 pb-5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedTask(task);
-                        setSubmitError(null);
-                        setSubmit(true);
-                      }}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f5a73] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(31,90,115,0.25)] transition hover:bg-[#184a5f]"
-                    >
-                      <Upload className="h-4 w-4" aria-hidden />
-                      {task.actionLabel}
-                    </button>
-                  </div>
-                ) : task.gradeLabel ? (
-                  <div className="mt-auto px-5 pb-5">
-                    <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+                <div className="mt-auto px-5 pb-5">
+                  <Link
+                    href={`/dashboard/workspace/${workspace.id}/tasks/${task.id}?from=member`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                      task.actionLabel
+                        ? "bg-[#1f5a73] text-white shadow-[0_10px_20px_rgba(31,90,115,0.25)] hover:bg-[#184a5f]"
+                        : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    }`}
+                  >
+                    {task.actionLabel ? (
+                      <FileText className="h-4 w-4" aria-hidden />
+                    ) : (
                       <Check className="h-4 w-4" aria-hidden />
-                      {task.gradeLabel}
-                    </span>
-                  </div>
-                ) : null}
+                    )}
+                    {task.actionLabel ?? task.gradeLabel ?? "Ver detalle"}
+                  </Link>
+                </div>
               </article>
             ))
           )}
         </div>
       </div>
-      {submit && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 py-6 backdrop-blur-[2px]"
-          onClick={resetSubmitModal}
-        >
-          <div
-            className="w-full max-w-[570px] rounded-[26px] border border-[#d7d7d7] bg-white px-5 py-5 shadow-[0_28px_80px_rgba(15,23,42,0.18)] sm:px-6 sm:py-6"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="pr-4">
-                <h2 className="text-[1.65rem] font-semibold leading-tight text-[#171717]">
-                  Entregar: {selectedTask?.title ?? "tarea"}
-                </h2>
-                <p className="mt-1 text-base text-[#9a9a9a]">
-                  Escribe tu respuesta o sube tus archivos para esta tarea.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={resetSubmitModal}
-                disabled={isSubmittingDelivery}
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Cerrar modal"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <label className="block">
-                <span className="sr-only">Respuesta de la entrega</span>
-                <textarea
-                  value={deliveryText}
-                  onChange={(event) => setDeliveryText(event.target.value)}
-                  disabled={isSubmittingDelivery}
-                  placeholder="Escribe tu respuesta aqui"
-                  className="min-h-[114px] w-full resize-none rounded-2xl border border-[#cdcdcd] px-5 py-4 text-base text-slate-700 outline-none transition placeholder:text-[#a0a0a0] focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10"
-                />
-              </label>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-                disabled={isSubmittingDelivery}
-              />
-
-              {/*Cuando le demos click en el boton se va a ejecutar el input oculto*/}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isSubmittingDelivery}
-                className="flex min-h-[84px] w-full items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d4d4d4] px-4 py-6 text-center text-lg text-[#939393] transition hover:border-[#275D79]/40 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                  <Upload className="h-5 w-5" />
-                </span>
-                <span className="text-base sm:text-[1.05rem]">
-                  Arrastra archivos aqui o haz clic para subir
-                </span>
-              </button>
-
-              {attachedFilesLabel.length > 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <Paperclip className="h-4 w-4" />
-                    Archivos seleccionados
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {attachedFilesLabel.map((file) => (
-                      <div
-                        key={file.name}
-                        className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 shadow-sm"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-slate-800">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-slate-500">{file.size}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(file.name)}
-                          disabled={isSubmittingDelivery}
-                          className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label={`Quitar ${file.name}`}
-                        >
-                          <CircleX className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            {submitError ? (
-              <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {submitError}
-              </p>
-            ) : null}
-
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={resetSubmitModal}
-                disabled={isSubmittingDelivery}
-                className="inline-flex min-w-[126px] items-center justify-center rounded-xl border border-[#d0d0d0] bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmitDelivery}
-                disabled={!hasDeliveryContent || isSubmittingDelivery}
-                className="inline-flex min-w-[148px] items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
-              >
-                {hasDeliveryContent ? (
-                  <Send className="h-4 w-4" aria-hidden />
-                ) : (
-                  <Check className="h-4 w-4" aria-hidden />
-                )}
-                {isSubmittingDelivery ? "Enviando..." : "Enviar entrega"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }

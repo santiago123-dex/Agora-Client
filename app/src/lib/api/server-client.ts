@@ -2,25 +2,25 @@ import { getAccessTokenFromCookies } from "@/app/src/lib/auth/session-server";
 import { refreshSession } from "@/app/src/lib/auth/refresh-session";
 import { ApiError } from "./client";
 
-const API_URL =
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+import { GATEWAY_URL } from "./config";
 
 type ServerApiFetchOptions = RequestInit & {
     headers?: HeadersInit;
+    refreshOnUnauthorized?: boolean;
 };
 
 export async function serverApiFetch<T>(
     path: string,
     options: ServerApiFetchOptions = {}
 ): Promise<T> {
-    if (!API_URL) {
-        throw new ApiError("API_URL no está configurada", 500);
+    if (!GATEWAY_URL) {
+        throw new ApiError("GATEWAY_URL no está configurada", 500);
     }
 
-    const { headers, ...rest } = options;
+    const { headers, refreshOnUnauthorized = true, ...rest } = options;
 
     const makeRequest = async (token: string) => {
-        const response = await fetch(`${API_URL}${path}`, {
+        const response = await fetch(`${GATEWAY_URL}${path}`, {
             ...rest,
             headers: {
                 "Content-Type": "application/json",
@@ -30,9 +30,7 @@ export async function serverApiFetch<T>(
             cache: "no-store",
         });
 
-        const data = await response.json().catch(() => null);
-
-        return { response, data };
+        return response;
     };
 
     let token = await getAccessTokenFromCookies();
@@ -41,24 +39,22 @@ export async function serverApiFetch<T>(
         throw new ApiError("No hay sesión activa", 401);
     }
 
-    let { response, data } = await makeRequest(token);
+    let response = await makeRequest(token);
 
-    if (response.status === 401) {
+    if (response.status === 401 && refreshOnUnauthorized) {
         const refreshed = await refreshSession();
-        token = refreshed.access_token;
-
-        const retry = await makeRequest(token);
-        response = retry.response;
-        data = retry.data;
+        response = await makeRequest(refreshed.access_token);
     }
 
     if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
         throw new ApiError(
-            data?.message ?? "Ocurrió un error en la petición",
+            errorData?.message ?? "Ocurrió un error en la petición",
             response.status,
-            data
+            errorData
         );
     }
 
+    const data = await response.json().catch(() => null);
     return data as T;
 }

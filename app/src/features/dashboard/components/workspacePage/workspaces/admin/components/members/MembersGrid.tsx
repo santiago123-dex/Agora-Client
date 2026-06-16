@@ -10,9 +10,20 @@ type Props = {
 export default function MembersGrid({ members, isLoading, error }: Props) {
   if (isLoading) {
     return (
-      <p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-        Cargando miembros...
-      </p>
+      <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex h-full min-h-35 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-slate-200" />
+              <div className="h-4 w-28 rounded bg-slate-200" />
+            </div>
+            <div className="mt-auto h-5 w-16 rounded-full bg-slate-200" />
+          </div>
+        ))}
+      </div>
     );
   }
 

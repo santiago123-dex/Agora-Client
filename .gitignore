@@ -45,3 +45,7 @@ next-env.d.ts
 /Agora-Gateway
 /Agora-User-Service
 /Servicio de Workspace
+/Agora-Agent
+/Agora-AI-Orchestrator 
+/Agora-Payment
+/.agents

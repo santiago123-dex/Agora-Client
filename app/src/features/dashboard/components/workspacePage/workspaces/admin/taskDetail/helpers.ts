@@ -21,14 +21,15 @@ export function getMemberName(member: WorkspaceMemberDetailsResponse) {
 export function getInitials(name: string) {
   return name
     .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase())
+    .flatMap((part) => (part ? [part[0]?.toUpperCase()] : []))
     .join("")
     .slice(0, 2);
 }
 
 export function getSubmissionText(submission?: SubmissionResponse) {
-  const content = submission?.content;
+  if (!submission) return "Este estudiante todavía no ha enviado respuesta.";
+
+  const content = submission.content;
 
   if (!content) return "Este estudiante todavía no ha enviado respuesta.";
 
@@ -73,7 +74,9 @@ function mapSubmissionFile(value: unknown, index: number): SubmissionFileView {
 }
 
 export function getSubmissionFiles(submission?: SubmissionResponse): SubmissionFileView[] {
-  const files = submission?.files;
+  if (!submission) return [];
+
+  const files = submission.files;
 
   if (!files) return [];
 
@@ -91,12 +94,70 @@ export function getSubmissionFiles(submission?: SubmissionResponse): SubmissionF
 }
 
 export function getStoredGrade(submission?: SubmissionResponse) {
-  const result = submission?.result;
+  if (!submission) return undefined;
+
+  const result = submission.result;
 
   if (!result) return undefined;
 
   const value = result.grade ?? result.score ?? result.points;
-  return typeof value === "number" ? value : undefined;
+  if (typeof value === "number") return value;
+
+  const ai = result.ai;
+  if (ai && typeof ai === "object") {
+    const aiScore = (ai as Record<string, unknown>).score;
+    if (typeof aiScore === "number") return aiScore;
+  }
+
+  return undefined;
+}
+
+export function getStoredAiAnalysis(
+  submission?: SubmissionResponse,
+):
+  | {
+      total_score: number;
+      feedback_summary: string;
+      criteria_results: Array<{
+        criterion_id: string;
+        criterion_name: string;
+        score: number;
+        feedback: string;
+      }>;
+      evaluated_at: string;
+    }
+  | undefined {
+  if (!submission) return undefined;
+
+  const result = submission.result;
+  if (!result) return undefined;
+
+  const ai = result.ai;
+  if (!ai || typeof ai !== "object") return undefined;
+
+  const aiRecord = ai as Record<string, unknown>;
+  const score = aiRecord.score;
+  if (typeof score !== "number") return undefined;
+
+  const rubricResults = aiRecord.rubricResults;
+  const criteria_results = Array.isArray(rubricResults)
+    ? rubricResults.map((r: unknown) => {
+        const cr = r as Record<string, unknown>;
+        return {
+          criterion_id: String(cr.criterionId ?? ""),
+          criterion_name: String(cr.criterionId ?? ""),
+          score: typeof cr.score === "number" ? cr.score : 0,
+          feedback: String(cr.feedback ?? ""),
+        };
+      })
+    : [];
+
+  return {
+    total_score: score,
+    feedback_summary: String(aiRecord.feedback ?? ""),
+    criteria_results,
+    evaluated_at: String(aiRecord.evaluatedAt ?? ""),
+  };
 }
 
 export function getSubmissionStatus(
@@ -120,6 +181,8 @@ export function buildRows(
   dueDate: string,
   localGrades: Record<string, { grade?: number; feedback?: string }>,
 ): MemberSubmissionRow[] {
+  if (members.length === 0) return [];
+
   const submissionsByUserId = new Map(
     submissions.map((submission) => [String(submission.userId), submission]),
   );

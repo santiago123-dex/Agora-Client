@@ -12,10 +12,16 @@ export async function GET(_request: Request, { params }: Props) {
   try {
     const { workspaceId } = await params;
 
-    const memberships = await serverApiFetch<WorkspaceMemberResponse[]>(
+    const membershipsPromise = serverApiFetch<WorkspaceMemberResponse[]>(
       "/workspaces/member/user",
       { method: "GET" },
     );
+    const membersPromise = serverApiFetch<WorkspaceMemberResponse[]>(
+      `/workspaces/member/workspace/${workspaceId}`,
+      { method: "GET" },
+    );
+
+    const memberships = await membershipsPromise;
 
     const belongsToWorkspace = memberships.some(
       (item) => String(item.workspaceId) === String(workspaceId),
@@ -28,10 +34,7 @@ export async function GET(_request: Request, { params }: Props) {
       );
     }
 
-    const members = await serverApiFetch<WorkspaceMemberResponse[]>(
-      `/workspaces/member/workspace/${workspaceId}`,
-      { method: "GET" },
-    );
+    const members = await membersPromise;
 
     return NextResponse.json({ count: members.length });
   } catch (error) {

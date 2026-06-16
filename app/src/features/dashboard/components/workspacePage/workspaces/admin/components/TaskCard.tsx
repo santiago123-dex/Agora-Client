@@ -48,7 +48,7 @@ export default function TaskCard({
   }`;
 
   return (
-    <article className="flex h-full min-h-60 flex-col rounded-[1.35rem] border border-[#94B8C4] bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]">
+    <article className="flex h-full min-h-60 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]">
       <div className="flex flex-1 flex-col">
         <TaskIcon task={task} />
 
@@ -82,7 +82,7 @@ export default function TaskCard({
       {workspaceId ? (
         <Link
           href={taskHref}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#E9F0F3] px-3 py-2 text-sm font-semibold text-[#275D79] transition hover:bg-[#D8E7EC]"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
         >
           <Clock className="h-4 w-4" aria-hidden />
           {actionLabel}
@@ -90,7 +90,7 @@ export default function TaskCard({
       ) : (
         <button
           type="button"
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#E9F0F3] px-3 py-2 text-sm font-semibold text-[#275D79] transition hover:bg-[#D8E7EC]"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
         >
           <Clock className="h-4 w-4" aria-hidden />
           {actionLabel}

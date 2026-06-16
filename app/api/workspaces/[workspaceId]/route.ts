@@ -67,14 +67,18 @@ export async function PATCH(request: Request, { params }: Props) {
     const { workspaceId } = await params;
     const body = (await request.json()) as UpdateWorkspacePayload;
 
-    const [currentWorkspace, memberships] = await Promise.all([
+    const [currentWorkspace, memberships, invitation] = await Promise.all([
       serverApiFetch<WorkspaceResponse>(`/workspaces/getWorkspaceById/${workspaceId}`, {
         method: "GET",
       }),
       serverApiFetch<WorkspaceMemberResponse[]>("/workspaces/member/user", {
         method: "GET",
       }),
-    ])
+      serverApiFetch<{ workspaceId: number; code: string }>(
+        `/workspaces/${workspaceId}/invitation-code`,
+        { method: "GET" }
+      ).catch(() => ({ workspaceId: Number(workspaceId), code: "" })),
+    ]);
 
     const membership = memberships.find(
       (item) => String(item.workspaceId) === String(currentWorkspace.id)
@@ -102,7 +106,7 @@ export async function PATCH(request: Request, { params }: Props) {
           name: body.name,
           description: body.description,
           data: {
-            ...(currentWorkspace.data ?? {}),
+            code: invitation.code,
             accentColor: body.accentColor,
           },
         }),
