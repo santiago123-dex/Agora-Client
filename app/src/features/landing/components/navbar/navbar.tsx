@@ -26,7 +26,7 @@ export default function NavbarLanding() {
                         <Image
                             src={logo}
                             alt="Logo de Agora"
-                            className="h-9 w-9 object-contain sm:h-11 sm:w-11"
+                            className="logo-light h-9 w-9 object-contain sm:h-11 sm:w-11"
                         />
                     </div>
                     <span className="text-xl font-semibold tracking-tight sm:text-2xl">Agora</span>

@@ -50,3 +50,10 @@ export function notifyWorkspaceCreated(workspaceName: string) {
     `"${workspaceName}" fue creado exitosamente`,
   );
 }
+
+export async function markAsRead(ids: string[]): Promise<void> {
+  await bffFetch("/api/notifications", {
+    method: "PATCH",
+    body: JSON.stringify({ ids }),
+  });
+}

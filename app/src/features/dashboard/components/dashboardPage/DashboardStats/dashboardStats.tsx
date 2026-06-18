@@ -34,33 +34,33 @@ const cards = [
   {
     label: "Mis espacios",
     icon: Layers,
-    bg: "bg-[#275D79]/10",
-    iconColor: "text-[#275D79]",
-    valueColor: "text-[#275D79]",
+    bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
+    iconColor: "text-[#275D79] dark:text-[#275D79]",
+    valueColor: "text-[#275D79] dark:text-[#275D79]",
     getValue: (total: number) => total,
   },
   {
     label: "Creé",
     icon: Pen,
-    bg: "bg-emerald-100",
-    iconColor: "text-emerald-600",
-    valueColor: "text-emerald-600",
+    bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
+    iconColor: "text-[#275D79] dark:text-[#275D79]",
+    valueColor: "text-[#275D79] dark:text-[#275D79]",
     getValue: (_total: number, admin: number) => admin,
   },
   {
     label: "Participo",
     icon: UserPlus,
-    bg: "bg-amber-100",
-    iconColor: "text-amber-600",
-    valueColor: "text-amber-600",
+    bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
+    iconColor: "text-[#275D79] dark:text-[#275D79]",
+    valueColor: "text-[#275D79] dark:text-[#275D79]",
     getValue: (_total: number, _admin: number, member: number) => member,
   },
   {
     label: "Total miembros",
     icon: Users,
-    bg: "bg-slate-100",
-    iconColor: "text-slate-600",
-    valueColor: "text-slate-600",
+    bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
+    iconColor: "text-[#275D79] dark:text-[#275D79]",
+    valueColor: "text-[#275D79] dark:text-[#275D79]",
     getValue: () => "—",
   },
 ] as const;
@@ -84,11 +84,11 @@ export default function DashboardStats() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="animate-pulse rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm"
+            className="animate-pulse rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]"
           >
-            <div className="mb-3 h-8 w-8 rounded-lg bg-slate-200" />
-            <div className="mb-2 h-3 w-16 rounded bg-slate-200" />
-            <div className="h-7 w-10 rounded bg-slate-100" />
+            <div className="mb-3 h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700" />
+            <div className="mb-2 h-3 w-16 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="h-7 w-10 rounded bg-slate-100 dark:bg-slate-700" />
           </div>
         ))}
       </div>
@@ -104,12 +104,12 @@ export default function DashboardStats() {
         return (
           <div
             key={card.label}
-            className="group rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#275D79]/5"
+            className="group rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#275D79]/5 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-[#275D79]/10"
           >
             <div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg ${card.bg} ${card.iconColor}`}>
               <Icon size={16} />
             </div>
-            <p className="text-xs font-medium text-slate-500">{card.label}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
             <p className={`mt-1 text-2xl font-bold tabular-nums ${card.valueColor}`}>
               {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
             </p>

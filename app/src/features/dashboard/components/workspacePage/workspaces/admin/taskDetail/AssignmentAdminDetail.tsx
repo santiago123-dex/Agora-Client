@@ -42,13 +42,13 @@ type LocalGrade = {
 };
 
 const loadingState = (
-  <div className="p-7 text-sm text-slate-500">
+  <div className="p-7 text-sm text-slate-500 dark:text-slate-400">
     Cargando detalle de tarea...
   </div>
 );
 
 const noMembersState = (
-  <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+  <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400">
     No hay miembros en este espacio para calificar.
   </div>
 );
@@ -389,14 +389,14 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
 
   if (error || !assignment) {
     return (
-      <div className="p-7 text-sm text-red-600">
+      <div className="p-7 text-sm text-red-600 dark:text-red-400">
         {error ?? "Tarea no encontrada"}
       </div>
     );
   }
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7">
+    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7 dark:bg-[#0b1120]">
       <div className="mx-auto max-w-6xl space-y-6">
         <AssignmentHeader
           assignment={assignment}
@@ -416,7 +416,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:bg-[#1a2740]"
           >
             <Download size={16} />
             Exportar CSV
@@ -454,7 +454,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
               <button
                 type="button"
                 onClick={() => { setUserToggledList(true); setListVisible((prev) => !prev); }}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:bg-[#1a2740]"
               >
                 {listVisible ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 {listVisible ? "Ocultar lista" : "Mostrar lista"}

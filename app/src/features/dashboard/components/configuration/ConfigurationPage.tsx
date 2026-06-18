@@ -64,7 +64,9 @@ export default function ConfigurationPage() {
             firstName={form.firstName}
             lastName={form.lastName}
             email={form.email}
+            avatarUrl={form.avatarUrl}
             onChange={updateField}
+            onAvatarChange={(url) => updateField("avatarUrl", url)}
           />
 
           <AiAgentCard

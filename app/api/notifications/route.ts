@@ -54,3 +54,24 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const { ids } = body as { ids?: string[] };
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ message: "Se requiere un array de ids" }, { status: 400 });
+    }
+
+    for (const n of store) {
+      if (ids.includes(n.id)) {
+        n.read = true;
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ message: "Error al actualizar notificaciones" }, { status: 400 });
+  }
+}

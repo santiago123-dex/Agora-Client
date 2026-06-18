@@ -1,13 +1,35 @@
-import { User, Mail } from "lucide-react";
+import { User, Mail, Camera, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { uploadFile } from "@/app/src/lib/api/media";
 
 type Props = {
   firstName: string;
   lastName: string;
   email: string;
+  avatarUrl?: string | null;
   onChange: (field: "firstName" | "lastName" | "email", value: string) => void;
+  onAvatarChange?: (url: string) => void;
 };
 
-export default function PersonalInfoCard({ firstName, lastName, email, onChange }: Props) {
+export default function PersonalInfoCard({ firstName, lastName, email, avatarUrl, onChange, onAvatarChange }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onAvatarChange) return;
+    setUploading(true);
+    try {
+      const result = await uploadFile(file);
+      const url = `/api/media/${result.media.id}/file`;
+      onAvatarChange(url);
+    } catch {
+      /* ignore */
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
       <div className="flex items-center gap-3">
@@ -16,7 +38,32 @@ export default function PersonalInfoCard({ firstName, lastName, email, onChange 
         </span>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Información Personal</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Tu nombre y correo electrónico</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Tu nombre, correo y foto de perfil</p>
+        </div>
+      </div>
+
+      <div className="mt-5 flex items-center gap-4">
+        <div className="relative">
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-[#3f7a99] text-lg font-semibold text-white">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              (firstName[0]?.toUpperCase() ?? "U") + (lastName[0]?.toUpperCase() ?? "")
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
+          >
+            {uploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+        </div>
+        <div className="text-xs text-slate-400 dark:text-slate-500">
+          <p>PNG, JPG o WEBP</p>
+          <p>Máximo 5 MB</p>
         </div>
       </div>
 

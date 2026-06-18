@@ -6,6 +6,7 @@ export type ConfigFormData = {
   firstName: string;
   lastName: string;
   email: string;
+  avatarUrl?: string;
   config: {
     agenticMode: boolean;
     retroStyle: string;

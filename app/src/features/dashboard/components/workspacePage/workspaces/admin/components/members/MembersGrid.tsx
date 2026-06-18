@@ -14,13 +14,13 @@ export default function MembersGrid({ members, isLoading, error }: Props) {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="flex h-full min-h-35 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            className="flex h-full min-h-35 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]"
           >
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-slate-200" />
-              <div className="h-4 w-28 rounded bg-slate-200" />
+              <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-700" />
+              <div className="h-4 w-28 rounded bg-slate-200 dark:bg-slate-700" />
             </div>
-            <div className="mt-auto h-5 w-16 rounded-full bg-slate-200" />
+            <div className="mt-auto h-5 w-16 rounded-full bg-slate-200 dark:bg-slate-700" />
           </div>
         ))}
       </div>
@@ -29,7 +29,7 @@ export default function MembersGrid({ members, isLoading, error }: Props) {
 
   if (error) {
     return (
-      <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">
         {error}
       </p>
     );

@@ -12,7 +12,7 @@ export default function TaskGrid({ emptyMessage, tasks, workspaceId, from }: Tas
   return (
     <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {tasks.length === 0 ? (
-        <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
+        <p className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400">
           {emptyMessage}
         </p>
       ) : (
