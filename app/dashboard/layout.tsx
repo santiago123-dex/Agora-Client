@@ -27,7 +27,7 @@ import {
 import { clearSessionCookies } from "@/app/src/lib/auth/session-client";
 import { UserContext } from "@/app/src/lib/contexts/UserContext";
 import type { CurrentUser } from "@/app/src/lib/contexts/UserContext";
-import { useTheme } from "@/app/src/lib/hooks/useTheme";
+import { useThemeContext } from "@/app/src/lib/providers/ThemeProvider";
 import NotificationBell from "@/app/src/features/dashboard/components/dashboardPage/NotificationBell/notificationBell";
 import FirstTimeModal from "@/app/src/features/dashboard/components/onboarding/FirstTimeModal";
 import { GradingProvider } from "../src/lib/contexts/GradingContext";
@@ -112,6 +112,9 @@ function normalizeCurrentUser(data: unknown): CurrentUser | null {
     | undefined;
   const config = profile?.config as Record<string, unknown> | undefined;
   const theme = (config?.theme as string | undefined) ?? "light";
+  const avatarUrl =
+    (rawUser as Record<string, unknown>).avatarUrl as string | undefined ??
+    (profile?.avatarUrl as string | undefined);
 
   return {
     ...user,
@@ -120,6 +123,7 @@ function normalizeCurrentUser(data: unknown): CurrentUser | null {
     email: user.email ?? user.profile?.email,
     name,
     theme,
+    avatarUrl,
   };
 }
 
@@ -160,10 +164,19 @@ function SidebarUserBlock({
   }, [user]);
 
   return (
-    <div className="mt-auto border-t border-white/10 px-1 py-4">
+    <div className="mt-auto border-t border-white/10 px-1 py-4 dark:border-white/10">
       <div className="flex items-center gap-3 rounded-xl px-2 py-2 text-white">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-[#3f7a99] text-sm font-semibold shrink-0`}>
-          {initials}
+        <div className={`h-10 w-10 shrink-0 ${user?.avatarUrl ? "" : "flex items-center justify-center rounded-full bg-[#3f7a99] text-sm font-semibold"}`}>
+          {user?.avatarUrl ? (
+            <img
+              src={user.avatarUrl}
+              alt={displayName}
+              referrerPolicy="no-referrer"
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            initials
+          )}
         </div>
 
         <div className={`min-w-0 transition-opacity duration-200 ${collapsed ? "lg:opacity-0 lg:group-hover/sidebar:opacity-100" : ""}`}>
@@ -176,7 +189,7 @@ function SidebarUserBlock({
         type="button"
         onClick={onLogout}
         disabled={isLoggingOut}
-        className={`mt-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white disabled:opacity-60 ${collapsed ? "lg:justify-center lg:group-hover/sidebar:justify-start" : ""}`}
+        className={`mt-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white dark:hover:bg-slate-700/50 dark:hover:text-white disabled:opacity-60 ${collapsed ? "lg:justify-center lg:group-hover/sidebar:justify-start" : ""}`}
       >
         <LogOut size={16} />
         <span className={`transition-opacity duration-200 ${collapsed ? "lg:hidden lg:group-hover/sidebar:inline" : ""}`}>
@@ -200,6 +213,7 @@ export default function LayoutDashboard({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const autoCollapsedRef = useRef(false);
+  const { theme, toggleTheme } = useThemeContext();
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -216,8 +230,6 @@ export default function LayoutDashboard({
       autoCollapsedRef.current = false;
     }
   }, [isAiOpen]);
-
-  useTheme(user?.theme);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -296,8 +308,8 @@ export default function LayoutDashboard({
           onClick={isMobile ? () => setIsMobileMenuOpen(false) : undefined}
           className={`group/link relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
             isActive
-              ? "bg-white text-[#275D79] font-semibold shadow-sm"
-              : "text-white/90 hover:bg-white/15 hover:text-white"
+              ? "bg-white font-semibold text-[#275D79] shadow-sm dark:bg-white dark:text-[#275D79]"
+              : "text-white/90 hover:bg-white/15 hover:text-white dark:hover:bg-slate-700/50 dark:hover:text-white"
           }`}
         >
           {isActive && (
@@ -319,19 +331,19 @@ export default function LayoutDashboard({
     >
       <GradingProvider>
         <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-[#0b1120] lg:flex-row">
-          <aside
-            className={`hidden bg-[#275D79] lg:flex lg:min-h-screen lg:flex-col transition-all duration-300 overflow-hidden group/sidebar ${sidebarCollapsed ? "lg:w-16" : "lg:w-60"} shrink-0`}
-          >
+            <aside
+            className={`hidden bg-[#275D79] lg:flex lg:min-h-screen lg:flex-col transition-all duration-300 overflow-hidden group/sidebar dark:bg-[#141f33] dark:border-r dark:border-[#253245] ${sidebarCollapsed ? "lg:w-16" : "lg:w-60"} shrink-0`}
+            >
             <Link
               href="/"
-              className="flex h-16 items-center gap-2 border-b border-white/10 px-4"
+              className="flex h-16 items-center gap-2 border-b border-white/10 px-4 dark:border-[#253245]"
             >
               <Image
                 src={logo}
                 alt="Logo Agora"
                 className="h-9 w-9 shrink-0 object-contain brightness-1000"
               />
-              <h2 className={`text-lg font-semibold text-white transition-opacity duration-200 ${sidebarCollapsed ? "lg:opacity-0 lg:group-hover/sidebar:opacity-100" : ""}`}>Agora</h2>
+              <h2 className={`text-lg font-semibold text-white transition-opacity duration-200 dark:text-white ${sidebarCollapsed ? "lg:opacity-0 lg:group-hover/sidebar:opacity-100" : ""}`}>Agora</h2>
             </Link>
 
             <div className="flex flex-1 flex-col px-3 py-4">
@@ -393,23 +405,12 @@ export default function LayoutDashboard({
                 <div className="ml-auto flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      const root = document.documentElement;
-                      root.classList.toggle("dark");
-                      try {
-                        localStorage.setItem(
-                          "theme:v1",
-                          root.classList.contains("dark") ? "dark" : "light",
-                        );
-                      } catch {
-                        // localStorage not available
-                      }
-                    }}
+                    onClick={toggleTheme}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                     aria-label="Cambiar tema"
                   >
-                    <Moon size={18} className="dark:hidden" />
-                    <Sun size={18} className="hidden dark:inline" />
+                    <Sun size={18} className="hidden dark:block" />
+                  <Moon size={18} className="dark:hidden" />
                   </button>
                   <NotificationBell />
                   <button
@@ -417,7 +418,7 @@ export default function LayoutDashboard({
                     onClick={() => setIsAiOpen((prev) => !prev)}
                     className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition ${
                       isAiOpen
-                        ? "border-[#275D79] bg-[#275D79] text-white dark:border-[#3a7fa0] dark:bg-[#3a7fa0]"
+                        ? "border-[#275D79] bg-[#275D79] text-white dark:border-[#275D79] dark:bg-[#275D79]"
                         : "border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                     }`}
                     aria-label={
@@ -444,7 +445,7 @@ export default function LayoutDashboard({
           <aside
             id="mobile-dashboard-menu"
             aria-hidden={!isMobileMenuOpen}
-            className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82vw] bg-[#275D79] shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${
+            className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82vw] bg-[#275D79] shadow-2xl transition-transform duration-300 ease-in-out dark:bg-[#141f33] dark:border-r dark:border-[#253245] lg:hidden ${
               isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
@@ -453,7 +454,7 @@ export default function LayoutDashboard({
                 <Image
                   src={logo}
                   alt="Logo Agora"
-                  className="h-9 w-9 shrink-0 object-contain brightness-1000"
+                className="h-9 w-9 shrink-0 object-contain brightness-1000"
                 />
                 <h2 className="text-lg font-semibold text-white">Agora</h2>
               </Link>

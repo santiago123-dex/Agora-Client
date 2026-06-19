@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Inter } from "next/font/google";
+import { Inter, DM_Serif_Display } from "next/font/google";
+import { Toaster } from "sonner";
+import { ThemeProvider } from "@/app/src/lib/providers/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,8 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`h-full antialiased ${inter.variable} ${dmSerifDisplay.variable}`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className={`h-full antialiased ${inter.variable} ${dmSerifDisplay.variable}`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{ duration: 3000 }}
+        />
+      </body>
     </html>
   );
 }

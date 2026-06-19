@@ -64,7 +64,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-[#dceef5] px-6 py-10 dark:bg-slate-950">
+    <section className="auth-page relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-[#dceef5] px-6 py-10 dark:bg-slate-950">
             <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-[#275D79]/10 blur-3xl dark:opacity-20" />
             <div className="absolute -bottom-16 right-12 h-56 w-56 rounded-full bg-[#9DC2F8]/20 blur-3xl dark:opacity-20" />
             <div className="absolute -right-12 top-1/3 h-80 w-80 rounded-full bg-[#275D79]/8 blur-3xl dark:opacity-20" />
@@ -74,7 +74,7 @@ export default function RegisterForm() {
           <Image
             src={logo}
             alt="Logo Agora"
-            className="h-16 w-24 object-contain"
+            className="logo-light h-16 w-24 object-contain"
           />
 
           <h1 className="mt-4 text-[1.8rem] font-bold tracking-[0.06em] text-[#275D79]">

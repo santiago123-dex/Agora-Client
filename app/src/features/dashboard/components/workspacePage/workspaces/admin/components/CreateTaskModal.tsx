@@ -2,11 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Send, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Trash2, Upload } from "lucide-react";
 import {
   createAssignment,
   type AssignmentStatus,
 } from "@/app/src/lib/api/assignments";
+import { uploadFile } from "@/app/src/lib/api/media";
 import type { WorkspaceAdminTask } from "../../../data/workspace";
 import { assignmentToAdminTask } from "../utils/assignment-mappers";
 
@@ -141,6 +142,21 @@ export default function CreateTaskModal({
         throw new Error("La suma de los pesos de las rúbricas no puede superar 100%");
       }
 
+      let attachments: Array<{ name: string; size: number; type: string; mediaId: string }> = [];
+      if (selectedFiles.length > 0) {
+        attachments = await Promise.all(
+          selectedFiles.map(async (file) => {
+            const result = await uploadFile(file);
+            return {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              mediaId: result.media.id,
+            };
+          }),
+        );
+      }
+
       const assignment = await createAssignment({
         workspaceId: Number(workspaceId),
         name: name.trim(),
@@ -154,7 +170,7 @@ export default function CreateTaskModal({
         settings: {
           allowLateSubmissions,
           maxFileSizeMb: Number(maxFileSizeMb),
-          attachmentNames: selectedFiles.map((file) => file.name),
+          attachments,
         },
       });
 
@@ -430,7 +446,12 @@ export default function CreateTaskModal({
                 className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send className="h-4 w-4" aria-hidden />
-                {isSubmittingCreateTask ? "Creando..." : "Crear Tarea"}
+                {isSubmittingCreateTask && selectedFiles.length > 0 ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Subiendo archivos...
+                  </>
+                ) : isSubmittingCreateTask ? "Creando..." : "Crear Tarea"}
               </button>
             </div>
           </div>
