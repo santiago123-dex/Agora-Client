@@ -29,6 +29,9 @@ export function createAssignment(payload: CreateAssignmentPayload) {
   return bffFetch<AssignmentResponse>("/api/workspaces/assignments", {
     method: "POST",
     body: JSON.stringify(payload),
+  }).then((res) => {
+    import("sonner").then(({ toast }) => toast.success("Tarea creada"));
+    return res;
   });
 }
 

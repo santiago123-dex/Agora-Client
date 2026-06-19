@@ -118,6 +118,8 @@ export function approveSuggestion(suggestionId: string, overrides?: CriterionOve
       ...(overrides?.length ? { overrides } : {}),
     }),
   }).then(async (response) => {
+    const { toast } = await import("sonner");
+    toast.success("Calificaciones guardadas");
     try {
       const { createNotification } = await import("./notifications");
       const count = response.results?.length ?? 0;

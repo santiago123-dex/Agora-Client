@@ -32,7 +32,7 @@ export default function DemoWorkspacesPage() {
               </div>
             )}
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f8fb] text-lg dark:bg-[#0d1a2e]">{ws.icon}</div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f8fb] text-lg text-[#275D79] dark:bg-[#0d1a2e] dark:text-[#7BB8D4]">{ws.icon}</div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-100">{ws.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{ws.students} estudiantes · {ws.tasks} tareas</p>

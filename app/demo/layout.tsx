@@ -89,7 +89,7 @@ export default function DemoLayout({
                     <div className="flex flex-col gap-2">
                         {tourNavLinks.map((link) => (
                             <Link
-                                key={link.href}
+                                key={`${link.href}-${link.label}`}
                                 href={link.href}
                                 className="inline-flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/15 hover:text-white"
                             >
@@ -116,7 +116,7 @@ export default function DemoLayout({
             <div className="flex flex-1 flex-col">
                 <header className="sticky top-0 z-30 bg-slate-50 dark:bg-[#0b1120]">
                     <nav className="flex h-14 items-center gap-3 border-b border-[#ededed] px-4 dark:border-[#1e293b] sm:h-16 sm:px-6">
-                        <span className="text-[18px] font-semibold text-[#275D79]">Agora</span>
+                        <span className="text-[18px] font-semibold text-[#275D79] dark:text-[#7BB8D4]">Agora</span>
 
                         <div className="ml-auto flex items-center gap-2">
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#dadada] dark:border-slate-600">

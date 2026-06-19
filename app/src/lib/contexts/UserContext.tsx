@@ -11,6 +11,7 @@ export type CurrentUser = {
   name?: string;
   email?: string;
   username?: string;
+  avatarUrl?: string;
   profileUnavailable?: boolean;
   theme?: string;
   profile?: {
@@ -18,6 +19,7 @@ export type CurrentUser = {
     firstName?: string;
     lastName?: string;
     email?: string;
+    avatarUrl?: string;
   };
 };
 

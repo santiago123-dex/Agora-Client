@@ -11,6 +11,7 @@ function toFormData(user: UserResponse): ConfigFormData {
     firstName: user.firstName ?? "",
     lastName: user.lastName ?? "",
     email: user.email ?? "",
+    avatarUrl: user.profile?.avatarUrl,
     config: {
       agenticMode: c.agenticMode ?? false,
       retroStyle: c.retroStyle ?? "detailed",
@@ -37,6 +38,7 @@ function toPayload(form: ConfigFormData, currentProfile: UserProfile | null | un
     email: form.email,
     profile: {
       ...(currentProfile ?? {}),
+      avatarUrl: form.avatarUrl ?? undefined,
       config: form.config,
     },
   };

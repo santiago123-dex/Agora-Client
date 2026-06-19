@@ -49,10 +49,10 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
 
 export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, weeklyReport, onChange, onSelect }: Props) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
-          <Bot size={20} />
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
+          <Bot size={15} />
         </span>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Agente IA</h2>
@@ -60,7 +60,7 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
         </div>
       </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Calificación automática con IA</p>
@@ -69,16 +69,16 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
           <Toggle enabled={agenticMode} onChange={(v) => onChange("agenticMode", v)} />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <FileText size={14} />
+            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+              <FileText size={13} />
               Estilo de retroalimentación
             </span>
             <select
               value={retroStyle}
               onChange={(e) => onSelect("retroStyle", e.target.value)}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
             >
               {retroOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -86,14 +86,14 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
             </select>
           </label>
           <label className="block">
-            <span className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <Gauge size={14} />
+            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+              <Gauge size={13} />
               Nivel de exigencia
             </span>
             <select
               value={exigencyLevel}
               onChange={(e) => onSelect("exigencyLevel", e.target.value)}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-[#275D79] focus:bg-white focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:focus:bg-[#0a1424] dark:focus:ring-[#275D79]/40"
             >
               {exigencyOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -103,21 +103,21 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
         </div>
 
         {agenticMode && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
-            <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              <Sparkles size={14} />
-              Vista previa de retroalimentación
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3 dark:border-emerald-800 dark:bg-emerald-950/30">
+            <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              <Sparkles size={13} />
+              Vista previa
             </div>
-            <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+            <p className="whitespace-pre-line text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
               {previews[retroStyle] ?? previews.detailed}
             </p>
           </div>
         )}
 
-        <div className="flex items-center justify-between rounded-xl bg-amber-50 px-4 py-3 dark:bg-amber-950/40">
+        <div className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2.5 dark:bg-amber-950/40">
           <div>
             <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Informe semanal automático</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Recibe un resumen de rendimiento cada semana</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Resumen de rendimiento cada semana</p>
           </div>
           <Toggle enabled={weeklyReport} onChange={(v) => onChange("weeklyReport", v)} />
         </div>

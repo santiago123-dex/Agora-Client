@@ -223,7 +223,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
   const code = workspace.inviteCode ?? "—";
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6 dark:from-[#0b1120] dark:to-[#0b1120]">
       <div className="mx-auto w-full max-w-5xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-[0_20px_50px_rgba(37,93,121,0.35)]"
@@ -270,7 +270,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
                     <Copy className="h-4 w-4" />
                   </button>
                   {copied ? (
-                    <span className="absolute -bottom-8 right-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-slate-800 shadow">
+                    <span                     className="absolute -bottom-8 right-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-slate-800 shadow dark:bg-[#0f1a2e] dark:text-slate-200">
                       Copiado
                     </span>
                   ) : null}
@@ -321,14 +321,14 @@ export default function WorkspaceAdmin({ workspace }: Props) {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto">
+          <div className="inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
             <button
               type="button"
               onClick={() => setTab("tareas")}
               className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${
                 tab === "tareas"
                   ? "bg-[#275D79] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               <FileText className="h-4 w-4" aria-hidden />
@@ -340,7 +340,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${
                 tab === "miembros"
                   ? "bg-[#275D79] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               <Users className="h-4 w-4" aria-hidden />
@@ -367,31 +367,31 @@ export default function WorkspaceAdmin({ workspace }: Props) {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex h-full min-h-60 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                    className="flex h-full min-h-60 animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]"
                   >
-                    <div className="h-11 w-11 rounded-full bg-slate-200" />
+                    <div className="h-11 w-11 rounded-full bg-slate-200 dark:bg-slate-700" />
                     <div className="mt-4 space-y-2">
-                      <div className="h-5 w-3/4 rounded bg-slate-200" />
-                      <div className="h-4 w-full rounded bg-slate-200" />
+                      <div className="h-5 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700" />
                     </div>
                     <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-                      <div className="h-4 w-24 rounded bg-slate-200" />
-                      <div className="h-4 w-12 rounded bg-slate-200" />
+                      <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-4 w-12 rounded bg-slate-200 dark:bg-slate-700" />
                     </div>
-                    <div className="mt-4 h-9 w-full rounded-lg bg-slate-200" />
+                    <div className="mt-4 h-9 w-full rounded-lg bg-slate-200 dark:bg-slate-700" />
                   </div>
                 ))}
               </div>
             ) : null}
 
             {assignmentsError ? (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
                 {assignmentsError}
               </p>
             ) : null}
 
             <div>
-              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
+              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100">
                 <ListChecks className="h-5 w-5 text-amber-500" aria-hidden />
                 Actividades por calificar
               </h2>
@@ -404,7 +404,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
             </div>
 
             <div>
-              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
+              <h2 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100">
                 <ListChecks className="h-5 w-5 text-emerald-500" aria-hidden />
                 Actividades calificadas
               </h2>
