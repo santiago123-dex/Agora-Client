@@ -171,6 +171,7 @@ function SidebarUserBlock({
             <img
               src={user.avatarUrl}
               alt={displayName}
+              referrerPolicy="no-referrer"
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
