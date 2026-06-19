@@ -189,7 +189,7 @@ function SidebarUserBlock({
         type="button"
         onClick={onLogout}
         disabled={isLoggingOut}
-        className={`mt-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white disabled:opacity-60 ${collapsed ? "lg:justify-center lg:group-hover/sidebar:justify-start" : ""}`}
+        className={`mt-3 inline-flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white dark:hover:bg-slate-700/50 dark:hover:text-white disabled:opacity-60 ${collapsed ? "lg:justify-center lg:group-hover/sidebar:justify-start" : ""}`}
       >
         <LogOut size={16} />
         <span className={`transition-opacity duration-200 ${collapsed ? "lg:hidden lg:group-hover/sidebar:inline" : ""}`}>
@@ -309,7 +309,7 @@ export default function LayoutDashboard({
           className={`group/link relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
             isActive
               ? "bg-white font-semibold text-[#275D79] shadow-sm dark:bg-white dark:text-[#275D79]"
-              : "text-white/90 hover:bg-white/15 hover:text-white"
+              : "text-white/90 hover:bg-white/15 hover:text-white dark:hover:bg-slate-700/50 dark:hover:text-white"
           }`}
         >
           {isActive && (

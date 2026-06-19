@@ -5,8 +5,6 @@ import { useUserConfig } from "./hooks/useUserConfig";
 import PersonalInfoCard from "./components/PersonalInfoCard";
 import AiAgentCard from "./components/AiAgentCard";
 import NotificationsCard from "./components/NotificationsCard";
-import ThemeCard from "./components/ThemeCard";
-import PasswordCard from "./components/PasswordCard";
 
 export default function ConfigurationPage() {
   const {
@@ -32,9 +30,9 @@ export default function ConfigurationPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
-      <div className="mx-auto max-w-3xl space-y-6">
-        <div>
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6">
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Configuración</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Administra tu perfil y preferencias
@@ -42,13 +40,13 @@ export default function ConfigurationPage() {
         </div>
 
         {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">
+          <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">
             Cambios guardados correctamente
           </div>
         )}
@@ -58,7 +56,7 @@ export default function ConfigurationPage() {
             e.preventDefault();
             save();
           }}
-          className="space-y-6"
+          className="space-y-5"
         >
           <PersonalInfoCard
             firstName={form.firstName}
@@ -69,29 +67,24 @@ export default function ConfigurationPage() {
             onAvatarChange={(url) => updateField("avatarUrl", url)}
           />
 
-          <AiAgentCard
-            agenticMode={form.config.agenticMode}
-            retroStyle={form.config.retroStyle}
-            exigencyLevel={form.config.exigencyLevel}
-            weeklyReport={form.config.weeklyReport}
-            onChange={updateConfig}
-            onSelect={updateConfig}
-          />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <NotificationsCard
+              newSubmission={form.config.newSubmission}
+              newGrading={form.config.newGrading}
+              submissionAlert={form.config.submissionAlert}
+              sendEmailNotification={form.config.sendEmailNotification}
+              onChange={updateConfig}
+            />
 
-          <NotificationsCard
-            newSubmission={form.config.newSubmission}
-            newGrading={form.config.newGrading}
-            submissionAlert={form.config.submissionAlert}
-            sendEmailNotification={form.config.sendEmailNotification}
-            onChange={updateConfig}
-          />
-
-          <PasswordCard />
-
-          <ThemeCard
-            theme={form.config.theme}
-            onChange={(v) => updateConfig("theme", v)}
-          />
+            <AiAgentCard
+              agenticMode={form.config.agenticMode}
+              retroStyle={form.config.retroStyle}
+              exigencyLevel={form.config.exigencyLevel}
+              weeklyReport={form.config.weeklyReport}
+              onChange={updateConfig}
+              onSelect={updateConfig}
+            />
+          </div>
 
           <div className="flex justify-end">
             <button

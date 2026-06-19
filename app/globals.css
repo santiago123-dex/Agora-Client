@@ -198,7 +198,7 @@ textarea::-webkit-scrollbar {
   color: #94a3b8;
 }
 .dark .landing-page .text-gray-300 {
-  color: #64748b;
+  color: #cbd5e1;
 }
 .dark .landing-page .bg-\[\#275D79\] {
   background-color: #3A8BAA;
@@ -352,4 +352,25 @@ textarea::-webkit-scrollbar {
   a {
     text-decoration: none;
   }
+}
+
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}
+
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0b1120;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

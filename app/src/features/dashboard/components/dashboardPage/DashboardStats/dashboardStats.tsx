@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import { Layers, Pen, Users, UserPlus } from "lucide-react";
-import { getMyWorkspaces } from "@/app/src/lib/api/workspaces";
+import { getMyWorkspaces, getWorkspaceMemberCount } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "@/app/src/features/dashboard/components/workspacePage/data/workspace-api";
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -61,22 +61,30 @@ const cards = [
     bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
     iconColor: "text-[#275D79] dark:text-[#275D79]",
     valueColor: "text-[#275D79] dark:text-[#275D79]",
-    getValue: () => "—",
+    getValue: (_total: number, _admin: number, _member: number, totalMembers: number) => totalMembers,
   },
 ] as const;
 
 export default function DashboardStats() {
-  const { data: workspaces, isLoading } = useSWR(
+  const { data, isLoading } = useSWR(
     "dashboard-stats",
     async () => {
       const response = await getMyWorkspaces();
-      return response.map(workspaceToCard);
+      const cards = response.map(workspaceToCard);
+      const memberCounts = await Promise.all(
+        cards.map((w) =>
+          getWorkspaceMemberCount(w.id).then((r) => r.count).catch(() => 0),
+        ),
+      );
+      return { cards, totalMembers: memberCounts.reduce((a, b) => a + b, 0) };
     },
   );
 
-  const total = workspaces?.length ?? 0;
-  const adminCount = workspaces?.filter((w) => w.roleLabel === "admin").length ?? 0;
-  const memberCount = workspaces?.filter((w) => w.roleLabel === "member").length ?? 0;
+  const workspaces = data?.cards ?? [];
+  const totalMembers = data?.totalMembers ?? 0;
+  const total = workspaces.length;
+  const adminCount = workspaces.filter((w) => w.roleLabel === "admin").length;
+  const memberCount = workspaces.filter((w) => w.roleLabel === "member").length;
 
   if (isLoading) {
     return (
@@ -99,7 +107,7 @@ export default function DashboardStats() {
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        const value = card.getValue(total, adminCount, memberCount);
+        const value = card.getValue(total, adminCount, memberCount, totalMembers);
 
         return (
           <div

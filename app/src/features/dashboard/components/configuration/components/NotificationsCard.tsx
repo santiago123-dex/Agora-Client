@@ -39,10 +39,10 @@ export default function NotificationsCard({ newSubmission, newGrading, submissio
   const values = { newSubmission, newGrading, submissionAlert, sendEmailNotification };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-400">
-          <Bell size={20} />
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-400">
+          <Bell size={15} />
         </span>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Notificaciones</h2>
@@ -50,15 +50,15 @@ export default function NotificationsCard({ newSubmission, newGrading, submissio
         </div>
       </div>
 
-      <div className="mt-5 space-y-1">
+      <div className="mt-4 space-y-0.5">
         {items.map((item) => (
           <div
             key={item.key}
-            className="flex items-center justify-between rounded-xl px-3 py-2.5 transition hover:bg-slate-50 dark:hover:bg-slate-700/50"
+            className="flex items-center justify-between rounded-lg px-3 py-2 transition hover:bg-slate-50 dark:hover:bg-slate-700/50"
           >
             <div>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.label}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{item.desc}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</p>
             </div>
             <Toggle enabled={values[item.key]} onChange={(v) => onChange(item.key, v)} />
           </div>

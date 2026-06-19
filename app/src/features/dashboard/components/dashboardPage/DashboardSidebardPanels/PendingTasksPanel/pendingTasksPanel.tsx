@@ -98,8 +98,8 @@ export default function PendingTasksPanel() {
               key={task.id}
               className={`group relative overflow-hidden rounded-2xl border px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 task.urgent
-                  ? "border-red-200 bg-red-50/50 hover:shadow-red-200 dark:border-red-900/60 dark:bg-red-950/20"
-                  : "border-slate-200 bg-white hover:shadow-[#275D79]/5 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-[#275D79]/10"
+                  ? "border-red-200 bg-red-50/50 hover:shadow-red-200 dark:border-red-900/60 dark:bg-red-950/20 dark:hover:shadow-black/40"
+                  : "border-slate-200 bg-white hover:shadow-[#275D79]/5 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-black/30"
               }`}
             >
               <div
