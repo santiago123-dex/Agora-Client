@@ -187,13 +187,14 @@ export function buildRows(
   dueDate: string,
   localGrades: Record<string, { grade?: number; feedback?: string }>,
 ): MemberSubmissionRow[] {
-  if (members.length === 0) return [];
+  const students = members.filter((m) => m.role !== "ADMIN");
+  if (students.length === 0) return [];
 
   const submissionsByUserId = new Map(
     submissions.map((submission) => [String(submission.userId), submission]),
   );
 
-  return members.map((member) => {
+  return students.map((member) => {
     const submission = submissionsByUserId.get(String(member.userId));
     const local = localGrades[String(member.userId)] ?? {};
 

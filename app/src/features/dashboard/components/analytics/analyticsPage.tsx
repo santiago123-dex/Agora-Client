@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { getMyWorkspaces, getWorkspaceMemberCount } from "@/app/src/lib/api/workspaces";
 import { getAssignmentsByWorkspace } from "@/app/src/lib/api/assignments";
-import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
+import { getSubmissionsByAssignment, type SubmissionResponse } from "@/app/src/lib/api/submissions";
 import { ChartPie, TrendingUp, Layers } from "lucide-react";
 
 async function fetchAnalytics() {
@@ -22,19 +22,19 @@ async function fetchAnalytics() {
       adminWorkspaces.map(async (ws) => {
         const [assignments, memberCount] = await Promise.all([
           getAssignmentsByWorkspace(ws.id).catch(() => []),
-          getWorkspaceMemberCount(ws.id).catch(() => ({ count: 0 })),
+          getWorkspaceMemberCount(ws.id, "MEMBER").catch(() => ({ count: 0 })),
         ]);
 
-        const submissionCounts = await Promise.all(
+        const submissionsLists = await Promise.all(
           assignments.map((a) =>
-            getSubmissionsByAssignment(a.id)
-              .then((s) => s.length)
-              .catch(() => 0),
+            getSubmissionsByAssignment(a.id).catch<SubmissionResponse[]>(() => []),
           ),
         );
 
-        const totalSubmissions = submissionCounts.reduce((a, b) => a + b, 0);
-        const gradedCount = assignments.filter((a) => a.isExpired || a.status === "CERRADO").length;
+        const totalSubmissions = submissionsLists.reduce((a, s) => a + s.length, 0);
+        const gradedCount = submissionsLists.filter(
+          (subs) => subs.length > 0 && subs.every((s) => s.result !== null),
+        ).length;
 
         return {
           ...ws,

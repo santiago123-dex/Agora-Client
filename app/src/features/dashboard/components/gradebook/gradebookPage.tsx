@@ -13,7 +13,7 @@ import { Search, Download, ArrowUpDown, ArrowUp, ArrowDown, BookOpen } from "luc
 
 async function fetchGradebook(workspaceId: string) {
   const [members, assignments] = await Promise.all([
-    getWorkspaceMembers(workspaceId).catch<WorkspaceMemberDetailsResponse[]>(() => []),
+    getWorkspaceMembers(workspaceId, "MEMBER").catch<WorkspaceMemberDetailsResponse[]>(() => []),
     getAssignmentsByWorkspace(workspaceId).catch(() => []),
   ]);
 

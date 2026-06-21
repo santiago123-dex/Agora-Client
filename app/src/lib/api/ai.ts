@@ -6,6 +6,15 @@ export type AiBlock = {
   headers?: string[];
   columns?: string[];
   rows?: string[][];
+  labels?: string[];
+  values?: number[];
+  chart_type?: string;
+  fields?: { label: string; value: string }[];
+  severity?: string;
+  message?: string;
+  label?: string;
+  value?: string | number;
+  delta?: string | number;
   [key: string]: unknown;
 };
 

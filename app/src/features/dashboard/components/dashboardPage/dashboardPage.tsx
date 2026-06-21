@@ -21,7 +21,7 @@ async function fetchWorkspaces() {
   return Promise.all(
     cards.map(async (w) => {
       try {
-        const { count } = await getWorkspaceMemberCount(w.id);
+        const { count } = await getWorkspaceMemberCount(w.id, "MEMBER");
         if (w.roleLabel === "admin") {
           return { ...w, adminStats: w.adminStats ? { ...w.adminStats, members: count } : undefined };
         }

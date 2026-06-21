@@ -69,13 +69,15 @@ export function getWorkspaceInvitationCode(id: string | number) {
   );
 }
 
-export function getWorkspaceMembers(workspaceId: string | number){
-  return bffFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members`);
+export function getWorkspaceMembers(workspaceId: string | number, role?: string){
+  const query = role ? `?role=${role}` : "";
+  return bffFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members${query}`);
 }
 
-export function getWorkspaceMemberCount(workspaceId: string | number) {
+export function getWorkspaceMemberCount(workspaceId: string | number, role?: string) {
+  const query = role ? `?role=${role}` : "";
   return bffFetch<{ count: number }>(
-    `/api/workspaces/${workspaceId}/members/count`
+    `/api/workspaces/${workspaceId}/members/count${query}`
   );
 }
 
