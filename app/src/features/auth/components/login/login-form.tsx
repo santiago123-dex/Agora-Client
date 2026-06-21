@@ -83,7 +83,7 @@ export default function LoginForm() {
             <div className="absolute -bottom-16 right-12 h-56 w-56 rounded-full bg-[#9DC2F8]/20 blur-3xl dark:opacity-20" />
             <div className="absolute -right-12 top-1/3 h-80 w-80 rounded-full bg-[#275D79]/8 blur-3xl dark:opacity-20" />
 
-            <div className="z-10 w-full max-w-md rounded-[1.6rem] border border-slate-200/50 bg-white/80 px-8 py-10 shadow-[0_2px_0_0_rgba(39,93,121,0.12),0_24px_70px_rgba(16,57,80,0.1)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/80 sm:px-10">
+            <div className="z-10 w-full max-w-md rounded-2xl border border-slate-200/50 bg-white/80 px-8 py-10 shadow-[0_2px_0_0_rgba(39,93,121,0.12),0_24px_70px_rgba(16,57,80,0.1)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/80 sm:px-10">
                 <div className="flex flex-col items-center text-center">
                     <Image
                         src={logo}
@@ -91,7 +91,7 @@ export default function LoginForm() {
                         className="logo-light h-16 w-24 object-contain"
                     />
 
-                    <h1 className="mt-4 text-[1.8rem] font-bold tracking-[0.06em] text-[#275D79]">
+                    <h1 className="mt-4 text-3xl font-bold tracking-tight text-[#275D79]">
                         AGORA
                     </h1>
                     <p className="mt-1 text-sm text-slate-500">
@@ -168,7 +168,7 @@ export default function LoginForm() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#275D79] text-sm font-semibold text-white shadow-[0_8px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#275D79] text-sm font-semibold text-white shadow-md transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
                     >
                         {isSubmitting ? (
                             <>

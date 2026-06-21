@@ -33,7 +33,7 @@ export default function AssignmentHeader({ assignment, workspaceId, onEdit, from
         </Link>
 
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-100">
+          <h1 className="serif text-2xl tracking-tight text-slate-950 dark:text-slate-100">
             {assignment.name}
           </h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-400">

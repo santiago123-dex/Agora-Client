@@ -31,7 +31,7 @@ export default function CreatedWorkspaceSection() {
     return (
       <div className="grid gap-5 md:grid-cols-2">
         {[1, 2].map((i) => (
-          <div key={i} className="animate-pulse overflow-hidden rounded-[20px] border border-slate-200 bg-white">
+          <div key={i} className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white">
             <div className="h-16 bg-slate-200" />
             <div className="space-y-2 px-4 py-4">
               <div className="h-5 w-3/4 rounded bg-slate-200" />
@@ -63,7 +63,7 @@ export default function CreatedWorkspaceSection() {
     <div className="grid gap-5 md:grid-cols-2">
       {workspaces.map((workspace) => (
         <Link href={`/dashboard/workspace/${workspace.id}?from=dashboard`} key={workspace.id}>
-          <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)]">
+          <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div
               className="flex h-16 items-end px-3 pb-3"
               style={{ backgroundColor: workspace.accentColor }}

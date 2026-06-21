@@ -43,7 +43,7 @@ export default function DemoSections() {
                     <h2 className="serif text-4xl tracking-tight text-slate-950 dark:text-slate-100">
                         As&iacute; funciona Agora
                     </h2>
-                    <p className="mt-3 text-xl text-gray-400">
+                    <p className="mt-3 text-xl text-slate-400">
                         Recorré la plataforma paso a paso. Todo funciona de verdad.
                     </p>
                 </div>

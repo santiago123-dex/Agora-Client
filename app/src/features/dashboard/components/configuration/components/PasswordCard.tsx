@@ -61,7 +61,7 @@ export default function PasswordCard() {
       <div className="mt-4 space-y-3">
         {fields.map((field) => (
           <label key={field.label} className="block">
-            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">{field.label}</span>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{field.label}</span>
             <div className="relative mt-1">
               <Lock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input

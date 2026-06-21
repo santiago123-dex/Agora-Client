@@ -191,14 +191,8 @@ textarea::-webkit-scrollbar {
 .dark .landing-page .border-neutral-100 {
   border-color: #1e293b;
 }
-.dark .landing-page .text-gray-400 {
-  color: #8896a6;
-}
-.dark .landing-page .text-gray-500 {
+.dark .landing-page .text-slate-500 {
   color: #94a3b8;
-}
-.dark .landing-page .text-gray-300 {
-  color: #cbd5e1;
 }
 .dark .landing-page .bg-\[\#275D79\] {
   background-color: #3A8BAA;

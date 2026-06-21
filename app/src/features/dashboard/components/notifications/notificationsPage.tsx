@@ -30,7 +30,7 @@ export default function NotificationsPage() {
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-950 dark:text-slate-100">
+            <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">
               Notificaciones
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

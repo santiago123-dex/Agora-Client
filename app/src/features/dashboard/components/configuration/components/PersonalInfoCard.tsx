@@ -46,7 +46,7 @@ export default function PersonalInfoCard({ firstName, lastName, email, avatarUrl
         <div className="flex-1 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Nombre</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Nombre</span>
               <input
                 type="text"
                 value={firstName}
@@ -55,7 +55,7 @@ export default function PersonalInfoCard({ firstName, lastName, email, avatarUrl
               />
             </label>
             <label className="block">
-              <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Apellido</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Apellido</span>
               <input
                 type="text"
                 value={lastName}
@@ -65,7 +65,7 @@ export default function PersonalInfoCard({ firstName, lastName, email, avatarUrl
             </label>
           </div>
           <label className="block">
-            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Correo electrónico</span>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Correo electrónico</span>
             <div className="relative mt-1">
               <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -97,7 +97,7 @@ export default function PersonalInfoCard({ firstName, lastName, email, avatarUrl
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
-          <div className="text-center text-[11px] text-slate-400 dark:text-slate-500">
+          <div className="text-center text-xs text-slate-400 dark:text-slate-500">
             <p>PNG, JPG o WEBP</p>
             <p>Máximo 5 MB</p>
           </div>

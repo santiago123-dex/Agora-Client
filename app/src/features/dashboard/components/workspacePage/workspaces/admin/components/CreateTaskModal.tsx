@@ -332,7 +332,7 @@ export default function CreateTaskModal({
               <button
                 type="button"
                 onClick={addRubric}
-                className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#275D79] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61]"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61]"
               >
                 <span className="text-base leading-none">+</span>
                 Crear nueva rúbrica
@@ -443,7 +443,7 @@ export default function CreateTaskModal({
               <button
                 type="submit"
                 disabled={isSubmittingCreateTask}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send className="h-4 w-4" aria-hidden />
                 {isSubmittingCreateTask && selectedFiles.length > 0 ? (

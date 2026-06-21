@@ -97,7 +97,7 @@ export default function HeroSection() {
             style={{
               transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
             }}
-            className="relative w-full max-w-2xl rounded-[28px] border border-[#e2dcd3]/70 bg-white/90 p-5 shadow-[0_24px_80px_rgba(167,139,110,0.12)] backdrop-blur transition-transform duration-200 ease-out"
+            className="relative w-full max-w-2xl rounded-3xl border border-[#e2dcd3]/70 bg-white/90 p-5 shadow-[0_24px_80px_rgba(167,139,110,0.12)] backdrop-blur transition-transform duration-200 ease-out"
           >
             <div className="mb-4 flex items-center gap-2 px-1">
               <div className="flex gap-1.5">
@@ -105,7 +105,7 @@ export default function HeroSection() {
                 <div className="h-3 w-3 rounded-full bg-amber-400" />
                 <div className="h-3 w-3 rounded-full bg-emerald-400" />
               </div>
-              <span className="ml-auto text-[11px] font-medium text-slate-400">Ágora · Dashboard</span>
+              <span className="ml-auto text-xs font-medium text-slate-400">Ágora · Dashboard</span>
             </div>
 
             <div className="mb-4 grid grid-cols-2 gap-3">
@@ -127,7 +127,7 @@ export default function HeroSection() {
             </div>
 
             <div className="space-y-3">
-              <div className="overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="flex h-10 items-end bg-[#EAB308] px-3 pb-2">
                   <span className="rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">creado</span>
                 </div>
@@ -139,10 +139,10 @@ export default function HeroSection() {
                     <p className="text-sm font-semibold text-slate-950">Matemáticas Avanzadas</p>
                     <p className="text-xs text-slate-500">Cálculo y álgebra lineal · 32 estudiantes</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600">Activo</span>
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">Activo</span>
                 </div>
               </div>
-              <div className="overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="flex h-10 items-end bg-[#2563EB] px-3 pb-2">
                   <span className="rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">creado</span>
                 </div>
@@ -154,7 +154,7 @@ export default function HeroSection() {
                     <p className="text-sm font-semibold text-slate-950">Laboratorio de Física</p>
                     <p className="text-xs text-slate-500">Prácticas de laboratorio · 22 estudiantes</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600">Activo</span>
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">Activo</span>
                 </div>
               </div>
             </div>

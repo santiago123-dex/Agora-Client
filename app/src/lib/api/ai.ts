@@ -131,3 +131,72 @@ export function approveSuggestion(suggestionId: string, overrides?: CriterionOve
     return response;
   });
 }
+
+// ── Generate Class ──
+
+export type Activity = {
+  name: string;
+  duration: string;
+  description: string;
+};
+
+export type RubricItem = {
+  criterion: string;
+  excellent: string;
+  good: string;
+  fair: string;
+  poor: string;
+};
+
+export type Evaluation = {
+  method: string;
+  criteria: string;
+};
+
+export type PlanData = {
+  objective: string;
+  topics: string[];
+  activities: Activity[];
+  rubric: RubricItem[];
+  evaluation: Evaluation;
+};
+
+export type GenerateClassResponse = {
+  id?: string;
+  title: string;
+  plan_data: PlanData;
+};
+
+export type ClassPlanListItem = {
+  id: string;
+  title: string;
+  prompt: string;
+  created_at: string;
+};
+
+export type ClassPlanDetail = {
+  id: string;
+  user_id: string;
+  title: string;
+  prompt: string;
+  plan_data: PlanData;
+  created_at: string;
+};
+
+export function generateClassPlan(prompt: string) {
+  return bffFetch<GenerateClassResponse>("/api/ai/generate-class", {
+    method: "POST",
+    body: JSON.stringify({ prompt }),
+  });
+}
+
+export function saveClassPlan(title: string, prompt: string, plan_data: PlanData) {
+  return bffFetch<{ plan: ClassPlanDetail }>("/api/ai/generate-class/save", {
+    method: "POST",
+    body: JSON.stringify({ title, prompt, plan_data }),
+  });
+}
+
+export function getClassPlanHistory() {
+  return bffFetch<{ plans: ClassPlanListItem[] }>("/api/ai/generate-class/history");
+}

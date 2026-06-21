@@ -172,7 +172,7 @@ export default function SubmissionReviewPanel({
                 type="button"
                 onClick={onAnalyze}
                 disabled={!canGrade || isAnalyzing}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isAnalyzing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -361,7 +361,7 @@ export default function SubmissionReviewPanel({
             type="button"
             onClick={onSave}
             disabled={!canGrade || grade.trim().length === 0}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
             Guardar calificación

@@ -48,7 +48,7 @@ export default function TaskCard({
   }`;
 
   return (
-    <article className="flex h-full min-h-60 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)] dark:border-[#253245] dark:bg-[#0f1a2e]">
+    <article className="flex h-full min-h-60 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-lg dark:border-[#253245] dark:bg-[#0f1a2e]">
       <div className="flex flex-1 flex-col">
         <TaskIcon task={task} />
 

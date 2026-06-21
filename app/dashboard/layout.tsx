@@ -21,6 +21,7 @@ import {
   Moon,
   NotebookText,
   Settings,
+  Sparkles,
   Sun,
   X,
 } from "lucide-react";
@@ -76,6 +77,11 @@ const navLinks: Array<{
     label: "Configuración",
     href: "/dashboard/configuration",
     icon: Settings,
+  },
+  {
+    label: "Generar Clase",
+    href: "/dashboard/generar-clase",
+    icon: Sparkles,
   },
   {
     label: "Suscripción",

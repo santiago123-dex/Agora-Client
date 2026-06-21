@@ -122,7 +122,7 @@ export default function PendingTasksPanel() {
                 </div>
 
                 <div
-                  className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                     task.urgent
                       ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                       : "bg-slate-100 text-slate-500 dark:bg-[#1e293b] dark:text-slate-400"

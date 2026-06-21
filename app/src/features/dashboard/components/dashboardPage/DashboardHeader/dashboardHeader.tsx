@@ -75,10 +75,10 @@ export default function DashboardHeader() {
   };
 
   return (
-    <section className="w-full px-4 py-5 sm:px-7 sm:py-6">
+    <section className="w-full px-4 py-6 pb-10 sm:px-7">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">Bienvenido de vuelta</h2>
+          <h2 className="serif text-2xl text-slate-900 sm:text-3xl dark:text-slate-100">Bienvenido de vuelta</h2>
           <p className="text-slate-500">Aqui tienes un resumen de tu actividad</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">

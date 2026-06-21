@@ -183,7 +183,7 @@ export default function AnalyticsPage() {
     <section className="px-4 py-6 pb-10 sm:px-7">
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-950 dark:text-slate-100">Analíticas</h1>
+          <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">Analíticas</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Resumen general de tu actividad</p>
         </div>
 

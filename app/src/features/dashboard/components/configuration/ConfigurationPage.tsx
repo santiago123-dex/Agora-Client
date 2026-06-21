@@ -30,10 +30,10 @@ export default function ConfigurationPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 pb-10 dark:bg-[#0b1120] sm:px-7">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Configuración</h1>
+          <h1 className="serif text-xl text-slate-900 dark:text-slate-100">Configuración</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Administra tu perfil y preferencias
           </p>

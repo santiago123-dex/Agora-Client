@@ -177,7 +177,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-[#253245] dark:bg-[#0f1a2e]">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">{assignment.name}</h1>
+            <h1 className="serif text-2xl text-slate-900 sm:text-3xl dark:text-slate-100">{assignment.name}</h1>
             <p className="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-400">{assignment.description}</p>
           </div>
 
@@ -411,7 +411,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                       type="button"
                       onClick={handleSubmit}
                       disabled={!hasContent || isSubmitting}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
                     >
                       <Send className="h-4 w-4" />
                       {isUploadingFiles ? "Subiendo archivos..." : isSubmitting ? "Enviando..." : "Enviar entrega"}

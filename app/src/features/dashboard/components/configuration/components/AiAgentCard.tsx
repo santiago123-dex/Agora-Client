@@ -71,7 +71,7 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+            <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
               <FileText size={13} />
               Estilo de retroalimentación
             </span>
@@ -86,7 +86,7 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+            <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
               <Gauge size={13} />
               Nivel de exigencia
             </span>
@@ -108,7 +108,7 @@ export default function AiAgentCard({ agenticMode, retroStyle, exigencyLevel, we
               <Sparkles size={13} />
               Vista previa
             </div>
-            <p className="whitespace-pre-line text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
+            <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-300">
               {previews[retroStyle] ?? previews.detailed}
             </p>
           </div>

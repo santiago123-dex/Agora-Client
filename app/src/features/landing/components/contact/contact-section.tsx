@@ -11,7 +11,7 @@ export default function ContactSection() {
                     <h2 className="serif text-4xl tracking-tight text-slate-950">
                     ¿Tenés preguntas?
                 </h2>
-                    <p className="mt-3 text-xl text-gray-500">
+                    <p className="mt-3 text-xl text-slate-500">
                     Estamos acá para ayudarte a vos y a tu institución.
                     </p>
                 </div>
