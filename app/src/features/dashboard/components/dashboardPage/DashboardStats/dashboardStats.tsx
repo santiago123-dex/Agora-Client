@@ -61,7 +61,7 @@ const cards = [
     bg: "bg-[#275D79]/10 dark:bg-[#275D79]/20",
     iconColor: "text-[#275D79] dark:text-[#275D79]",
     valueColor: "text-[#275D79] dark:text-[#275D79]",
-    getValue: (_total: number, _admin: number, _member: number, totalMembers: number) => totalMembers,
+    getValue: (_total: number, admin: number, _member: number, totalMembers: number) => admin === 0 ? "—" : totalMembers,
   },
 ] as const;
 
@@ -71,12 +71,15 @@ export default function DashboardStats() {
     async () => {
       const response = await getMyWorkspaces();
       const cards = response.map(workspaceToCard);
-      const memberCounts = await Promise.all(
-        cards.map((w) =>
-          getWorkspaceMemberCount(w.id).then((r) => r.count).catch(() => 0),
-        ),
-      );
-      return { cards, totalMembers: memberCounts.reduce((a, b) => a + b, 0) };
+      const adminWorkspaces = cards.filter((w) => w.roleLabel === "admin");
+      const totalMembers = adminWorkspaces.length > 0
+        ? (await Promise.all(
+            adminWorkspaces.map((w) =>
+              getWorkspaceMemberCount(w.id, "MEMBER").then((r) => r.count).catch(() => 0),
+            ),
+          )).reduce((a, b) => a + b, 0)
+        : 0;
+      return { cards, totalMembers };
     },
   );
 

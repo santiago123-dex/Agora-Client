@@ -81,11 +81,12 @@ export default function WorkspaceAdmin({ workspace }: Props) {
     workspace.id,
   );
 
+  const studentMembers = members.filter((m) => m.role === "MEMBER");
   const totalTasks = assignmentTasks.length;
 
   const taskIds = assignmentTasks.map((t) => t.id).sort().join(",");
-  const { data: submissionCounts = {} } = useSWR(
-    taskIds ? ["submission-counts", workspace.id, taskIds] : null,
+  const { data: submissionStats = {} } = useSWR(
+    taskIds ? ["submission-stats", workspace.id, taskIds] : null,
     async ([, , idsStr]) => {
       if (!idsStr) return {};
       const ids = idsStr.split(",").filter(Boolean);
@@ -93,15 +94,17 @@ export default function WorkspaceAdmin({ workspace }: Props) {
         ids.map(async (id) => {
           try {
             const submissions = await getSubmissionsByAssignment(id);
-            return [id, submissions.length] as [string, number];
+            return [id, { submitted: submissions.length, graded: submissions.filter((s) => s.result !== null).length }] as [string, { submitted: number; graded: number }];
           } catch {
-            return [id, 0] as [string, number];
+            return [id, { submitted: 0, graded: 0 }] as [string, { submitted: number; graded: number }];
           }
         }),
       );
       return Object.fromEntries(entries);
     },
   );
+
+  const totalGradedSubmissions = Object.values(submissionStats).reduce<number>((sum, s) => sum + s.graded, 0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -202,10 +205,11 @@ export default function WorkspaceAdmin({ workspace }: Props) {
 
   const stats = workspace.adminStats;
   const totalMembers = members.length || stats?.members || 0;
+  const studentMembersCount = studentMembers.length || 0;
   const assignmentTasksWithCounts = assignmentTasks.map((task) => ({
     ...task,
-    doneCount: submissionCounts[task.id] ?? task.doneCount,
-    totalCount: totalMembers,
+    doneCount: submissionStats[task.id]?.submitted ?? task.doneCount,
+    totalCount: studentMembersCount || totalMembers,
   }));
 
   // Tareas normales, Tareas por calificar, y tareas calificadas
@@ -294,12 +298,12 @@ export default function WorkspaceAdmin({ workspace }: Props) {
                   {(
                     [
                       [
-                        "Miembros",
-                        isLoadingMembers ? "..." : String(totalMembers),
+                        "Estudiantes",
+                        isLoadingMembers ? "..." : String(studentMembersCount),
                       ],
                       ["Tareas", String(assignmentTasks.length || stats.tasks)],
                       ["Por calificar", String(stats.toGrade)],
-                      ["Completadas", stats.completedLabel],
+                      ["Calificadas", String(totalGradedSubmissions)],
                     ] as const
                   ).map(([label, value]) => (
                     <div

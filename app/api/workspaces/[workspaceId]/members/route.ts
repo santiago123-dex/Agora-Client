@@ -11,17 +11,14 @@ type Props = {
     }>;
 };
 
-export async function GET(_request: Request, { params }: Props) {
+export async function GET(request: Request, { params }: Props) {
     try {
         const { workspaceId } = await params;
-
+        const { searchParams } = new URL(request.url);
+        const role = searchParams.get("role");
 
         const membershipsPromise = serverApiFetch<WorkspaceMemberResponse[]>(
             "/workspaces/member/user",
-            { method: "GET" }
-        );
-        const membersPromise = serverApiFetch<WorkspaceMemberDetailsResponse[]>(
-            `/workspaces/member/workspace/${workspaceId}/details`,
             { method: "GET" }
         );
 
@@ -45,7 +42,11 @@ export async function GET(_request: Request, { params }: Props) {
             );
         }
 
-        const members = await membersPromise;
+        const roleQuery = role ? `?role=${role}` : "";
+        const members = await serverApiFetch<WorkspaceMemberDetailsResponse[]>(
+            `/workspaces/member/workspace/${workspaceId}/details${roleQuery}`,
+            { method: "GET" }
+        );
 
         return NextResponse.json(members);
     } catch (error) {

@@ -44,7 +44,7 @@ export default function PinnedWorkspacesSection({ role }: Props) {
           matched.map(async (w) => {
             let count = 0;
             try {
-              const res = await getWorkspaceMemberCount(w.id);
+              const res = await getWorkspaceMemberCount(w.id, "MEMBER");
               count = res.count;
             } catch { /* ignore */ }
             if (w.roleLabel === "admin") {

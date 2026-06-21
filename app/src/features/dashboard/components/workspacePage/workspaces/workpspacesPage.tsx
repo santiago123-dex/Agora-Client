@@ -83,7 +83,7 @@ export default function WorkspacesPage() {
           let count = fallbackCount;
 
           try {
-            const response = await getWorkspaceMemberCount(workspace.id);
+            const response = await getWorkspaceMemberCount(workspace.id, "MEMBER");
             count = response.count;
           } catch {
             // Si no se puede cargar el conteo, mantenemos el valor inicial.

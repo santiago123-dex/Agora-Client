@@ -103,13 +103,11 @@ export default function WorkspaceMember({ workspace }: Props) {
               </p>
 
               {stats ? (
-                <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="mt-7 grid grid-cols-2 gap-3">
                   {(
                     [
                       ["Miembros", String(stats.members)],
                       ["Tareas", String(tasks.length || stats.tasks)],
-                      ["Por calificar", String(stats.toGrade)],
-                      ["Completadas", stats.completedLabel],
                     ] as const
                   ).map(([label, value]) => (
                     <div
