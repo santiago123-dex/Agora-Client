@@ -450,7 +450,7 @@ export default function AiChatPanel({
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
+                className="rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
               >
                 Nueva conversación
               </button>

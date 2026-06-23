@@ -140,3 +140,100 @@ export function approveSuggestion(suggestionId: string, overrides?: CriterionOve
     return response;
   });
 }
+
+// ── Generate Class ──
+
+export type Activity = {
+  name: string;
+  duration: string;
+  description: string;
+};
+
+export type RubricItem = {
+  criterion: string;
+  excellent: string;
+  good: string;
+  fair: string;
+  poor: string;
+};
+
+export type Evaluation = {
+  method: string;
+  criteria: string;
+};
+
+export type TopicDetail = {
+  name: string;
+  explanation: string;
+  key_points: string[];
+  examples: string[];
+};
+
+export type PlanData = {
+  objective: string;
+  topics: string[];
+  topic_details?: TopicDetail[];
+  activities: Activity[];
+  rubric: RubricItem[];
+  evaluation: Evaluation;
+};
+
+export type GenerateClassResponse = {
+  id?: string;
+  type: "plan" | "chat";
+  session_id?: string;
+  title: string;
+  message?: string;
+  plan_data?: PlanData;
+};
+
+export type ClassPlanListItem = {
+  id: string;
+  title: string;
+  prompt: string;
+  created_at: string;
+};
+
+export type ClassPlanDetail = {
+  id: string;
+  user_id: string;
+  title: string;
+  prompt: string;
+  plan_data: PlanData;
+  created_at: string;
+};
+
+export function generateClassPlan(prompt: string, sessionId?: string) {
+  return bffFetch<GenerateClassResponse>("/api/ai/generate-class", {
+    method: "POST",
+    body: JSON.stringify({ prompt, session_id: sessionId }),
+  });
+}
+
+export function saveClassPlan(title: string, prompt: string, plan_data: PlanData) {
+  return bffFetch<{ plan: ClassPlanDetail }>("/api/ai/generate-class/save", {
+    method: "POST",
+    body: JSON.stringify({ title, prompt, plan_data }),
+  });
+}
+
+export function getClassPlanHistory() {
+  return bffFetch<{ plans: ClassPlanListItem[] }>("/api/ai/generate-class/history");
+}
+
+export function getClassPlan(id: string) {
+  return bffFetch<{ plan: ClassPlanDetail }>(`/api/ai/generate-class/${id}`);
+}
+
+export function deleteClassPlan(id: string) {
+  return bffFetch<{ status: string }>(`/api/ai/generate-class/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function deleteConversation(sessionId: string) {
+  return bffFetch<{ status: string }>(
+    `/api/ai/chat/conversations?session_id=${sessionId}`,
+    { method: "DELETE" },
+  );
+}

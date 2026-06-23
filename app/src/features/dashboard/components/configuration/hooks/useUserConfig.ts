@@ -66,6 +66,23 @@ export function useUserConfig() {
       .catch((err) => {
         if (!active) return;
         setError(err instanceof Error ? err.message : "Error al cargar usuario");
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          avatarUrl: undefined,
+          config: {
+            agenticMode: false,
+            retroStyle: "detailed",
+            exigencyLevel: "moderated",
+            weeklyReport: false,
+            newSubmission: true,
+            newGrading: true,
+            submissionAlert: true,
+            sendEmailNotification: false,
+            theme: "light",
+          },
+        });
       })
       .finally(() => {
         if (active) setIsLoading(false);

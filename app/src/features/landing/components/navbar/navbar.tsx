@@ -96,7 +96,7 @@ export default function NavbarLanding() {
                             <Link
                                 href="/auth/register"
                                 onClick={() => setIsMobileOpen(false)}
-                                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm"
+                                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm transition hover:bg-[#285a77]"
                             >
                                 Comenzar Gratis
                             </Link>

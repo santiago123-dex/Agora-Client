@@ -227,7 +227,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
   const code = workspace.inviteCode ?? "—";
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6 dark:from-[#0b1120] dark:to-[#0b1120]">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-6 pb-10 sm:px-7 dark:from-[#0b1120] dark:to-[#0b1120]">
       <div className="mx-auto w-full max-w-5xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-[0_20px_50px_rgba(37,93,121,0.35)]"
@@ -286,7 +286,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               <span className="inline-block rounded-full border border-white/25 bg-white/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur-sm">
                 Creador
               </span>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="serif mt-4 text-3xl tracking-tight sm:text-4xl">
                 {editedWorkspace.title}
               </h1>
               <p className="mt-2 max-w-3xl text-base text-white/90 sm:text-lg">
@@ -325,7 +325,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
+          <div className="inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-md backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
             <button
               type="button"
               onClick={() => setTab("tareas")}
@@ -576,7 +576,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               <button
                 type="submit"
                 disabled={isSavingEdit}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Pencil className="h-4 w-4" aria-hidden />
                 {isSavingEdit ? "Guardando..." : "Guardar cambios"}

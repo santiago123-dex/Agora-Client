@@ -8,7 +8,7 @@ export default function CtaSection() {
           <h2 className="serif mb-3 text-4xl tracking-tight text-white">
             Listo para transformar tu forma de ense&ntilde;ar?
           </h2>
-          <p className="text-gray-300">
+          <p className="text-slate-300">
             Unete a miles de profesores que ya estan usando Agora para
             simplificar su trabajo.
           </p>

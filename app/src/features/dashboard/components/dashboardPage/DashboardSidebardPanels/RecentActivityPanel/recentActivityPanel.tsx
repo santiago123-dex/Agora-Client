@@ -137,7 +137,7 @@ export default function RecentActivityPanel() {
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {item.context}
                 </p>
-                <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">{item.time}</p>
+                <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{item.time}</p>
               </div>
 
               {i === 0 && (

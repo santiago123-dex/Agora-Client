@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
                     <h2 className="serif text-4xl tracking-tight text-slate-950">
                         Lo que dicen los educadores
                     </h2>
-                    <p className="mt-3 text-xl text-gray-500">
+                    <p className="mt-3 text-xl text-slate-500">
                         Miles de profesores ya confían en Agora para gestionar sus clases.
                     </p>
                 </div>
@@ -88,7 +88,7 @@ export default function TestimonialsSection() {
                                         <p className="text-sm font-semibold text-slate-950">
                                             {testimonial.name}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-slate-500">
                                             {testimonial.role}
                                         </p>
                                     </div>

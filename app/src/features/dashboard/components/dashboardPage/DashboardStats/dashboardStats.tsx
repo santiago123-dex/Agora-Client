@@ -115,7 +115,7 @@ export default function DashboardStats() {
         return (
           <div
             key={card.label}
-            className="group rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#275D79]/5 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-[#275D79]/10"
+            className="group rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#275D79]/5 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:shadow-[#275D79]/10"
           >
             <div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg ${card.bg} ${card.iconColor}`}>
               <Icon size={16} />

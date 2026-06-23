@@ -74,7 +74,7 @@ export default function PricingSection() {
                     <h2 className="serif text-4xl tracking-tight text-slate-950">
                         Planes para cada necesidad
                     </h2>
-                    <p className="mt-3 text-xl text-gray-400">
+                    <p className="mt-3 text-xl text-slate-400">
                         Empezá gratis, escalá cuando lo necesites.
                     </p>
 
@@ -116,7 +116,7 @@ export default function PricingSection() {
                             <h3 className="text-lg font-semibold text-slate-950">
                                 {plan.name}
                             </h3>
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-slate-500">
                                 {plan.description}
                             </p>
 
@@ -125,7 +125,7 @@ export default function PricingSection() {
                                     {plan.price}
                                 </span>
                                 {plan.period ? (
-                                    <span className="text-sm text-gray-400">
+                                    <span className="text-sm text-slate-400">
                                         {plan.period}
                                     </span>
                                 ) : null}

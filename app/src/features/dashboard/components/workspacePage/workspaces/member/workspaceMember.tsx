@@ -55,7 +55,7 @@ export default function WorkspaceMember({ workspace }: Props) {
 
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6 dark:from-[#0b1120] dark:to-[#0b1120]">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-6 pb-10 sm:px-7 dark:from-[#0b1120] dark:to-[#0b1120]">
       <div className="mx-auto w-full max-w-6xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-lg "
@@ -95,7 +95,7 @@ export default function WorkspaceMember({ workspace }: Props) {
               <span className="inline-block rounded-full border border-white/25 bg-white/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur-sm">
                 Creador
               </span>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="serif mt-4 text-3xl tracking-tight sm:text-4xl">
                 {workspace.title}
               </h1>
               <p className="mt-2 max-w-3xl text-base text-white/90 sm:text-lg">
@@ -123,10 +123,10 @@ export default function WorkspaceMember({ workspace }: Props) {
             </div>
           </div>
         </div>
-        <div className="mt-6 inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
+        <div className="mt-6 inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-md backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm transition sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1f4a61] sm:flex-none"
           >
             <FileText className="h-4 w-4" aria-hidden />
             Tareas
@@ -170,7 +170,7 @@ export default function WorkspaceMember({ workspace }: Props) {
             tasks.map((task) => (
               <article
                 key={task.id}
-                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)] dark:border-[#253245] dark:bg-[#0f1a2e]"
+                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-lg dark:border-[#253245] dark:bg-[#0f1a2e]"
               >
                 <div className="p-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-400">

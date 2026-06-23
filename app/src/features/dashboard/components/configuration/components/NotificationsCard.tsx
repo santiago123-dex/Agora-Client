@@ -58,7 +58,7 @@ export default function NotificationsCard({ newSubmission, newGrading, submissio
           >
             <div>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.label}</p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{item.desc}</p>
             </div>
             <Toggle enabled={values[item.key]} onChange={(v) => onChange(item.key, v)} />
           </div>

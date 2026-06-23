@@ -99,7 +99,7 @@ export default function NotificationBell() {
                     <p className="mt-0.5 text-xs text-slate-500">
                       {n.description}
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-400">{n.time}</p>
+                    <p className="mt-1 text-xs text-slate-400">{n.time}</p>
                   </div>
                   {!n.read ? (
                     <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#275D79]" />
