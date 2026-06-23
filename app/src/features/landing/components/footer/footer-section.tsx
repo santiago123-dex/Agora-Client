@@ -10,7 +10,7 @@ const footer = (
         <Image
           src={logo}
           alt="Logo de Agora"
-          className="h-14 w-20 object-contain"
+          className="logo-light h-14 w-20 object-contain"
         />
         <span className="text-2xl font-semibold tracking-tight">Agora</span>
       </Link>

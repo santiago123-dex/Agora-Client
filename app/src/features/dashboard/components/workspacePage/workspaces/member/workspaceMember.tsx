@@ -55,7 +55,7 @@ export default function WorkspaceMember({ workspace }: Props) {
 
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-5 pb-12 sm:px-7 sm:py-6">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-50 to-slate-100/80 px-4 py-6 pb-10 sm:px-7 dark:from-[#0b1120] dark:to-[#0b1120]">
       <div className="mx-auto w-full max-w-6xl">
         <div
           className="relative overflow-hidden rounded-3xl border border-white/30 text-white shadow-lg "
@@ -83,7 +83,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                     <Copy className="h-4 w-4" />
                   </button>
                   {copied ? (
-                    <span className="absolute -bottom-8 right-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-slate-800 shadow">
+                    <span                     className="absolute -bottom-8 right-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-slate-800 shadow dark:bg-[#0f1a2e] dark:text-slate-200">
                       Copiado
                     </span>
                   ) : null}
@@ -95,7 +95,7 @@ export default function WorkspaceMember({ workspace }: Props) {
               <span className="inline-block rounded-full border border-white/25 bg-white/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur-sm">
                 Creador
               </span>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="serif mt-4 text-3xl tracking-tight sm:text-4xl">
                 {workspace.title}
               </h1>
               <p className="mt-2 max-w-3xl text-base text-white/90 sm:text-lg">
@@ -103,13 +103,11 @@ export default function WorkspaceMember({ workspace }: Props) {
               </p>
 
               {stats ? (
-                <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="mt-7 grid grid-cols-2 gap-3">
                   {(
                     [
                       ["Miembros", String(stats.members)],
                       ["Tareas", String(tasks.length || stats.tasks)],
-                      ["Por calificar", String(stats.toGrade)],
-                      ["Completadas", stats.completedLabel],
                     ] as const
                   ).map(([label, value]) => (
                     <div
@@ -125,10 +123,10 @@ export default function WorkspaceMember({ workspace }: Props) {
             </div>
           </div>
         </div>
-        <div className="mt-6 inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:w-auto">
+        <div className="mt-6 inline-flex w-full rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-md backdrop-blur-sm sm:w-auto dark:border-[#253245] dark:bg-[#0f1a2e]">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1f4a61] sm:flex-none"
           >
             <FileText className="h-4 w-4" aria-hidden />
             Tareas
@@ -141,53 +139,53 @@ export default function WorkspaceMember({ workspace }: Props) {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="flex h-full w-full max-w-md animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="flex h-full w-full max-w-md animate-pulse flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]"
               >
-                <div className="h-10 w-10 rounded-xl bg-slate-200" />
+                <div className="h-10 w-10 rounded-xl bg-slate-200 dark:bg-slate-700" />
                 <div className="mt-3 space-y-2">
-                  <div className="h-5 w-3/4 rounded bg-slate-200" />
-                  <div className="h-4 w-full rounded bg-slate-200" />
+                  <div className="h-5 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700" />
                 </div>
                 <div className="mt-4 pt-3">
-                  <div className="h-4 w-32 rounded bg-slate-200" />
+                  <div className="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700" />
                 </div>
-                <div className="mt-4 h-10 w-full rounded-xl bg-slate-200" />
+                <div className="mt-4 h-10 w-full rounded-xl bg-slate-200 dark:bg-slate-700" />
               </div>
             ))}
           </div>
         ) : null}
 
         {memberTasksError ? (
-          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
             {memberTasksError}
           </p>
         ) : null}
 
         <div className="grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 lg:grid-cols-3">
           {tasks.length === 0 ? (
-            <p className="col-span-full w-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
+            <p className="col-span-full w-full rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400">
               No hay tareas en el momento
             </p>
           ) : (
             tasks.map((task) => (
               <article
                 key={task.id}
-                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-[0_14px_30px_rgba(39,93,121,0.12)]"
+                className="flex h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#275D79] hover:shadow-lg dark:border-[#253245] dark:bg-[#0f1a2e]"
               >
                 <div className="p-5">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-400">
                     <Clock className="h-5 w-5" aria-hidden />
                   </span>
 
-                  <h3 className="mt-3 text-base font-semibold text-slate-900">
+                  <h3 className="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">
                     {task.title}
                   </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     {task.description}
                   </p>
 
-                  <div className="mt-4 border-t border-slate-100 pt-3">
-                    <div className="flex items-center gap-4 text-sm text-slate-500">
+                  <div className="mt-4 border-t border-slate-100 pt-3 dark:border-[#253245]">
+                    <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                       <span className="inline-flex items-center gap-1.5">
                         <CalendarDays className="h-4 w-4" aria-hidden />
                         {task.dueLabel}
@@ -203,7 +201,7 @@ export default function WorkspaceMember({ workspace }: Props) {
                     className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                       task.actionLabel
                         ? "bg-[#1f5a73] text-white shadow-[0_10px_20px_rgba(31,90,115,0.25)] hover:bg-[#184a5f]"
-                        : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-950"
                     }`}
                   >
                     {task.actionLabel ? (

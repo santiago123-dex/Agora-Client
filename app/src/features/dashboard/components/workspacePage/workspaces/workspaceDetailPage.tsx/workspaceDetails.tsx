@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { getWorkspaceById, getWorkspaceInvitationCode } from "@/app/src/lib/api/workspaces";
+import { getWorkspaceById, getWorkspaceInvitationCode, getWorkspaceMemberCount } from "@/app/src/lib/api/workspaces";
 import { workspaceToCard } from "../../data/workspace-api";
 import WorkspaceAdmin from "../admin/workspaceAdmin";
 import WorkspaceMember from "../member/workspaceMember";
@@ -19,13 +19,29 @@ export default function WorkspaceDetails({ workspaceId }: WorkspaceDetailsProps)
         getWorkspaceById(id),
         getWorkspaceInvitationCode(id),
       ]);
-      return workspaceToCard({
+      const card = workspaceToCard({
         ...response,
         data: {
           ...(response.data ?? {}),
           code: invitation.code,
         },
       });
+
+      const { count } = await getWorkspaceMemberCount(id, "MEMBER").catch(() => ({ count: 0 }));
+
+      if (card.roleLabel === "admin") {
+        (card as AdminWorkspace).adminStats = {
+          ...(card as AdminWorkspace).adminStats!,
+          members: count,
+        };
+      } else {
+        (card as MemberWorkspace).memberStats = {
+          ...(card as MemberWorkspace).memberStats!,
+          members: count,
+        };
+      }
+
+      return card;
     },
   );
 

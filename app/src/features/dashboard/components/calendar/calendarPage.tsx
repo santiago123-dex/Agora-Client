@@ -66,6 +66,10 @@ async function fetchCalendarEvents() {
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
+  const years = useMemo(() => {
+    const y = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, i) => y - 2 + i);
+  }, []);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [view, setView] = useState<"month" | "week">("month");
 
@@ -162,9 +166,9 @@ export default function CalendarPage() {
   if (isLoading) {
     return (
       <section className="px-4 py-6 pb-10 sm:px-7">
-        <h1 className="mb-6 text-2xl font-bold text-slate-950">Calendario</h1>
-        <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="h-96 rounded bg-slate-100" />
+        <h1 className="mb-6 serif text-2xl text-slate-950 dark:text-slate-100">Calendario</h1>
+        <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
+          <div className="h-96 rounded bg-slate-100 dark:bg-slate-800" />
         </div>
       </section>
     );
@@ -175,19 +179,19 @@ export default function CalendarPage() {
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-950">Calendario</h1>
-            <p className="mt-1 text-sm text-slate-500">{totalEvents} tareas con fecha asignada</p>
+            <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">Calendario</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{totalEvents} tareas con fecha asignada</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
+            <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-[#253245] dark:bg-[#0f1a2e]">
               <button
                 type="button"
                 onClick={() => setView("month")}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   view === "month"
                     ? "bg-[#275D79] text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
+                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 Mes
@@ -198,7 +202,7 @@ export default function CalendarPage() {
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   view === "week"
                     ? "bg-[#275D79] text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
+                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 Semana
@@ -208,7 +212,7 @@ export default function CalendarPage() {
             <button
               type="button"
               onClick={goToToday}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:bg-[#1a2740]"
             >
               <CalendarDays size={14} />
               Hoy
@@ -218,19 +222,34 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={prev}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
               >
-                <ChevronLeft className="h-4 w-4 text-slate-600" />
+                <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               </button>
-              <span className="min-w-36 text-center text-base font-semibold text-slate-900">
-                {MONTHS[currentMonth]} {currentYear}
-              </span>
+              <select
+                value={currentMonth}
+                onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#275D79] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-100"
+              >
+                {MONTHS.map((m, i) => (
+                  <option key={m} value={i}>{m}</option>
+                ))}
+              </select>
+              <select
+                value={currentYear}
+                onChange={(e) => setCurrentYear(Number(e.target.value))}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#275D79] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-100"
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={next}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
               >
-                <ChevronRight className="h-4 w-4 text-slate-600" />
+                <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               </button>
             </div>
           </div>
@@ -238,24 +257,24 @@ export default function CalendarPage() {
 
         {workspaces.length > 0 && (
           <div className="flex flex-wrap items-center gap-4 text-xs">
-            <span className="text-slate-400 font-medium">Workspaces:</span>
+            <span className="text-slate-400 font-medium dark:text-slate-500">Workspaces:</span>
             {workspaces.map((ws) => (
               <span key={ws.id} className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: ws.accentColor }}
                 />
-                <span className="text-slate-600">{ws.name}</span>
+                <span className="text-slate-600 dark:text-slate-400">{ws.name}</span>
               </span>
             ))}
           </div>
         )}
 
         {view === "month" ? (
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="grid grid-cols-7 border-b border-slate-100">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
+            <div className="grid grid-cols-7 border-b border-slate-100 dark:border-[#253245]">
               {DAYS.map((d) => (
-                <div key={d} className="px-2 py-3 text-center text-xs font-semibold text-slate-500">
+                <div key={d} className="px-2 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
                   {d}
                 </div>
               ))}
@@ -265,8 +284,8 @@ export default function CalendarPage() {
               {calendarDays.map((day, idx) => (
                 <div
                   key={idx}
-                  className={`relative min-h-24 border-b border-r border-slate-100 px-1.5 py-2 ${
-                    day.day === 0 ? "bg-slate-50" : ""
+                  className={`relative min-h-24 border-b border-r border-slate-100 px-1.5 py-2 dark:border-[#253245] ${
+                    day.day === 0 ? "bg-slate-50 dark:bg-[#0a1220]" : ""
                   }`}
                 >
                   {day.day > 0 ? (
@@ -276,7 +295,7 @@ export default function CalendarPage() {
                           className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
                             day.isToday
                               ? "bg-[#275D79] font-bold text-white"
-                              : "text-slate-700"
+                              : "text-slate-700 dark:text-slate-300"
                           }`}
                         >
                           {day.day}
@@ -300,7 +319,7 @@ export default function CalendarPage() {
                           </button>
                         ))}
                         {day.events.length > 3 ? (
-                          <span className="px-1 text-[10px] text-slate-400">
+                          <span className="px-1 text-[10px] text-slate-400 dark:text-slate-500">
                             +{day.events.length - 3} más
                           </span>
                         ) : null}
@@ -312,17 +331,17 @@ export default function CalendarPage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
             <div className="grid grid-cols-7">
               {weekDays.map((wd, idx) => (
-                <div key={idx} className="border-b border-r border-slate-100 last:border-r-0">
+                <div key={idx} className="border-b border-r border-slate-100 last:border-r-0 dark:border-[#253245]">
                   <div className={`px-2 py-2 text-center ${wd.isToday ? "bg-[#275D79]/5" : ""}`}>
-                    <p className="text-xs text-slate-500">{wd.dayName}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{wd.dayName}</p>
                     <span
                       className={`inline-flex mt-0.5 h-7 w-7 items-center justify-center rounded-full text-sm ${
                         wd.isToday
                           ? "bg-[#275D79] font-bold text-white"
-                          : "text-slate-700"
+                          : "text-slate-700 dark:text-slate-300"
                       }`}
                     >
                       {wd.day}
@@ -330,7 +349,7 @@ export default function CalendarPage() {
                   </div>
                   <div className="space-y-1 px-1.5 pb-2 min-h-[200px]">
                     {wd.events.length === 0 ? (
-                      <p className="px-1 py-4 text-center text-[10px] text-slate-300">Sin tareas</p>
+                      <p className="px-1 py-4 text-center text-[10px] text-slate-300 dark:text-slate-600">Sin tareas</p>
                     ) : (
                       wd.events.map((event) => (
                         <button
@@ -382,7 +401,7 @@ export default function CalendarPage() {
               <div className="mt-4 flex gap-3">
                 <Link
                   href={`/dashboard/workspace/${selectedEvent.workspaceId}?from=dashboard`}
-                  className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f4a61]"
+                  className="rounded-xl bg-[#275D79] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f4a61]"
                   onClick={() => setSelectedEvent(null)}
                 >
                   Ir al espacio
@@ -390,7 +409,7 @@ export default function CalendarPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-[#1a2740]"
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-[#253245] dark:text-slate-400 dark:hover:bg-[#1a2740]"
                 >
                   Cerrar
                 </button>

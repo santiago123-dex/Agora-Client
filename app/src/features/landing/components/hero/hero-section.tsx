@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { BookOpen, FileText } from "lucide-react";
+import { Layers, BarChart3 } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
 import AnimatedCounter from "../AnimatedCounter";
 
@@ -97,43 +97,65 @@ export default function HeroSection() {
             style={{
               transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
             }}
-            className="relative w-full max-w-2xl rounded-[28px] border border-[#e2dcd3]/70 bg-white/90 p-5 shadow-[0_24px_80px_rgba(167,139,110,0.12)] backdrop-blur transition-transform duration-200 ease-out"
+            className="relative w-full max-w-2xl rounded-3xl border border-[#e2dcd3]/70 bg-white/90 p-5 shadow-[0_24px_80px_rgba(167,139,110,0.12)] backdrop-blur transition-transform duration-200 ease-out"
           >
-            <div className="space-y-3 rounded-3xl bg-[#f5f0ea] p-4">
-              <div className="flex items-center justify-between rounded-2xl bg-white px-5 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#275D79] shadow-sm">
-                    <BookOpen size={18} />
-                  </div>
-                  <div>
-                    <p className="text-xl font-semibold text-slate-950">
-                      Matemáticas Avanzadas
-                    </p>
-                    <p className="text-sm text-slate-500">32 estudiantes</p>
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-slate-700">
-                  Activo
-                </span>
+            <div className="mb-4 flex items-center gap-2 px-1">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-rose-400" />
+                <div className="h-3 w-3 rounded-full bg-amber-400" />
+                <div className="h-3 w-3 rounded-full bg-emerald-400" />
               </div>
+              <span className="ml-auto text-xs font-medium text-slate-400">Ágora · Dashboard</span>
+            </div>
 
-              <div className="flex items-center justify-between rounded-2xl bg-white px-5 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#275D79] shadow-sm">
-                    <FileText size={18} />
-                  </div>
-                  <div>
-                    <p className="text-xl font-semibold text-slate-950">
-                      Tarea: Integrales
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      28 entregas pendientes
-                    </p>
-                  </div>
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              {[
+                { value: "4", label: "Espacios", color: "#275D79" },
+                { value: "12", label: "Tareas activas", color: "#3a8cab" },
+                { value: "83%", label: "Rendimiento", color: "#10b981" },
+                { value: "156", label: "Estudiantes", color: "#f59e0b" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-xl px-4 py-3 text-white shadow-sm"
+                  style={{ backgroundColor: s.color }}
+                >
+                  <p className="text-xs font-medium text-white/70">{s.label}</p>
+                  <p className="mt-0.5 text-xl font-bold">{s.value}</p>
                 </div>
-                <span className="text-sm font-semibold text-slate-700">
-                  Revisar
-                </span>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex h-10 items-end bg-[#EAB308] px-3 pb-2">
+                  <span className="rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">creado</span>
+                </div>
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAB308]/10 text-[#EAB308]">
+                    <Layers size={16} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-950">Matemáticas Avanzadas</p>
+                    <p className="text-xs text-slate-500">Cálculo y álgebra lineal · 32 estudiantes</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">Activo</span>
+                </div>
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex h-10 items-end bg-[#2563EB] px-3 pb-2">
+                  <span className="rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">creado</span>
+                </div>
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                    <BarChart3 size={16} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-950">Laboratorio de Física</p>
+                    <p className="text-xs text-slate-500">Prácticas de laboratorio · 22 estudiantes</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">Activo</span>
+                </div>
               </div>
             </div>
           </div>

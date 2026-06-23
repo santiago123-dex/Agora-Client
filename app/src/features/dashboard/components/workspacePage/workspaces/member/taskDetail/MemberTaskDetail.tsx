@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CalendarDays, Check, Clock, FileText, Paperclip, Send, Upload, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Clock, Download, Eye, FileText, Paperclip, Send, Upload, X } from "lucide-react";
 import { getAssignmentById, type AssignmentResponse } from "@/app/src/lib/api/assignments";
 import { getMySubmissionByAssignment, createSubmission, deleteSubmission, type SubmissionResponse, type CreateSubmissionPayload } from "@/app/src/lib/api/submissions";
+import { uploadFile, getMediaFileUrl } from "@/app/src/lib/api/media";
+import DocumentPreviewModal, { type PreviewFile } from "@/app/src/components/ui/DocumentPreviewModal";
 
 type Props = {
   workspaceId: string;
@@ -34,6 +36,10 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -79,15 +85,26 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
     setSubmitError(null);
 
     try {
+      setIsUploadingFiles(true);
+      const attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const result = await uploadFile(file);
+          return {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            mediaId: result.media.id,
+            dataUrl: `/api/media/${result.media.id}/file`,
+          };
+        }),
+      );
+      setIsUploadingFiles(false);
+
       const payload: CreateSubmissionPayload = {
         assignmentId: Number(assignment.id),
         content: { text: deliveryText.trim() },
         files: {
-          attachments: selectedFiles.map((file) => ({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-          })),
+          attachments,
         },
       };
 
@@ -100,6 +117,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
       setSubmitError(err instanceof Error ? err.message : "No se pudo enviar la entrega");
     } finally {
       setIsSubmitting(false);
+      setIsUploadingFiles(false);
     }
   };
 
@@ -123,42 +141,47 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
 
   const rubricCriteria = assignment?.rubric?.criteria as Array<{ name: string; weight: number; description?: string }> | undefined;
   const settings = assignment?.settings as Record<string, unknown> | undefined;
+  const assignmentAttachments = useMemo(() => {
+    const raw = settings?.attachments;
+    if (!Array.isArray(raw)) return [];
+    return raw as Array<{ name: string; mediaId: string; type?: string }>;
+  }, [settings]);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8]">
-        <p className="text-sm text-slate-500">Cargando tarea...</p>
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] dark:bg-[#0b1120]">
+        <p className="text-sm text-slate-500 dark:text-slate-400">Cargando tarea...</p>
       </div>
     );
   }
 
   if (error || !assignment) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8]">
-        <p className="text-sm text-red-600">{error ?? "Tarea no encontrada"}</p>
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] dark:bg-[#0b1120]">
+        <p className="text-sm text-red-600 dark:text-red-400">{error ?? "Tarea no encontrada"}</p>
       </div>
     );
   }
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7">
+    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 sm:px-7 dark:bg-[#0b1120]">
       <div className="mx-auto max-w-4xl space-y-6">
         <button
           type="button"
           onClick={() => router.push(`/dashboard/workspace/${workspaceId}?from=workspace`)}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:bg-[#1a2740]"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al workspace
         </button>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-[#253245] dark:bg-[#0f1a2e]">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{assignment.name}</h1>
-            <p className="mt-2 text-base leading-relaxed text-slate-600">{assignment.description}</p>
+            <h1 className="serif text-2xl text-slate-900 sm:text-3xl dark:text-slate-100">{assignment.name}</h1>
+            <p className="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-400">{assignment.description}</p>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="h-4 w-4" />
               {formatDueDate(assignment.dueDate)}
@@ -171,16 +194,16 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
 
           {rubricCriteria && rubricCriteria.length > 0 ? (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-800">Rúbrica de evaluación</h3>
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Rúbrica de evaluación</h3>
               <div className="mt-2 space-y-2">
                 {rubricCriteria.map((criterion, idx) => (
-                  <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                  <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-[#253245] dark:bg-[#0a1424]">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-800">{criterion.name}</span>
-                      <span className="text-sm font-semibold text-[#275D79]">{criterion.weight}%</span>
+                      <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{criterion.name}</span>
+                      <span className="text-sm font-semibold text-[#275D79] dark:text-[#3a7fa0]">{criterion.weight}%</span>
                     </div>
                     {criterion.description ? (
-                      <p className="mt-0.5 text-xs text-slate-500">{criterion.description}</p>
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{criterion.description}</p>
                     ) : null}
                   </div>
                 ))}
@@ -189,17 +212,53 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
           ) : null}
 
           {settings ? (
-            <div className="mt-4 text-xs text-slate-400">
+            <div className="mt-4 text-xs text-slate-400 dark:text-slate-500">
               {settings.allowLateSubmissions ? "Entregas fuera de tiempo: permitidas" : "Entregas fuera de tiempo: no permitidas"}
               {settings.maxFileSizeMb ? ` · Tamaño máximo: ${settings.maxFileSizeMb} MB` : null}
+            </div>
+          ) : null}
+
+          {assignmentAttachments.length > 0 ? (
+            <div className="mt-4">
+              <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-300">Archivos de la tarea</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {assignmentAttachments.map((file) => (
+                  <div key={file.mediaId} className="inline-flex items-center gap-1">
+                    <a
+                      href={getMediaFileUrl(file.mediaId)}
+                      download={file.name}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:border-[#3a7fa0] dark:hover:text-[#3a7fa0]"
+                    >
+                      <Paperclip className="h-3.5 w-3.5" />
+                      {file.name}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewFiles([{
+                          name: file.name,
+                          mediaId: file.mediaId,
+                          mimeType: file.type ?? "application/octet-stream",
+                        }]);
+                        setPreviewIndex(0);
+                        setPreviewOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-medium text-[#275D79] transition hover:bg-[#EEF5F7] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-[#3a7fa0] dark:hover:bg-[#1a2740]"
+                      title="Vista previa"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
 
         {isGraded && submission?.result ? (
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-emerald-800">Calificación</h2>
-            <p className="mt-2 text-3xl font-bold text-emerald-700">
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/30">
+            <h2 className="text-lg font-semibold text-emerald-800 dark:text-emerald-300">Calificación</h2>
+            <p className="mt-2 text-3xl font-bold text-emerald-700 dark:text-emerald-400">
               {(() => {
                 const r = submission.result as Record<string, unknown>;
                 const teacher = r.teacher as Record<string, unknown> | undefined;
@@ -213,41 +272,64 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
               const teacher = r.teacher as Record<string, unknown> | undefined;
               const feedback = teacher?.feedback as string | undefined;
               return feedback ? (
-                <p className="mt-2 text-sm text-emerald-700">{feedback}</p>
+                <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-400">{feedback}</p>
               ) : null;
             })()}
           </div>
         ) : isSubmitted && !showCancelConfirm ? (
-          <div className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
+          <div className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm dark:border-blue-800 dark:bg-blue-950/30">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-blue-800">Tu entrega</h2>
-                <p className="mt-1 text-sm text-blue-600">
+                <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-300">Tu entrega</h2>
+                <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
                   Entregada el {submission?.createdAt ? new Date(submission.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-white px-3 py-1 text-sm font-medium text-blue-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-white px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-[#0f1a2e] dark:text-blue-400">
                 <Check className="h-4 w-4" />
                 Entregada
               </span>
             </div>
 
             {submission?.content?.text ? (
-              <div className="mt-4 rounded-xl border border-blue-100 bg-white px-4 py-3">
-                <p className="whitespace-pre-wrap text-sm text-slate-700">{submission.content.text as string}</p>
+              <div className="mt-4 rounded-xl border border-blue-100 bg-white px-4 py-3 dark:border-blue-800/50 dark:bg-[#0f1a2e]">
+                <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{submission.content.text as string}</p>
               </div>
             ) : null}
 
-            {submission?.files?.attachments && Array.isArray(submission.files.attachments) && (submission.files.attachments as Array<{ name: string; size: number }>).length > 0 ? (
+            {submission?.files?.attachments && Array.isArray(submission.files.attachments) && (submission.files.attachments as Array<Record<string, unknown>>).length > 0 ? (
               <div className="mt-3">
-                <p className="text-xs font-medium text-blue-600">Archivos adjuntos</p>
+                <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Archivos adjuntos</p>
                 <div className="mt-1 space-y-1">
-                  {(submission.files.attachments as Array<{ name: string; size: number }>).map((file) => (
-                    <div key={file.name} className="flex items-center gap-2 text-xs text-slate-600">
-                      <Paperclip className="h-3 w-3" />
-                      {file.name}
-                    </div>
-                  ))}
+                  {(submission.files.attachments as Array<Record<string, unknown>>).map((file) => {
+                    const name = file.name as string;
+                    const mediaId = file.mediaId as string | undefined;
+                    const dataUrl = file.dataUrl as string | undefined;
+                    return (
+                      <div key={name} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                        <Paperclip className="h-3 w-3" />
+                        <span className="truncate">{name}</span>
+                        {(mediaId || dataUrl) ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPreviewFiles([{
+                                name,
+                                mediaId: mediaId ?? dataUrl!.replace("/api/media/", "").replace("/file", ""),
+                                mimeType: (file.type as string) ?? "application/octet-stream",
+                              }]);
+                              setPreviewIndex(0);
+                              setPreviewOpen(true);
+                            }}
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-blue-200 px-2 py-0.5 text-[10px] font-medium text-blue-600 transition hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/30"
+                          >
+                            <Eye className="h-3 w-3" />
+                            Vista previa
+                          </button>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
@@ -256,7 +338,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
               <button
                 type="button"
                 onClick={() => { setDeliveryText(submission?.content?.text as string ?? ""); setShowCancelConfirm(true); }}
-                className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50 dark:border-blue-800 dark:bg-[#0f1a2e] dark:text-blue-400 dark:hover:bg-blue-950/30"
               >
                 Re-enviar
               </button>
@@ -264,7 +346,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                 type="button"
                 onClick={handleCancel}
                 disabled={isCancelling}
-                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:bg-[#0f1a2e] dark:text-red-400 dark:hover:bg-red-950/30"
               >
                 <X className="h-4 w-4" />
                 {isCancelling ? "Cancelando..." : "Cancelar entrega"}
@@ -278,18 +360,18 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
         ) : null}
 
         {!isSubmitted || showCancelConfirm ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-[#253245] dark:bg-[#0f1a2e]">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {isGraded || isExpiredOrClosed ? "Tarea cerrada" : showCancelConfirm ? "Re-enviar tarea" : "Entregar tarea"}
             </h2>
 
             {isGraded || isExpiredOrClosed ? (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 {isGraded ? "Esta tarea ya ha sido calificada y no acepta más entregas." : "Esta tarea ya ha vencido y no acepta más entregas."}
               </p>
             ) : (
               <>
-                <p className="mt-1 text-sm text-slate-500">{showCancelConfirm ? "Modifica tu respuesta y vuelve a enviar." : "Escribe tu respuesta para esta tarea."}</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{showCancelConfirm ? "Modifica tu respuesta y vuelve a enviar." : "Escribe tu respuesta para esta tarea."}</p>
 
                   <div className="mt-4 space-y-4">
                     <textarea
@@ -298,11 +380,11 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                       disabled={isSubmitting}
                       placeholder="Escribe tu respuesta aquí..."
                       rows={6}
-                      className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10"
+                      className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-4 focus:ring-[#275D79]/10 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0]"
                     />
 
                     <div>
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-sky-300 px-4 py-3 text-sm text-slate-500 transition hover:bg-sky-50">
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-sky-300 px-4 py-3 text-sm text-slate-500 transition hover:bg-sky-50 dark:border-sky-700 dark:text-slate-400 dark:hover:bg-sky-950/30">
                         <Upload className="h-5 w-5" />
                         Adjuntar archivos
                         <input
@@ -315,7 +397,7 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                       {selectedFiles.length > 0 ? (
                         <ul className="mt-2 space-y-1">
                           {selectedFiles.map((file) => (
-                            <li key={`${file.name}-${file.size}`} className="flex items-center gap-2 text-xs text-slate-500">
+                            <li key={`${file.name}-${file.size}`} className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                               <Paperclip className="h-3 w-3" />
                               {file.name} ({(file.size / 1024).toFixed(1)} KB)
                             </li>
@@ -329,17 +411,17 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                       type="button"
                       onClick={handleSubmit}
                       disabled={!hasContent || isSubmitting}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(39,93,121,0.24)] transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:bg-[#7ba2b4] disabled:shadow-none"
                     >
                       <Send className="h-4 w-4" />
-                      {isSubmitting ? "Enviando..." : "Enviar entrega"}
+                      {isUploadingFiles ? "Subiendo archivos..." : isSubmitting ? "Enviando..." : "Enviar entrega"}
                     </button>
                     {showCancelConfirm ? (
                       <button
                         type="button"
                         onClick={() => setShowCancelConfirm(false)}
                         disabled={isSubmitting}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:bg-[#1a2740]"
                       >
                         Mantener entrega actual
                       </button>
@@ -348,13 +430,20 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                 </div>
 
                 {submitError ? (
-                  <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</p>
+            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400">{submitError}</p>
                 ) : null}
               </>
             )}
           </div>
         ) : null}
       </div>
+
+      <DocumentPreviewModal
+        files={previewFiles}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        initialIndex={previewIndex}
+      />
     </section>
   );
 }

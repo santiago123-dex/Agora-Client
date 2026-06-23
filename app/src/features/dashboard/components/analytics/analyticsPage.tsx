@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { getMyWorkspaces, getWorkspaceMemberCount } from "@/app/src/lib/api/workspaces";
 import { getAssignmentsByWorkspace } from "@/app/src/lib/api/assignments";
-import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
+import { getSubmissionsByAssignment, type SubmissionResponse } from "@/app/src/lib/api/submissions";
 import { ChartPie, TrendingUp, Layers } from "lucide-react";
 
 async function fetchAnalytics() {
@@ -23,19 +22,19 @@ async function fetchAnalytics() {
       adminWorkspaces.map(async (ws) => {
         const [assignments, memberCount] = await Promise.all([
           getAssignmentsByWorkspace(ws.id).catch(() => []),
-          getWorkspaceMemberCount(ws.id).catch(() => ({ count: 0 })),
+          getWorkspaceMemberCount(ws.id, "MEMBER").catch(() => ({ count: 0 })),
         ]);
 
-        const submissionCounts = await Promise.all(
+        const submissionsLists = await Promise.all(
           assignments.map((a) =>
-            getSubmissionsByAssignment(a.id)
-              .then((s) => s.length)
-              .catch(() => 0),
+            getSubmissionsByAssignment(a.id).catch<SubmissionResponse[]>(() => []),
           ),
         );
 
-        const totalSubmissions = submissionCounts.reduce((a, b) => a + b, 0);
-        const gradedCount = assignments.filter((a) => a.isExpired || a.status === "CERRADO").length;
+        const totalSubmissions = submissionsLists.reduce((a, s) => a + s.length, 0);
+        const gradedCount = submissionsLists.filter(
+          (subs) => subs.length > 0 && subs.every((s) => s.result !== null),
+        ).length;
 
         return {
           ...ws,
@@ -58,8 +57,6 @@ async function fetchAnalytics() {
   }
 }
 
-type TimeRange = "7d" | "30d" | "90d" | "all";
-
 function DonutChart({
   segments,
   size = 120,
@@ -67,7 +64,8 @@ function DonutChart({
   segments: { label: string; value: number; color: string }[];
   size?: number;
 }) {
-  const total = Math.max(segments.reduce((a, b) => a + b.value, 0), 1);
+  const rawTotal = segments.reduce((a, b) => a + b.value, 0);
+  const total = Math.max(rawTotal, 1);
   const center = size / 2;
   const radius = center * 0.7;
   const strokeWidth = center * 0.25;
@@ -102,10 +100,10 @@ function DonutChart({
         {paths.map((p) => (
           <path key={p.key} d={p.d} fill={p.fill} className="transition-all duration-500" />
         ))}
-        <text x={center} y={center - 4} textAnchor="middle" className="fill-slate-950 text-lg font-bold" fontSize="18">
-          {total}
+        <text x={center} y={center - 4} textAnchor="middle" className="fill-slate-950 dark:fill-slate-100 text-lg font-bold" fontSize="18">
+          {rawTotal}
         </text>
-        <text x={center} y={center + 10} textAnchor="middle" className="fill-slate-500 text-[9px]" fontSize="9">
+        <text x={center} y={center + 10} textAnchor="middle" className="fill-slate-500 dark:fill-slate-400 text-[9px]" fontSize="9">
           total
         </text>
       </svg>
@@ -113,8 +111,8 @@ function DonutChart({
         {paths.map((p) => (
           <div key={p.key} className="flex items-center gap-2 text-xs">
             <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: p.fill }} />
-            <span className="text-slate-600">{p.label}</span>
-            <span className="ml-auto font-semibold text-slate-900">{p.percent}%</span>
+            <span className="text-slate-600 dark:text-slate-400">{p.label}</span>
+            <span className="ml-auto font-semibold text-slate-900 dark:text-slate-100">{p.percent}%</span>
           </div>
         ))}
       </div>
@@ -122,64 +120,15 @@ function DonutChart({
   );
 }
 
-function Sparkline({ data, color = "#275D79", height = 28, width = 64 }: { data: number[]; color?: string; height?: number; width?: number }) {
-  if (data.length < 2) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const points = data
-    .map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * height}`)
-    .join(" ");
-
-  return (
-    <svg width={width} height={height} className="shrink-0">
-      <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
-    </svg>
-  );
-}
-
-const timeRanges: { value: TimeRange; label: string }[] = [
-  { value: "7d", label: "7 días" },
-  { value: "30d", label: "30 días" },
-  { value: "90d", label: "90 días" },
-  { value: "all", label: "Todo" },
-];
-
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState<TimeRange>("all");
   const { data, isLoading, error } = useSWR("analytics", fetchAnalytics);
-
-  const rangeMultiplier = useMemo(() => {
-    switch (timeRange) {
-      case "7d": return 0.25;
-      case "30d": return 0.5;
-      case "90d": return 0.8;
-      case "all": return 1;
-    }
-  }, [timeRange]);
-
-  const sparklines = useMemo(() => {
-    if (!data) return { tasks: [], submissions: [] };
-    const total = data.workspaceData.reduce((a, b) => a + b.assignments, 0);
-    const totalSub = data.workspaceData.reduce((a, b) => a + b.submissions, 0);
-    const len = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : timeRange === "90d" ? 12 : 12;
-    return {
-      tasks: Array.from({ length: len }, (_, i) => Math.round((total / len) * (0.5 + Math.random() * 0.8) * (i + 1))),
-      submissions: Array.from({ length: len }, (_, i) => Math.round((totalSub / len) * (0.3 + Math.random() * 0.9) * (i + 1))),
-    };
-  }, [timeRange, data]);
 
   if (isLoading) {
     return (
       <section className="px-4 py-6 pb-10 sm:px-7">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="h-8 w-32 animate-pulse rounded bg-slate-200" />
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-8 w-16 animate-pulse rounded-lg bg-slate-200" />
-              ))}
-            </div>
+            <div className="h-8 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
           </div>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -197,7 +146,7 @@ export default function AnalyticsPage() {
   if (error || !data) {
     return (
       <section className="px-4 py-6 pb-10 sm:px-7">
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">
           {error instanceof Error ? error.message : "Error al cargar analíticas"}
         </div>
       </section>
@@ -222,111 +171,49 @@ export default function AnalyticsPage() {
   ];
 
   const statCards = [
-    {
-      label: "Espacios totales",
-      value: Math.round(data.totalWorkspaces * rangeMultiplier),
-      trend: "+12%",
-      positive: true,
-    },
-    {
-      label: "Tareas creadas",
-      value: Math.round(totalTasks * rangeMultiplier),
-      trend: "+8%",
-      positive: true,
-    },
-    {
-      label: "Entregas",
-      value: Math.round(totalSubmissions * rangeMultiplier),
-      trend: "+23%",
-      positive: true,
-      sparkline: sparklines.submissions,
-    },
-    {
-      label: "Completadas",
-      value: `${completionRate}%`,
-      trend: `${completionRate > 50 ? "+" : ""}${completionRate - 50}%`,
-      positive: completionRate >= 50,
-    },
-    {
-      label: "Miembros",
-      value: Math.round(totalMembers * rangeMultiplier),
-      trend: "+5%",
-      positive: true,
-      sparkline: sparklines.tasks,
-    },
-    {
-      label: "Entrega promedio",
-      value: `${submissionRate}%`,
-      trend: `${submissionRate > 50 ? "+" : ""}${submissionRate - 50}%`,
-      positive: submissionRate >= 50,
-    },
+    { label: "Espacios totales", value: data.totalWorkspaces },
+    { label: "Tareas creadas", value: totalTasks },
+    { label: "Entregas", value: totalSubmissions },
+    { label: "Completadas", value: `${completionRate}%` },
+    { label: "Miembros", value: totalMembers },
+    { label: "Entrega promedio", value: `${submissionRate}%` },
   ];
 
   return (
     <section className="px-4 py-6 pb-10 sm:px-7">
       <div className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-950">Analíticas</h1>
-            <p className="mt-1 text-sm text-slate-500">Resumen general de tu actividad</p>
-          </div>
-
-          <div className="flex gap-1 rounded-xl border border-slate-200 bg-white p-1">
-            {timeRanges.map((r) => (
-              <button
-                key={r.value}
-                type="button"
-                onClick={() => setTimeRange(r.value)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  timeRange === r.value
-                    ? "bg-[#275D79] text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
+        <div>
+          <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">Analíticas</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Resumen general de tu actividad</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {statCards.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)]"
+              className="rounded-2xl border border-slate-200 bg-white px-5 py-5 dark:border-[#253245] dark:bg-[#0f1a2e]"
             >
-              <div className="flex items-start justify-between">
-                <p className="text-xs font-medium text-slate-500">{stat.label}</p>
-                {stat.sparkline ? (
-                  <Sparkline data={stat.sparkline} color="#275D79" />
-                ) : null}
-              </div>
-              <p className="mt-1.5 text-2xl font-bold tabular-nums text-slate-950">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
+              <p className="mt-1.5 text-2xl font-bold tabular-nums text-slate-950 dark:text-slate-100">
                 {stat.value}
               </p>
-              <div className="mt-1 flex items-center gap-1">
-                <span className={`text-[11px] font-medium ${stat.positive ? "text-emerald-600" : "text-red-500"}`}>
-                  {stat.trend}
-                </span>
-                <span className="text-[11px] text-slate-400">vs periodo anterior</span>
-              </div>
             </div>
           ))}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
             <div className="mb-5 flex items-center gap-2">
               <ChartPie size={18} className="text-[#275D79]" />
-              <h2 className="text-sm font-bold text-slate-950">Distribución de espacios</h2>
+              <h2 className="text-sm font-bold text-slate-950 dark:text-slate-100">Distribución de espacios</h2>
             </div>
             <DonutChart segments={donutSegments} />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
             <div className="mb-5 flex items-center gap-2">
               <TrendingUp size={18} className="text-[#275D79]" />
-              <h2 className="text-sm font-bold text-slate-950">Estado de tareas</h2>
+              <h2 className="text-sm font-bold text-slate-950 dark:text-slate-100">Estado de tareas</h2>
             </div>
             <DonutChart segments={gradedSegments} size={120} />
           </div>
@@ -335,11 +222,11 @@ export default function AnalyticsPage() {
         <div>
           <div className="mb-4 flex items-center gap-2">
             <Layers size={18} className="text-[#275D79]" />
-            <h2 className="text-sm font-bold text-slate-950">Desglose por espacio</h2>
+            <h2 className="text-sm font-bold text-slate-950 dark:text-slate-100">Desglose por espacio</h2>
           </div>
           <div className="space-y-3">
             {data.workspaceData.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500">
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-white py-10 text-center text-sm text-slate-500 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400">
                 No tienes espacios como creador todavía.
               </p>
             ) : (
@@ -348,14 +235,14 @@ export default function AnalyticsPage() {
                 return (
                   <div
                     key={ws.id}
-                    className="rounded-2xl border border-slate-200 bg-white px-5 py-4 transition-all hover:shadow-md hover:-translate-y-0.5"
+                    className="rounded-2xl border border-slate-200 bg-white px-5 py-4 transition-all hover:shadow-md hover:-translate-y-0.5 dark:border-[#253245] dark:bg-[#0f1a2e]"
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className="h-3 w-3 rounded-full shrink-0"
                         style={{ backgroundColor: ws.accentColor }}
                       />
-                      <h3 className="text-sm font-semibold text-slate-900">{ws.name}</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{ws.name}</h3>
                     </div>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -366,10 +253,10 @@ export default function AnalyticsPage() {
                       ] as const).map((bar) => (
                         <div key={bar.label}>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500">{bar.label}</span>
-                            <span className="font-semibold text-slate-800">{bar.value}</span>
+                            <span className="text-slate-500 dark:text-slate-400">{bar.label}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{bar.value}</span>
                           </div>
-                          <div className="mt-1.5 h-2 rounded-full bg-slate-100">
+                          <div className="mt-1.5 h-2 rounded-full bg-slate-100 dark:bg-slate-800">
                             <div
                               className="h-2 rounded-full transition-all duration-500"
                               style={{

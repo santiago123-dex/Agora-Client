@@ -4,10 +4,10 @@ import {
   type WorkspaceMemberDetailsResponse,
 } from "@/app/src/lib/api/workspaces";
 
-export function useWorkspaceMembers(workspaceId: string | number) {
+export function useWorkspaceMembers(workspaceId: string | number, role?: string) {
   const { data: members = [], error, isLoading, mutate } = useSWR(
-    workspaceId ? ["workspace-members", workspaceId] : null,
-    ([, id]) => getWorkspaceMembers(id),
+    workspaceId ? ["workspace-members", workspaceId, role] : null,
+    ([, id, r]) => getWorkspaceMembers(id, r),
   );
 
   return {

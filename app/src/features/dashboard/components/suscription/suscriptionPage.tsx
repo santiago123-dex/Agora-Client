@@ -108,7 +108,7 @@ export default function SuscriptionPage() {
     <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 dark:bg-[#0b1120] sm:px-7">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 mt-10 flex flex-col items-center space-y-2">
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          <h2 className="serif text-2xl text-slate-900 dark:text-slate-100">
             Actualiza tu suscripción
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">

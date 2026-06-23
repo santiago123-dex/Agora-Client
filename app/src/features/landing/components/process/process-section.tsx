@@ -24,7 +24,7 @@ export default function ProcessSection() {
                     <h2 className="serif text-4xl tracking-tight">
                         Comienza en 3 simples pasos
                     </h2>
-                    <p className="mt-3 text-gray-500">
+                    <p className="mt-3 text-slate-500">
                         Configurar tu primer espacio de trabajo toma menos de 5 minutos.
                     </p>
                 </div>
@@ -48,7 +48,7 @@ export default function ProcessSection() {
                                 <h2 className="text-lg font-semibold text-slate-950 transition-colors duration-300 group-hover:text-[#275D79]">
                                     {step.title}
                                 </h2>
-                                <p className="mt-3 font-medium leading-7 text-gray-500">
+                                <p className="mt-3 font-medium leading-7 text-slate-500">
                                     {step.description}
                                 </p>
                             </div>

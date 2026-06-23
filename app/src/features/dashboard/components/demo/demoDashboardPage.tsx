@@ -56,7 +56,7 @@ export default function DemoDashboardPage() {
 
       <div className="mb-8 mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="relative rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)] dark:border-slate-700 dark:bg-[#141f33]">
+          <div key={s.label} className="relative rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-sm dark:border-slate-700 dark:bg-[#141f33]">
             <p className="text-2xl font-bold text-slate-950 dark:text-slate-100">{s.value}</p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
             <p className="mt-0.5 text-[10px] text-slate-400">{s.detail}</p>
@@ -74,9 +74,9 @@ export default function DemoDashboardPage() {
             <div className="grid gap-5 md:grid-cols-2">
               {adminWorkspaces.map((ws) => (
                 <Link key={ws.id} href={`/dashboard/workspace/${ws.id}`}>
-                  <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
+                  <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-[#141f33]">
                     <div className="flex h-16 items-end px-3 pb-3" style={{ backgroundColor: ws.color }}>
-                      <span className="rounded-md bg-white/20 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{ws.role}</span>
+                      <span className="rounded-md bg-white/20 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">{ws.role}</span>
                     </div>
                     <div className="space-y-1 px-4 py-4 [@media(min-width:1450px)]:py-7">
                       <h4 className="text-lg font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">{ws.title}</h4>
@@ -94,9 +94,9 @@ export default function DemoDashboardPage() {
             <div className="grid gap-5 md:grid-cols-2">
               {memberWorkspaces.map((ws) => (
                 <Link key={ws.id} href={`/dashboard/workspace/${ws.id}`}>
-                  <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] dark:border-slate-700 dark:bg-[#141f33]">
+                  <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-[#141f33]">
                     <div className="flex h-16 items-end px-3 pb-3" style={{ backgroundColor: ws.color }}>
-                      <span className="rounded-md bg-white/20 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{ws.role}</span>
+                      <span className="rounded-md bg-white/20 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">{ws.role}</span>
                     </div>
                     <div className="space-y-1 px-4 py-4 [@media(min-width:1450px)]:py-7">
                       <h4 className="text-lg font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-100">{ws.title}</h4>

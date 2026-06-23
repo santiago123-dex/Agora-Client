@@ -11,6 +11,7 @@ function toFormData(user: UserResponse): ConfigFormData {
     firstName: user.firstName ?? "",
     lastName: user.lastName ?? "",
     email: user.email ?? "",
+    avatarUrl: user.profile?.avatarUrl,
     config: {
       agenticMode: c.agenticMode ?? false,
       retroStyle: c.retroStyle ?? "detailed",
@@ -37,6 +38,7 @@ function toPayload(form: ConfigFormData, currentProfile: UserProfile | null | un
     email: form.email,
     profile: {
       ...(currentProfile ?? {}),
+      avatarUrl: form.avatarUrl ?? undefined,
       config: form.config,
     },
   };
@@ -64,6 +66,23 @@ export function useUserConfig() {
       .catch((err) => {
         if (!active) return;
         setError(err instanceof Error ? err.message : "Error al cargar usuario");
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          avatarUrl: undefined,
+          config: {
+            agenticMode: false,
+            retroStyle: "detailed",
+            exigencyLevel: "moderated",
+            weeklyReport: false,
+            newSubmission: true,
+            newGrading: true,
+            submissionAlert: true,
+            sendEmailNotification: false,
+            theme: "light",
+          },
+        });
       })
       .finally(() => {
         if (active) setIsLoading(false);

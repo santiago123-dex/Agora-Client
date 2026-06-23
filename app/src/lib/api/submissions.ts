@@ -3,6 +3,7 @@ export type SubmissionFilePayload = {
   size: number;
   type: string;
   dataUrl?: string;
+  mediaId?: string;
 };
 
 export type CreateSubmissionPayload = {

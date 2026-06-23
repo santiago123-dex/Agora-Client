@@ -1,24 +1,52 @@
 "use client";
 
-import { Bell } from "lucide-react";
-import useSWR from "swr";
-import { getNotifications } from "@/app/src/lib/api/notifications";
+import { Bell, CheckCheck } from "lucide-react";
+import useSWR, { useSWRConfig } from "swr";
+import { getNotifications, markAsRead } from "@/app/src/lib/api/notifications";
+import type { NotificationData } from "@/app/src/lib/api/notifications";
 
 export default function NotificationsPage() {
+  const { mutate } = useSWRConfig();
   const { data, error, isLoading } = useSWR("notifications", getNotifications);
 
   const notifications = data?.notifications ?? [];
 
+  const handleMarkAllRead = async () => {
+    const ids = notifications.filter((n) => !n.read).map((n) => n.id);
+    if (ids.length === 0) return;
+    await markAsRead(ids);
+    mutate("notifications");
+  };
+
+  const handleClick = async (n: NotificationData) => {
+    if (!n.read) {
+      await markAsRead([n.id]);
+      mutate("notifications");
+    }
+  };
+
   return (
     <section className="animate-page-in px-4 py-6 pb-10 sm:px-7">
       <div className="mx-auto max-w-3xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-950 dark:text-slate-100">
-            Notificaciones
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Historial de notificaciones
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">
+              Notificaciones
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Historial de notificaciones
+            </p>
+          </div>
+          {!isLoading && !error && notifications.filter((n) => !n.read).length > 0 ? (
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-[#275D79] transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#141f33] dark:text-[#4a9bc7] dark:hover:bg-[#1a2740]"
+            >
+              <CheckCheck size={16} />
+              Marcar todas como leídas
+            </button>
+          ) : null}
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#141f33]">
@@ -61,9 +89,11 @@ export default function NotificationsPage() {
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-[#253245]">
               {notifications.map((n) => (
-                <div
+                <button
                   key={n.id}
-                  className={`flex gap-4 px-5 py-4 ${
+                  type="button"
+                  onClick={() => handleClick(n)}
+                  className={`flex w-full gap-4 px-5 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/20 ${
                     !n.read
                       ? "bg-[#E9F2F5] dark:bg-slate-800/40"
                       : ""
@@ -83,7 +113,7 @@ export default function NotificationsPage() {
                   {!n.read ? (
                     <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#275D79]" />
                   ) : null}
-                </div>
+                </button>
               ))}
             </div>
           )}

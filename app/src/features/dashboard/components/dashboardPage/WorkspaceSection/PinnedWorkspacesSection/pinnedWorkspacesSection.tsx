@@ -44,7 +44,7 @@ export default function PinnedWorkspacesSection({ role }: Props) {
           matched.map(async (w) => {
             let count = 0;
             try {
-              const res = await getWorkspaceMemberCount(w.id);
+              const res = await getWorkspaceMemberCount(w.id, "MEMBER");
               count = res.count;
             } catch { /* ignore */ }
             if (w.roleLabel === "admin") {
@@ -66,7 +66,7 @@ export default function PinnedWorkspacesSection({ role }: Props) {
     return (
       <div className="grid gap-5 md:grid-cols-2">
         {[1, 2].map((i) => (
-          <div key={i} className="animate-pulse overflow-hidden rounded-[20px] border border-slate-200 bg-white dark:border-[#253245] dark:bg-[#0f1a2e]">
+          <div key={i} className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-[#253245] dark:bg-[#0f1a2e]">
             <div className="h-16 bg-slate-200 dark:bg-slate-700" />
             <div className="space-y-2 px-4 py-4">
               <div className="h-5 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
@@ -109,7 +109,7 @@ export default function PinnedWorkspacesSection({ role }: Props) {
       {cards.map((workspace) => (
         <div key={workspace.id} className="group relative">
           <Link href={`/dashboard/workspace/${workspace.id}?from=dashboard`}>
-            <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] transition-shadow hover:shadow-xl hover:shadow-[#275D79]/10 dark:border-[#253245] dark:bg-[#0f1a2e]">
+            <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-xl hover:shadow-[#275D79]/10 dark:border-[#253245] dark:bg-[#0f1a2e]">
               <div
                 className="flex h-16 items-end px-3 pb-3"
                 style={{ backgroundColor: workspace.accentColor }}

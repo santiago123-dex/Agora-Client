@@ -21,7 +21,7 @@ async function fetchWorkspaces() {
   return Promise.all(
     cards.map(async (w) => {
       try {
-        const { count } = await getWorkspaceMemberCount(w.id);
+        const { count } = await getWorkspaceMemberCount(w.id, "MEMBER");
         if (w.roleLabel === "admin") {
           return { ...w, adminStats: w.adminStats ? { ...w.adminStats, members: count } : undefined };
         }
@@ -64,12 +64,12 @@ function Section({ title, cards, togglePin }: {
         {cards.map((workspace) => (
           <div key={workspace.id} className="group relative">
             <Link href={`/dashboard/workspace/${workspace.id}?from=dashboard`}>
-              <article className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_10px_25px_rgba(15,23,42,0.05)] transition-shadow hover:shadow-xl hover:shadow-[#275D79]/10 dark:border-[#253245] dark:bg-[#0f1a2e]">
+              <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-xl hover:shadow-[#275D79]/10 dark:border-[#253245] dark:bg-[#0f1a2e]">
                 <div
                   className="flex h-16 items-end px-3 pb-3"
                   style={{ backgroundColor: workspace.accentColor }}
                 >
-                  <span className="rounded-md bg-white/20 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                  <span className="rounded-md bg-white/20 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
                     {workspace.roleLabel === "admin" ? "creado" : "miembro"}
                   </span>
                 </div>

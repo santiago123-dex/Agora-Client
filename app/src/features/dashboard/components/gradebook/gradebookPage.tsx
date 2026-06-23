@@ -9,11 +9,11 @@ import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
 import { getWorkspaceMembers } from "@/app/src/lib/api/workspaces";
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
 import type { SubmissionResponse } from "@/app/src/lib/api/submissions";
-import { ChevronDown, Search, Download, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Download, ArrowUpDown, ArrowUp, ArrowDown, BookOpen } from "lucide-react";
 
 async function fetchGradebook(workspaceId: string) {
   const [members, assignments] = await Promise.all([
-    getWorkspaceMembers(workspaceId).catch<WorkspaceMemberDetailsResponse[]>(() => []),
+    getWorkspaceMembers(workspaceId, "MEMBER").catch<WorkspaceMemberDetailsResponse[]>(() => []),
     getAssignmentsByWorkspace(workspaceId).catch(() => []),
   ]);
 
@@ -173,38 +173,52 @@ export default function GradebookPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-950">Gradebook</h1>
-            <p className="mt-1 text-sm text-slate-500">Notas de estudiantes por tarea</p>
+            <h1 className="serif text-2xl text-slate-950 dark:text-slate-100">Gradebook</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Notas de estudiantes por tarea</p>
           </div>
 
-          <div className="relative">
-            <select
-              value={selectedWsId}
-              onChange={(e) => { setSelectedWsId(e.target.value); setSearch(""); setSortCol(null); setSortDir(null); }}
-              className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-[#275D79] sm:w-64"
-            >
-              <option value="">Seleccionar espacio</option>
-              {adminWorkspaces.map((ws) => (
-                <option key={ws.id} value={ws.id}>
-                  {ws.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          </div>
+          {adminWorkspaces.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {adminWorkspaces.map((ws) => {
+                const color = typeof ws.data?.accentColor === "string" ? ws.data.accentColor : "#275D79";
+                const isSelected = selectedWsId === String(ws.id);
+                return (
+                  <button
+                    key={ws.id}
+                    type="button"
+                    onClick={() => { setSelectedWsId(isSelected ? "" : String(ws.id)); setSearch(""); setSortCol(null); setSortDir(null); }}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                      isSelected
+                        ? "border-transparent text-white shadow-sm"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:border-slate-600"
+                    }`}
+                    style={isSelected ? { backgroundColor: color } : {}}
+                  >
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: isSelected ? "white" : color }} />
+                    {ws.name}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-400 dark:border-[#253245] dark:bg-[#0f1a2e]">
+              <BookOpen size={16} />
+              No hay espacios como creador
+            </div>
+          )}
         </div>
 
         {!selectedWsId ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-            <p className="text-sm text-slate-500">Seleccioná un espacio para ver las notas.</p>
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center dark:border-[#253245] dark:bg-[#0f1a2e]">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Seleccioná un espacio para ver las notas.</p>
           </div>
         ) : isLoading ? (
-          <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="mb-4 h-10 w-64 rounded bg-slate-200" />
-            <div className="h-64 rounded bg-slate-100" />
+          <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
+            <div className="mb-4 h-10 w-64 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="h-64 rounded bg-slate-100 dark:bg-slate-800" />
           </div>
         ) : error || !data ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">
             Error al cargar el gradebook
           </div>
         ) : (
@@ -217,24 +231,24 @@ export default function GradebookPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar estudiante..."
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
               <button
                 type="button"
                 onClick={exportCSV}
-                className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:bg-[#1a2740]"
               >
                 <Download size={16} />
                 Exportar CSV
               </button>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50">
-                    <th className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-slate-100 bg-slate-50 dark:border-[#253245] dark:bg-[#0a1220]">
+                    <th className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-[#0a1220] dark:text-slate-400">
                       Estudiante
                     </th>
                     {data.assignments.map((a) => {
@@ -252,7 +266,7 @@ export default function GradebookPage() {
                       ];
 
                       return (
-                        <th key={a.id} className="px-3 py-3 text-xs font-semibold text-slate-500 min-w-[100px]">
+                        <th key={a.id} className="px-3 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 min-w-[100px]">
                           <button
                             type="button"
                             onClick={() => handleSort(aid)}
@@ -271,7 +285,7 @@ export default function GradebookPage() {
                         </th>
                       );
                     })}
-                    <th className="px-3 py-3 text-center text-xs font-semibold text-slate-500 min-w-[80px]">
+                    <th className="px-3 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 min-w-[80px]">
                       <button
                         type="button"
                         onClick={() => handleSort("__avg__")}
@@ -283,7 +297,7 @@ export default function GradebookPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#253245]">
                   {filteredMembers.length === 0 ? (
                     <tr>
                       <td colSpan={data.assignments.length + 2} className="px-4 py-12 text-center text-sm text-slate-500">
@@ -302,12 +316,12 @@ export default function GradebookPage() {
                         : null;
 
                       return (
-                        <tr key={member.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="sticky left-0 z-10 bg-white px-4 py-3 font-medium text-slate-900 hover:bg-slate-50">
+                          <tr key={member.id} className="hover:bg-slate-50 dark:hover:bg-[#0a1220] transition-colors">
+                          <td className="sticky left-0 z-10 bg-white px-4 py-3 font-medium text-slate-900 hover:bg-slate-50 dark:bg-[#0f1a2e] dark:text-slate-100 dark:hover:bg-[#0a1220]">
                             {getMemberName(member)}
                           </td>
                           {grades.map((g, i) => (
-                            <td key={i} className="px-3 py-3 text-slate-700">
+                            <td key={i} className="px-3 py-3 text-slate-700 dark:text-slate-300">
                               {g !== null ? (
                                 <span
                                   className="inline-flex items-center gap-1 font-semibold tabular-nums"
@@ -324,7 +338,7 @@ export default function GradebookPage() {
                               )}
                             </td>
                           ))}
-                          <td className="px-3 py-3 text-center font-bold tabular-nums text-slate-900">
+                          <td className="px-3 py-3 text-center font-bold tabular-nums text-slate-900 dark:text-slate-100">
                             {avg !== null ? `${Math.round(avg)}` : "—"}
                           </td>
                         </tr>
@@ -333,9 +347,9 @@ export default function GradebookPage() {
                   )}
                 </tbody>
                 {filteredMembers.length > 0 ? (
-                  <tfoot className="border-t-2 border-slate-200 bg-slate-50">
+                  <tfoot className="border-t-2 border-slate-200 bg-slate-50 dark:border-[#253245] dark:bg-[#0a1220]">
                     <tr>
-                      <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-500">
+                      <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-500 dark:bg-[#0a1220] dark:text-slate-400">
                         Promedio ({filteredMembers.length} estudiantes)
                       </td>
                       {data.assignments.map((a) => {
@@ -347,7 +361,7 @@ export default function GradebookPage() {
                           : null;
 
                         return (
-                          <td key={a.id} className="px-3 py-3 font-bold tabular-nums text-slate-800">
+                          <td key={a.id} className="px-3 py-3 font-bold tabular-nums text-slate-800 dark:text-slate-200">
                             {avg !== null ? avg : "—"}
                           </td>
                         );

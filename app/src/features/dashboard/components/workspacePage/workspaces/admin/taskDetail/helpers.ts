@@ -51,6 +51,8 @@ export function getSubmissionText(submission?: SubmissionResponse) {
 export type SubmissionFileView = {
   name: string;
   href?: string;
+  mediaId?: string;
+  mimeType?: string;
 };
 
 function mapSubmissionFile(value: unknown, index: number): SubmissionFileView {
@@ -63,10 +65,14 @@ function mapSubmissionFile(value: unknown, index: number): SubmissionFileView {
     const name = typeof file.name === "string" ? file.name : `archivo_${index + 1}`;
     const hrefCandidates = [file.dataUrl, file.url, file.href];
     const href = hrefCandidates.find((candidate) => typeof candidate === "string");
+    const mediaId = typeof file.mediaId === "string" ? file.mediaId : undefined;
+    const mimeType = typeof file.type === "string" ? file.type : undefined;
 
     return {
       name,
       href: typeof href === "string" ? href : undefined,
+      mediaId,
+      mimeType,
     };
   }
 
@@ -181,13 +187,14 @@ export function buildRows(
   dueDate: string,
   localGrades: Record<string, { grade?: number; feedback?: string }>,
 ): MemberSubmissionRow[] {
-  if (members.length === 0) return [];
+  const students = members.filter((m) => m.role !== "ADMIN");
+  if (students.length === 0) return [];
 
   const submissionsByUserId = new Map(
     submissions.map((submission) => [String(submission.userId), submission]),
   );
 
-  return members.map((member) => {
+  return students.map((member) => {
     const submission = submissionsByUserId.get(String(member.userId));
     const local = localGrades[String(member.userId)] ?? {};
 

@@ -2,10 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Save, Trash2, Upload, X } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Trash2, Upload, X } from "lucide-react";
 import ModalWrapper from "@/app/src/components/ui/ModalWrapper";
 import type { AssignmentResponse, AssignmentStatus } from "@/app/src/lib/api/assignments";
 import { deleteAssignment, updateAssignment } from "@/app/src/lib/api/assignments";
+import { uploadFile } from "@/app/src/lib/api/media";
 
 type RubricFormItem = {
   id: string;
@@ -69,12 +70,25 @@ function getInitialRubrics(assignment: AssignmentResponse): RubricFormItem[] {
   });
 }
 
-// extrae los archivos guardados
-function getInitialAttachmentNames(assignment: AssignmentResponse) {
+type StoredAttachment = {
+  name: string;
+  mediaId: string;
+  type?: string;
+  size?: number;
+};
+
+function getInitialAttachments(assignment: AssignmentResponse): StoredAttachment[] {
+  const attachments = assignment.settings?.attachments;
+  if (Array.isArray(attachments)) {
+    return attachments.filter((item): item is StoredAttachment =>
+      typeof item === "object" && item !== null && typeof item.name === "string" && typeof item.mediaId === "string"
+    );
+  }
   const attachmentNames = assignment.settings?.attachmentNames;
-  return Array.isArray(attachmentNames)
-    ? attachmentNames.filter((item): item is string => typeof item === "string")
-    : [];
+  if (Array.isArray(attachmentNames)) {
+    return [];
+  }
+  return [];
 }
 
 // extrae el tamaño guardado
@@ -106,8 +120,8 @@ export default function  EditAssignmentModal({
   const [maxFileSizeMb, setMaxFileSizeMb] = useState(
     () => getInitialMaxFileSize(assignment),
   );
-  const [attachmentNames, setAttachmentNames] = useState<string[]>(
-    () => getInitialAttachmentNames(assignment),
+  const [attachments, setAttachments] = useState<StoredAttachment[]>(
+    () => getInitialAttachments(assignment),
   );
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [rubrics, setRubrics] = useState<RubricFormItem[]>(
@@ -127,7 +141,7 @@ export default function  EditAssignmentModal({
     setStatus(assignment.status);
     setAllowLateSubmissions(getInitialAllowLate(assignment));
     setMaxFileSizeMb(getInitialMaxFileSize(assignment));
-    setAttachmentNames(getInitialAttachmentNames(assignment));
+    setAttachments(getInitialAttachments(assignment));
     setSelectedFiles([]);
     setRubrics(getInitialRubrics(assignment));
     setError(null);
@@ -155,8 +169,8 @@ export default function  EditAssignmentModal({
     );
   };
 
-  const removeAttachmentName = (fileName: string) => {
-    setAttachmentNames((current) => current.filter((item) => item !== fileName));
+  const removeAttachment = (mediaId: string) => {
+    setAttachments((current) => current.filter((item) => item.mediaId !== mediaId));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -188,6 +202,21 @@ export default function  EditAssignmentModal({
         throw new Error("La suma de los pesos de las rúbricas no puede superar 100%");
       }
 
+      let newAttachments: StoredAttachment[] = [];
+      if (selectedFiles.length > 0) {
+        newAttachments = await Promise.all(
+          selectedFiles.map(async (file) => {
+            const result = await uploadFile(file);
+            return {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              mediaId: result.media.id,
+            };
+          }),
+        );
+      }
+
       const updated = await updateAssignment(assignment.id, {
         workspaceId: Number(workspaceId),
         name: name.trim(),
@@ -201,10 +230,7 @@ export default function  EditAssignmentModal({
         settings: {
           allowLateSubmissions,
           maxFileSizeMb: Number(maxFileSizeMb),
-          attachmentNames: [
-            ...attachmentNames,
-            ...selectedFiles.map((file) => file.name),
-          ],
+          attachments: [...attachments, ...newAttachments],
         },
       });
 
@@ -337,16 +363,16 @@ export default function  EditAssignmentModal({
                 Adjunta los archivos necesarios
               </p>
 
-              {[...attachmentNames, ...selectedFiles.map((file) => file.name)].length > 0 ? (
+              {attachments.length + selectedFiles.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {attachmentNames.map((fileName) => (
+                  {attachments.map((file) => (
                     <button
-                      key={fileName}
+                      key={file.mediaId}
                       type="button"
-                      onClick={() => removeAttachmentName(fileName)}
-                      className="rounded-md bg-slate-200 px-2.5 py-1 text-xs text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                      onClick={() => removeAttachment(file.mediaId)}
+                      className="inline-flex items-center gap-1 rounded-md bg-slate-200 px-2.5 py-1 text-xs text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                     >
-                      {fileName} <X size={12} className="inline" />
+                      {file.name} <X size={12} className="inline" />
                     </button>
                   ))}
                   {selectedFiles.map((file) => (
@@ -407,7 +433,7 @@ export default function  EditAssignmentModal({
               <button
                 type="button"
                 onClick={addRubric}
-                className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#275D79] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61]"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61]"
               >
                 <span className="text-base leading-none">+</span>
                 Crear nueva rúbrica
@@ -508,10 +534,15 @@ export default function  EditAssignmentModal({
               <button
                 type="submit"
                 disabled={isSaving || isDeleting}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#275D79] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Save className="h-4 w-4" aria-hidden />
-                {isSaving ? "Guardando..." : "Guardar cambios"}
+                {isSaving && selectedFiles.length > 0 ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Subiendo archivos...
+                  </>
+                ) : isSaving ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </div>

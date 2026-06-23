@@ -11,6 +11,7 @@ import {
 import { ChevronLeft, MessageSquarePlus, X, MessageSquare, Trash2, Send } from "lucide-react";
 import { sendChatMessage } from "@/app/src/lib/api/ai";
 import type { ChatResponse, AiBlock, GradeResult } from "@/app/src/lib/api/ai";
+import { getWorkspaceMembers, getMyWorkspaces } from "@/app/src/lib/api/workspaces";
 import ChatBlocks from "./ChatBlocks";
 import { useGrading } from "@/app/src/lib/contexts/GradingContext";
 
@@ -236,6 +237,58 @@ export default function AiChatPanel({
     }
   };
 
+  const enrichBlocks = useCallback(async (blocks: AiBlock[] | undefined, wId: string | undefined) => {
+    if (!blocks || !wId) {
+      console.log("[enrichBlocks] skipped — missing blocks or workspaceId", { blocks, wId });
+      return blocks;
+    }
+    const hasNameColumn = blocks.some((b) => {
+      const cols = (b.columns ?? b.headers ?? []) as string[];
+      return cols.some((c) => /nombre|name|estudiante|alumno|miembro|usuario/i.test(c));
+    });
+    if (!hasNameColumn) {
+      console.log("[enrichBlocks] skipped — no name column in blocks");
+      return blocks;
+    }
+
+    console.log("[enrichBlocks] fetching enrichment data for workspace", wId);
+    const [members, workspaces] = await Promise.all([
+      getWorkspaceMembers(wId).catch((e) => {
+        console.error("[enrichBlocks] getWorkspaceMembers failed", e);
+        return [];
+      }),
+      getMyWorkspaces().catch((e) => {
+        console.error("[enrichBlocks] getMyWorkspaces failed", e);
+        return [];
+      }),
+    ]);
+
+    console.log("[enrichBlocks] members fetched", members.length, "workspaces fetched", workspaces.length);
+
+    const avatars: Record<string, string> = {};
+    for (const m of members) {
+      if (m.avatarUrl) {
+        avatars[m.fullName.toLowerCase().trim()] = m.avatarUrl;
+        console.log("[enrichBlocks] avatar stored for", m.fullName, "→", m.avatarUrl.slice(0, 40) + "...");
+      }
+    }
+
+    const accentColors: Record<string, string> = {};
+    for (const w of workspaces) {
+      if (w.data?.accentColor) {
+        accentColors[w.name.toLowerCase().trim()] = w.data.accentColor;
+      }
+    }
+
+    console.log("[enrichBlocks] avatars map keys:", Object.keys(avatars));
+    console.log("[enrichBlocks] accentColors map keys:", Object.keys(accentColors));
+
+    return blocks.map((b) => ({
+      ...b,
+      _enrichments: { avatars, accentColors },
+    }));
+  }, []);
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isPending) return;
@@ -286,12 +339,14 @@ export default function AiChatPanel({
           setAiSuggestions((prev) => ({ ...prev, ...bySubmission }));
         }
 
+        const enrichedBlocks = await enrichBlocks(res.blocks, workspaceId);
+
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
             content: res.message,
-            blocks: res.blocks,
+            blocks: enrichedBlocks ?? res.blocks,
             actions: res.actions_triggered,
           },
         ]);
@@ -307,7 +362,7 @@ export default function AiChatPanel({
         ]);
       }
     });
-  }, [input, isPending, sessionId, workspaceId]);
+  }, [input, isPending, sessionId, workspaceId, enrichBlocks]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -395,7 +450,7 @@ export default function AiChatPanel({
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="rounded-lg bg-[#275D79] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
+                className="rounded-xl bg-[#275D79] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1f4a61] dark:bg-[#3a7fa0] dark:hover:bg-[#2d6a8a]"
               >
                 Nueva conversación
               </button>

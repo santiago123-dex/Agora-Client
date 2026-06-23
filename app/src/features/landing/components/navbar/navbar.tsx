@@ -26,7 +26,7 @@ export default function NavbarLanding() {
                         <Image
                             src={logo}
                             alt="Logo de Agora"
-                            className="h-9 w-9 object-contain sm:h-11 sm:w-11"
+                            className="logo-light h-9 w-9 object-contain sm:h-11 sm:w-11"
                         />
                     </div>
                     <span className="text-xl font-semibold tracking-tight sm:text-2xl">Agora</span>
@@ -96,7 +96,7 @@ export default function NavbarLanding() {
                             <Link
                                 href="/auth/register"
                                 onClick={() => setIsMobileOpen(false)}
-                                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm"
+                                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm transition hover:bg-[#285a77]"
                             >
                                 Comenzar Gratis
                             </Link>

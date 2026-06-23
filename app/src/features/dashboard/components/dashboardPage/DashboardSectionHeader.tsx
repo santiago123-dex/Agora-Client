@@ -12,7 +12,7 @@ export default function DashboardSectionHeader({
 }: DashboardSectionHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <h3 className="serif text-[1.35rem] tracking-tight text-slate-950">
+      <h3 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
         {title}
       </h3>
       <Link

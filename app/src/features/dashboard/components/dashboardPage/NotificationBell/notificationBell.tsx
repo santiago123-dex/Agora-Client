@@ -1,14 +1,15 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import useSWR from "swr";
-import { getNotifications } from "@/app/src/lib/api/notifications";
+import useSWR, { useSWRConfig } from "swr";
+import { getNotifications, markAsRead } from "@/app/src/lib/api/notifications";
 import type { NotificationData } from "@/app/src/lib/api/notifications";
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { mutate } = useSWRConfig();
 
   const { data } = useSWR("notification-bell", getNotifications, {
     refreshInterval: 30000,
@@ -16,6 +17,20 @@ export default function NotificationBell() {
 
   const notifications = data?.notifications ?? [];
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleMarkAllRead = async () => {
+    const ids = notifications.filter((n) => !n.read).map((n) => n.id);
+    if (ids.length === 0) return;
+    await markAsRead(ids);
+    mutate("notification-bell");
+  };
+
+  const handleClick = async (n: NotificationData) => {
+    if (!n.read) {
+      await markAsRead([n.id]);
+      mutate("notification-bell");
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,10 +60,20 @@ export default function NotificationBell() {
 
       {isOpen ? (
         <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-slate-200 bg-white shadow-[0_16px_48px_rgba(15,23,42,0.12)] dark:border-slate-700 dark:bg-slate-900">
-          <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
             <h3 className="text-sm font-bold text-slate-950 dark:text-slate-100">
               Notificaciones
             </h3>
+            {unreadCount > 0 ? (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#275D79] hover:text-[#1f4a61] dark:text-[#4a9bc7]"
+              >
+                <CheckCheck size={14} />
+                Marcar leídas
+              </button>
+            ) : null}
           </div>
 
           {notifications.length === 0 ? (
@@ -62,6 +87,7 @@ export default function NotificationBell() {
                 <button
                   key={n.id}
                   type="button"
+                  onClick={() => handleClick(n)}
                   className={`flex w-full gap-3 px-5 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800 ${
                     !n.read ? "bg-[#E9F2F5] dark:bg-slate-800/50" : ""
                   }`}
@@ -73,7 +99,7 @@ export default function NotificationBell() {
                     <p className="mt-0.5 text-xs text-slate-500">
                       {n.description}
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-400">{n.time}</p>
+                    <p className="mt-1 text-xs text-slate-400">{n.time}</p>
                   </div>
                   {!n.read ? (
                     <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#275D79]" />

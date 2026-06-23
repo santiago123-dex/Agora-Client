@@ -1,7 +1,8 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   Bot,
   CheckCircle,
+  Eye,
   FileText,
   Loader2,
   RefreshCw,
@@ -18,6 +19,7 @@ import {
   getSubmissionFiles,
   getSubmissionText,
 } from "../helpers";
+import DocumentPreviewModal, { type PreviewFile } from "@/app/src/components/ui/DocumentPreviewModal";
 
 // Valor corregido por el profesor para un criterio de la rúbrica.
 // teacher_score y teacher_feedback reemplazan lo que sugirió la IA originalmente.
@@ -63,6 +65,10 @@ export default function SubmissionReviewPanel({
   onFeedbackChange,
   onSave,
 }: Props) {
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+
   const name = getMemberName(row.member);
   const files = getSubmissionFiles(row.submission);
   const storedGrade = row.localGrade ?? getStoredGrade(row.submission);
@@ -72,65 +78,79 @@ export default function SubmissionReviewPanel({
   const hasStoredAi = Boolean(storedAi) && !hasFreshSuggestion;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-        <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#D8E7EC] text-sm font-bold text-[#275D79]">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
+      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-[#253245]">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#D8E7EC] text-sm font-bold text-[#275D79] dark:bg-[#1a2740] dark:text-[#3a7fa0]">
           {getInitials(name)}
         </span>
         <div>
-          <h2 className="font-bold text-slate-950">{name}</h2>
-          <p className="text-xs text-slate-500">{row.member.userId}</p>
+          <h2 className="font-bold text-slate-950 dark:text-slate-100">{name}</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{row.member.userId}</p>
         </div>
       </div>
 
       <div className="space-y-5 px-5 py-4">
         <div>
-          <h3 className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-700">
+          <h3 className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             <FileText className="h-4 w-4" />
             Respuesta del estudiante
           </h3>
           <div
-            className={`rounded-xl p-4 text-sm leading-6 ${canGrade ? "bg-[#EEF5F7] text-slate-700" : "bg-slate-100 text-slate-500"}`}
+            className={`rounded-xl p-4 text-sm leading-6 ${canGrade ? "bg-[#EEF5F7] text-slate-700 dark:bg-[#0a1424] dark:text-slate-300" : "bg-slate-100 text-slate-500 dark:bg-[#0a1424] dark:text-slate-400"}`}
           >
             {getSubmissionText(row.submission)}
           </div>
 
           {files.length > 0 ? (
             <div className="mt-3 flex flex-wrap gap-2">
-              {files.map((file) => {
-                const content = (
-                  <>
-                    <FileText className="h-3.5 w-3.5" />
-                    {file.name}
-                  </>
-                );
-
-                return file.href ? (
-                  <a
-                    key={file.name}
-                    href={file.href}
-                    download={file.name}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79]"
-                  >
-                    {content}
-                  </a>
-                ) : (
-                  <span
-                    key={file.name}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
-                  >
-                    {content}
-                  </span>
-                );
-              })}
+              {files.map((file) => (
+                <div key={file.name} className="inline-flex items-center gap-1">
+                  {file.href || file.mediaId ? (
+                    <>
+                      <a
+                        href={file.href ?? `/api/media/${file.mediaId}/file`}
+                        download={file.name}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[#275D79] hover:text-[#275D79] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300 dark:hover:border-[#3a7fa0] dark:hover:text-[#3a7fa0]"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {file.name}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const id = file.mediaId ?? file.href?.replace("/api/media/", "").replace("/file", "") ?? "";
+                          if (id) {
+                            setPreviewFiles([{
+                              name: file.name,
+                              mediaId: id,
+                              mimeType: file.mimeType ?? "application/octet-stream",
+                            }]);
+                            setPreviewIndex(0);
+                            setPreviewOpen(true);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-medium text-[#275D79] transition hover:bg-[#EEF5F7] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-[#3a7fa0] dark:hover:bg-[#1a2740]"
+                        title="Vista previa"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-300">
+                      <FileText className="h-3.5 w-3.5" />
+                      {file.name}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           ) : null}
         </div>
 
-        <div className="rounded-xl border border-[#B8CED8] bg-[#F8FBFC] p-4">
+        <div className="rounded-xl border border-[#B8CED8] bg-[#F8FBFC] p-4 dark:border-[#253245] dark:bg-[#0a1424]">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
-              <Bot className="h-4 w-4 text-[#275D79]" />
+            <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+              <Bot className="h-4 w-4 text-[#275D79] dark:text-[#3a7fa0]" />
               Análisis de IA
             </h3>
             {hasStoredAi ? (
@@ -138,7 +158,7 @@ export default function SubmissionReviewPanel({
                 type="button"
                 onClick={onAnalyze}
                 disabled={isAnalyzing}
-                className="inline-flex items-center gap-2 rounded-lg border border-[#B8CED8] bg-white px-3 py-2 text-xs font-semibold text-[#275D79] transition hover:bg-[#EEF5F7] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#B8CED8] bg-white px-3 py-2 text-xs font-semibold text-[#275D79] transition hover:bg-[#EEF5F7] disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-[#3a7fa0] dark:hover:bg-[#1a2740]"
               >
                 {isAnalyzing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -152,7 +172,7 @@ export default function SubmissionReviewPanel({
                 type="button"
                 onClick={onAnalyze}
                 disabled={!canGrade || isAnalyzing}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isAnalyzing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -166,38 +186,29 @@ export default function SubmissionReviewPanel({
 
           {hasFreshSuggestion && aiSuggestion ? (
             <div className="space-y-3">
-              <div className="rounded-lg border border-[#B8CED8] bg-blue-50 p-4">
+              <div className="rounded-lg border border-[#B8CED8] bg-blue-50 p-4 dark:border-[#253245] dark:bg-blue-950/20">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-[#275D79]">
+                  <span className="text-sm font-bold text-[#275D79] dark:text-[#3a7fa0]">
                     Puntaje sugerido: {aiSuggestion.total_score} /{" "}
                     {aiSuggestion.max_score}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {aiSuggestion.grading_model}
                   </span>
                 </div>
-                {/* Cada criterio de la rúbrica es un bloque editable.
-                    Si onOverrideChange existe (el padre habilita overrides):
-                    - El score se muestra como input numérico
-                    - El feedback se muestra como textarea
-                    - Si el profesor modificó el valor, el fondo se vuelve ámbar
-                    Si no hay overrides habilitados, se muestra como texto estático. */}
                 {aiSuggestion.criteria_results.map((c) => {
-                  // ov = overrideValue si el profesor ya editó este criterio
                   const ov = overrides?.[c.criterion_id];
-                  // Muestra el valor overrideado si existe, sino el original de la IA
                   const displayScore = ov?.teacher_score ?? c.score;
                   const displayFeedback = ov?.teacher_feedback ?? c.feedback;
-                  // true si el profesor modificó este criterio (cambia el estilo a ámbar)
                   const isModified = ov != null;
 
                   return (
                     <div
                       key={c.criterion_id}
-                      className={`mb-2 rounded-lg p-3 ${isModified ? "border border-amber-200 bg-amber-50" : "bg-white"}`}
+                      className={`mb-2 rounded-lg p-3 ${isModified ? "border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30" : "bg-white dark:bg-[#0f1a2e]"}`}
                     >
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-700">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                           {c.criterion_name}
                         </span>
                         {onOverrideChange ? (
@@ -210,14 +221,14 @@ export default function SubmissionReviewPanel({
                               onChange={(e) => onOverrideChange(c.criterion_id, "teacher_score", e.target.value)}
                               className={`w-16 rounded border px-1.5 py-0.5 text-xs text-right outline-none ${
                                 isModified
-                                  ? "border-amber-300 bg-amber-100 font-semibold text-amber-800"
-                                  : "border-slate-200 bg-slate-50 text-slate-700"
+                                  ? "border-amber-300 bg-amber-100 font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+                                  : "border-slate-200 bg-slate-50 text-slate-700 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-300"
                               }`}
                             />
-                            <span className="text-xs text-slate-400">/ {c.max_score}</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500">/ {c.max_score}</span>
                           </div>
                         ) : (
-                          <span className="text-xs font-medium text-[#275D79]">
+                          <span className="text-xs font-medium text-[#275D79] dark:text-[#3a7fa0]">
                             {c.score} / {c.max_score}
                           </span>
                         )}
@@ -229,29 +240,29 @@ export default function SubmissionReviewPanel({
                           rows={2}
                           className={`mt-1 w-full resize-none rounded px-2 py-1 text-xs leading-5 outline-none ${
                             isModified
-                              ? "border border-amber-300 bg-amber-100 text-amber-800"
-                              : "border border-transparent bg-transparent text-slate-600 hover:border-slate-200 focus:border-slate-300"
+                              ? "border border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+                              : "border border-transparent bg-transparent text-slate-600 hover:border-slate-200 focus:border-slate-300 dark:text-slate-400 dark:hover:border-[#253245] dark:focus:border-[#253245]"
                           }`}
                         />
                       ) : (
-                        <p className="text-xs leading-5 text-slate-600">
+                        <p className="text-xs leading-5 text-slate-600 dark:text-slate-400">
                           {c.feedback}
                         </p>
                       )}
-                      <span className="mt-1 inline-block rounded-md bg-[#D8E7EC] px-2 py-0.5 text-[10px] font-medium text-[#275D79]">
+                      <span className="mt-1 inline-block rounded-md bg-[#D8E7EC] px-2 py-0.5 text-[10px] font-medium text-[#275D79] dark:bg-[#1a2740] dark:text-[#3a7fa0]">
                         {c.matched_level}
                       </span>
                     </div>
                   );
                 })}
-                <p className="mt-3 text-xs leading-5 text-slate-500 italic">
+                <p className="mt-3 text-xs leading-5 text-slate-500 italic dark:text-slate-400">
                   {aiSuggestion.feedback_summary}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onAcceptSuggestion}
-                className="inline-flex items-center gap-2 rounded-lg border border-[#B8CED8] bg-white px-3 py-2 text-xs font-semibold text-[#275D79] transition hover:bg-[#EEF5F7]"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#B8CED8] bg-white px-3 py-2 text-xs font-semibold text-[#275D79] transition hover:bg-[#EEF5F7] dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-[#3a7fa0] dark:hover:bg-[#1a2740]"
               >
                 <CheckCircle className="h-3.5 w-3.5" />
                 Aceptar sugerencia
@@ -259,42 +270,42 @@ export default function SubmissionReviewPanel({
             </div>
           ) : hasStoredAi && storedAi ? (
             <div className="space-y-3">
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-emerald-700">
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                     Calificación IA: {storedAi.total_score} puntos
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {new Date(storedAi.evaluated_at).toLocaleString("es-CO")}
                   </span>
                 </div>
                 {storedAi.criteria_results.map((c) => (
                   <div
                     key={c.criterion_id}
-                    className="mb-2 rounded-lg bg-white p-3"
+                    className="mb-2 rounded-lg bg-white p-3 dark:bg-[#0f1a2e]"
                   >
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                         {c.criterion_name}
                       </span>
-                      <span className="text-xs font-medium text-emerald-600">
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         {c.score} pts
                       </span>
                     </div>
-                    <p className="text-xs leading-5 text-slate-600">
+                    <p className="text-xs leading-5 text-slate-600 dark:text-slate-400">
                       {c.feedback}
                     </p>
                   </div>
                 ))}
-                <p className="mt-3 text-xs leading-5 text-slate-500 italic">
+                <p className="mt-3 text-xs leading-5 text-slate-500 italic dark:text-slate-400">
                   {storedAi.feedback_summary}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="min-h-28 rounded-lg bg-white px-4 py-5 text-sm leading-6 text-slate-600">
+            <div className="min-h-28 rounded-lg bg-white px-4 py-5 text-sm leading-6 text-slate-600 dark:bg-[#0f1a2e] dark:text-slate-400">
               {isAnalyzing ? (
-                <div className="flex items-center gap-3 text-[#275D79]">
+                <div className="flex items-center gap-3 text-[#275D79] dark:text-[#3a7fa0]">
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Analizando entrega con IA...
                 </div>
@@ -308,48 +319,62 @@ export default function SubmissionReviewPanel({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-5 py-4">
-        <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900">
+      <div className="border-t border-slate-100 px-5 py-4 dark:border-[#253245]">
+        <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
           <Send className="h-4 w-4" />
           Asignar calificación
         </h3>
-        <div className="space-y-3">
-          <label className="block text-xs font-medium text-slate-600">
-            Puntuación
-            <input
-              type="number"
-              min={0}
-              value={grade}
-              onChange={onGradeChange}
-              placeholder={
-                typeof storedGrade === "number" ? String(storedGrade) : "0"
-              }
-              disabled={!canGrade}
-              className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm outline-none focus:border-[#275D79] disabled:cursor-not-allowed disabled:opacity-60"
-            />
-          </label>
-          <label className="block text-xs font-medium text-slate-600">
-            Retroalimentación
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+              Puntuación
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                value={grade}
+                onChange={onGradeChange}
+                placeholder={
+                  typeof storedGrade === "number" ? String(storedGrade) : "0"
+                }
+                disabled={!canGrade}
+                className="w-24 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm outline-none focus:border-[#275D79] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0]"
+              />
+              <span className="text-xs text-slate-400 dark:text-slate-500">/ {aiSuggestion?.max_score ?? "—"} pts</span>
+            </div>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+              Retroalimentación
+            </label>
             <textarea
               value={feedback}
               onChange={onFeedbackChange}
               rows={4}
               disabled={!canGrade}
               placeholder="Escribe comentarios para el estudiante..."
-              className="mt-1 w-full resize-none rounded-lg border border-slate-200 bg-slate-100 px-3 py-3 text-sm outline-none focus:border-[#275D79] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 w-full resize-none rounded-lg border border-slate-200 bg-slate-100 px-3 py-3 text-sm outline-none focus:border-[#275D79] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0] dark:placeholder:text-slate-500"
             />
-          </label>
+          </div>
           <button
             type="button"
             onClick={onSave}
             disabled={!canGrade || grade.trim().length === 0}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#275D79] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#275D79] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1f4a61] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
             Guardar calificación
           </button>
         </div>
       </div>
+
+      <DocumentPreviewModal
+        files={previewFiles}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        initialIndex={previewIndex}
+      />
     </section>
   );
 }

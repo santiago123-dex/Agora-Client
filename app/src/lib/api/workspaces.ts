@@ -69,13 +69,15 @@ export function getWorkspaceInvitationCode(id: string | number) {
   );
 }
 
-export function getWorkspaceMembers(workspaceId: string | number){
-  return bffFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members`);
+export function getWorkspaceMembers(workspaceId: string | number, role?: string){
+  const query = role ? `?role=${role}` : "";
+  return bffFetch<WorkspaceMemberDetailsResponse[]>(`/api/workspaces/${workspaceId}/members${query}`);
 }
 
-export function getWorkspaceMemberCount(workspaceId: string | number) {
+export function getWorkspaceMemberCount(workspaceId: string | number, role?: string) {
+  const query = role ? `?role=${role}` : "";
   return bffFetch<{ count: number }>(
-    `/api/workspaces/${workspaceId}/members/count`
+    `/api/workspaces/${workspaceId}/members/count${query}`
   );
 }
 
@@ -85,7 +87,11 @@ export function createWorkspace(payload: CreateWorkspacePayload) {
     body: JSON.stringify(payload),
   }).then(async (workspace) => {
     try {
-      const { createNotification } = await import("./notifications");
+      const [{ toast }, { createNotification }] = await Promise.all([
+        import("sonner"),
+        import("./notifications"),
+      ]);
+      toast.success(`"${workspace.name}" creado`);
       await createNotification(
         "Espacio creado",
         `"${workspace.name}" fue creado exitosamente`,

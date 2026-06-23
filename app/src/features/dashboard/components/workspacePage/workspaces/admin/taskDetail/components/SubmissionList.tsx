@@ -17,12 +17,12 @@ const statusDot = {
 
 export default function SubmissionList({ rows, selectedUserId, onSelect }: Props) {
   return (
-    <aside className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-5 py-4">
-        <h2 className="font-bold text-slate-950">Entregas</h2>
+    <aside className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
+      <div className="border-b border-slate-100 px-5 py-4 dark:border-[#253245]">
+        <h2 className="font-bold text-slate-950 dark:text-slate-100">Entregas</h2>
       </div>
 
-      <div className="divide-y divide-slate-100 [content-visibility:auto] [contain-intrinsic-size:60px]">
+      <div className="divide-y divide-slate-100 [content-visibility:auto] [contain-intrinsic-size:60px] dark:divide-[#253245]">
         {rows.map((row) => {
           const name = getMemberName(row.member);
           const grade = row.localGrade ?? getStoredGrade(row.submission);
@@ -34,31 +34,31 @@ export default function SubmissionList({ rows, selectedUserId, onSelect }: Props
               type="button"
               onClick={() => onSelect(String(row.member.userId))}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${
-                isSelected ? "bg-[#E9F2F5]" : "hover:bg-slate-50"
+                isSelected ? "bg-[#E9F2F5] dark:bg-[#1a2740]" : "hover:bg-slate-50 dark:hover:bg-[#1a2740]/50"
               }`}
             >
-              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#D8E7EC] text-xs font-bold text-[#275D79]">
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#D8E7EC] text-xs font-bold text-[#275D79] dark:bg-[#1a2740] dark:text-[#3a7fa0]">
                 {getInitials(name)}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-slate-900">
+                <span className="block truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {name}
                 </span>
-                <span className="block text-xs text-slate-500">
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
                   {row.submission ? formatTaskDate(row.submission.createdAt) : "Sin entrega"}
                 </span>
               </span>
 
               {row.status === "late" ? (
-                <span className="rounded-md bg-rose-100 px-2 py-1 text-[0.65rem] font-semibold text-rose-600">
+                <span className="rounded-md bg-rose-100 px-2 py-1 text-[0.65rem] font-semibold text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
                   Tarde
                 </span>
               ) : typeof grade === "number" ? (
-                <span className="text-xs font-bold text-emerald-600">{grade}</span>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{grade}</span>
               ) : (
                 <span className={`h-2 w-2 rounded-full ${statusDot[row.status]}`} />
               )}
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />
             </button>
           );
         })}

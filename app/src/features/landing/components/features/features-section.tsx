@@ -39,7 +39,7 @@ export default function FeatureSection() {
             <div className="max-w-6xl mx-auto px-6">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
                     <h2 className="serif text-4xl tracking-tight">Todo lo que necesitas para ense&ntilde;ar mejor</h2>
-                    <p className="mt-3 text-xl text-gray-400">Herramientas dise&ntilde;adas espec&iacute;ficamente para optimizar tu tiempo y mejorar la experiencia de aprendizaje.</p>
+                    <p className="mt-3 text-xl text-slate-400">Herramientas dise&ntilde;adas espec&iacute;ficamente para optimizar tu tiempo y mejorar la experiencia de aprendizaje.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {features.map((item, index) => (
@@ -52,10 +52,10 @@ export default function FeatureSection() {
                         <div className="mb-3 flex h-12 w-12 bg-[#f5f0ea] items-center justify-center rounded-xl text-xl transition-all duration-300 group-hover:bg-[#275D79] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#275D79]/25">
                             {item.icon}
                         </div>
-                        <div className="mb-2 font-bold text-[17px] group-hover:text-[#275D79] transition-colors duration-300">
+                        <div className="mb-2 font-bold text-base group-hover:text-[#275D79] transition-colors duration-300">
                             {item.title}
                         </div>
-                        <div className="text-gray-500 font-medium">
+                        <div className="text-slate-500 font-medium">
                             {item.description}
                         </div>
                     </div>
