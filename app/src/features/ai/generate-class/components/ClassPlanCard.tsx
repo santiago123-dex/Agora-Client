@@ -10,6 +10,7 @@ type Props = {
 };
 
 export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
+  if (!plan.plan_data) return null;
   const data = plan.plan_data;
 
   return (
@@ -52,6 +53,50 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
             ))}
           </ul>
         </Section>
+
+        {data.topic_details && data.topic_details.length > 0 && (
+          <Section title="Contenido para el docente">
+            <div className="space-y-4">
+              {data.topic_details.map((td, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]"
+                >
+                  <h4 className="mb-2 text-base font-semibold text-slate-950 dark:text-slate-100">
+                    {td.name}
+                  </h4>
+                  <p className="mb-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    {td.explanation}
+                  </p>
+                  {td.key_points.length > 0 && (
+                    <div className="mb-3">
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#275D79] dark:text-[#7BB8D4]">
+                        Puntos clave
+                      </p>
+                      <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
+                        {td.key_points.map((kp, j) => (
+                          <li key={j}>{kp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {td.examples.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#275D79] dark:text-[#7BB8D4]">
+                        Ejemplos
+                      </p>
+                      <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
+                        {td.examples.map((ex, j) => (
+                          <li key={j}>{ex}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Actividades">
           <div className="space-y-3">
@@ -116,16 +161,18 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
           </div>
         </Section>
 
-        <Section title="Evaluación">
-          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Método: {data.evaluation.method}
-            </p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              {data.evaluation.criteria}
-            </p>
-          </div>
-        </Section>
+        {data.evaluation && (
+          <Section title="Evaluación">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Método: {data.evaluation.method}
+              </p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                {data.evaluation.criteria}
+              </p>
+            </div>
+          </Section>
+        )}
       </div>
 
       <style jsx>{`

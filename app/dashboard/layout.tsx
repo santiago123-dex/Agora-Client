@@ -138,11 +138,13 @@ function SidebarUserBlock({
   isLoggingOut,
   onLogout,
   collapsed,
+  isLoadingUser,
 }: {
   user: CurrentUser | null;
   isLoggingOut: boolean;
   onLogout: () => Promise<void>;
   collapsed?: boolean;
+  isLoadingUser?: boolean;
 }) {
   const displayName =
     user?.fullName ||
@@ -168,6 +170,20 @@ function SidebarUserBlock({
       .map((part) => part[0]?.toUpperCase())
       .join("");
   }, [user]);
+
+  if (isLoadingUser) {
+    return (
+      <div className="mt-auto border-t border-white/10 px-1 py-4 dark:border-white/10">
+        <div className="flex items-center gap-3 rounded-xl px-2 py-2">
+          <div className="h-10 w-10 animate-pulse rounded-full bg-white/20" />
+          <div className={`min-w-0 flex-1 transition-opacity duration-200 ${collapsed ? "lg:opacity-0 lg:group-hover/sidebar:opacity-100" : ""}`}>
+            <div className="mb-2 h-3 w-24 animate-pulse rounded bg-white/20" />
+            <div className="h-2.5 w-32 animate-pulse rounded bg-white/10" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-auto border-t border-white/10 px-1 py-4 dark:border-white/10">
@@ -338,11 +354,11 @@ export default function LayoutDashboard({
       <GradingProvider>
         <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-[#0b1120] lg:flex-row">
             <aside
-            className={`hidden bg-[#275D79] lg:flex lg:min-h-screen lg:flex-col transition-all duration-300 overflow-hidden group/sidebar dark:bg-[#141f33] dark:border-r dark:border-[#253245] ${sidebarCollapsed ? "lg:w-16" : "lg:w-60"} shrink-0`}
+            className={`hidden bg-[#275D79] lg:flex lg:h-screen lg:sticky lg:top-0 lg:flex-col transition-all duration-300 overflow-hidden group/sidebar dark:bg-[#141f33] dark:border-r dark:border-[#253245] ${sidebarCollapsed ? "lg:w-16 lg:hover:w-60" : "lg:w-60"} shrink-0`}
             >
             <Link
               href="/"
-              className="flex h-16 items-center gap-2 border-b border-white/10 px-4 dark:border-[#253245]"
+              className="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 px-4 dark:border-[#253245]"
             >
               <Image
                 src={logo}
@@ -352,18 +368,17 @@ export default function LayoutDashboard({
               <h2 className={`text-lg font-semibold text-white transition-opacity duration-200 dark:text-white ${sidebarCollapsed ? "lg:opacity-0 lg:group-hover/sidebar:opacity-100" : ""}`}>Agora</h2>
             </Link>
 
-            <div className="flex flex-1 flex-col px-3 py-4">
+            <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
               <div className="flex flex-col gap-2">{renderNavLinks()}</div>
+            </nav>
 
-              {!isLoadingUser && (
-                <SidebarUserBlock
-                  user={user}
-                  isLoggingOut={isLoggingOut}
-                  onLogout={handleLogout}
-                  collapsed={sidebarCollapsed}
-                />
-              )}
-            </div>
+            <SidebarUserBlock
+              user={user}
+              isLoggingOut={isLoggingOut}
+              onLogout={handleLogout}
+              collapsed={sidebarCollapsed}
+              isLoadingUser={isLoadingUser}
+            />
           </aside>
 
           <div
@@ -475,16 +490,17 @@ export default function LayoutDashboard({
               </button>
             </div>
 
-            <div className="flex h-[calc(100%-4rem)] flex-col px-3 py-4">
-              <div className="flex flex-col gap-2">{renderNavLinks(true)}</div>
+            <div className="flex h-[calc(100%-4rem)] flex-col overflow-hidden">
+              <nav className="flex-1 overflow-y-auto px-3 py-4">
+                <div className="flex flex-col gap-2">{renderNavLinks(true)}</div>
+              </nav>
 
-              {!isLoadingUser && (
-                <SidebarUserBlock
-                  user={user}
-                  isLoggingOut={isLoggingOut}
-                  onLogout={handleLogout}
-                />
-              )}
+              <SidebarUserBlock
+                user={user}
+                isLoggingOut={isLoggingOut}
+                onLogout={handleLogout}
+                isLoadingUser={isLoadingUser}
+              />
             </div>
           </aside>
 
