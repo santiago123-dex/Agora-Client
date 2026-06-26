@@ -102,6 +102,16 @@ function getInitialAllowLate(assignment: AssignmentResponse) {
   return typeof allowLateSubmissions === "boolean" ? allowLateSubmissions : true;
 }
 
+function getInitialGradingScale(assignment: AssignmentResponse) {
+  const scale = assignment.settings?.gradingScale;
+  return typeof scale === "number" ? String(scale) : "100";
+}
+
+function getInitialTeacherInstructions(assignment: AssignmentResponse) {
+  const instructions = assignment.settings?.teacherInstructions;
+  return typeof instructions === "string" ? instructions : "";
+}
+
 export default function  EditAssignmentModal({
   assignment,
   isOpen,
@@ -119,6 +129,12 @@ export default function  EditAssignmentModal({
   );
   const [maxFileSizeMb, setMaxFileSizeMb] = useState(
     () => getInitialMaxFileSize(assignment),
+  );
+  const [gradingScale, setGradingScale] = useState(
+    () => getInitialGradingScale(assignment),
+  );
+  const [teacherInstructions, setTeacherInstructions] = useState(
+    () => getInitialTeacherInstructions(assignment),
   );
   const [attachments, setAttachments] = useState<StoredAttachment[]>(
     () => getInitialAttachments(assignment),
@@ -141,6 +157,8 @@ export default function  EditAssignmentModal({
     setStatus(assignment.status);
     setAllowLateSubmissions(getInitialAllowLate(assignment));
     setMaxFileSizeMb(getInitialMaxFileSize(assignment));
+    setGradingScale(getInitialGradingScale(assignment));
+    setTeacherInstructions(getInitialTeacherInstructions(assignment));
     setAttachments(getInitialAttachments(assignment));
     setSelectedFiles([]);
     setRubrics(getInitialRubrics(assignment));
@@ -230,6 +248,8 @@ export default function  EditAssignmentModal({
         settings: {
           allowLateSubmissions,
           maxFileSizeMb: Number(maxFileSizeMb),
+          gradingScale: Number(gradingScale),
+          teacherInstructions: teacherInstructions.trim() || undefined,
           attachments: [...attachments, ...newAttachments],
         },
       });
@@ -500,6 +520,41 @@ export default function  EditAssignmentModal({
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                  Escala de calificación
+                </label>
+                <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                  La escala en la que la IA calificará (ej: 0.0 a 5.0 en Colombia)
+                </p>
+                <select
+                  value={gradingScale}
+                  onChange={(event) => setGradingScale(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200"
+                >
+                  <option value="5">0.0 – 5.0</option>
+                  <option value="10">0.0 – 10.0</option>
+                  <option value="100">0 – 100</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                  Instrucciones para la IA (opcional)
+                </label>
+                <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                  Instrucciones adicionales que la IA usará al calificar
+                </p>
+                <textarea
+                  value={teacherInstructions}
+                  onChange={(event) => setTeacherInstructions(event.target.value)}
+                  rows={3}
+                  placeholder="Ej: Penalizar con 1.0 si no hay proceso escrito"
+                  className="mt-1 w-full resize-none rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-[#275D79] focus:ring-2 focus:ring-[#275D79]/15 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200"
+                />
+              </div>
             </div>
 
             <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">

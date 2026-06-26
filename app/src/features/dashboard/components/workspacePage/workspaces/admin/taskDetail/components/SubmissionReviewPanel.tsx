@@ -32,6 +32,7 @@ type CriterionOverrideValue = {
 type Props = {
   row: MemberSubmissionRow;
   aiSuggestion?: GradeResult;
+  maxScore?: number;
   isAnalyzing: boolean;
   grade: string;
   feedback: string;
@@ -54,6 +55,7 @@ const NO_SUBMISSION_TEXT = "No hay entrega para analizar todavía.";
 export default function SubmissionReviewPanel({
   row,
   aiSuggestion,
+  maxScore,
   isAnalyzing,
   grade,
   feedback,
@@ -273,10 +275,13 @@ export default function SubmissionReviewPanel({
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                    Calificación IA: {storedAi.total_score} puntos
+                    Calificación IA: {storedAi.total_score}{storedAi.max_score != null ? ` / ${storedAi.max_score}` : " puntos"}
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {new Date(storedAi.evaluated_at).toLocaleString("es-CO")}
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">{storedAi.grading_model}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {new Date(storedAi.evaluated_at).toLocaleString("es-CO")}
+                    </span>
                   </span>
                 </div>
                 {storedAi.criteria_results.map((c) => (
@@ -333,6 +338,7 @@ export default function SubmissionReviewPanel({
               <input
                 type="number"
                 min={0}
+                max={maxScore ?? aiSuggestion?.max_score ?? undefined}
                 value={grade}
                 onChange={onGradeChange}
                 placeholder={
@@ -341,7 +347,7 @@ export default function SubmissionReviewPanel({
                 disabled={!canGrade}
                 className="w-24 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm outline-none focus:border-[#275D79] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#253245] dark:bg-[#0a1424] dark:text-slate-200 dark:focus:border-[#3a7fa0]"
               />
-              <span className="text-xs text-slate-400 dark:text-slate-500">/ {aiSuggestion?.max_score ?? "—"} pts</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">/ {aiSuggestion?.max_score ?? maxScore ?? "—"} pts</span>
             </div>
           </div>
           <div>

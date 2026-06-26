@@ -52,6 +52,16 @@ export function getMySubmissionByAssignment(assignmentId: string | number) {
   );
 }
 
+export function gradeSubmission(submissionId: string | number, score: number, feedback: string) {
+  return bffFetch<{ status: string }>(
+    `/api/workspaces/submissions/${submissionId}/grade`,
+    {
+      method: "POST",
+      body: JSON.stringify({ score, feedback }),
+    },
+  );
+}
+
 export function deleteSubmission(submissionId: string | number) {
   return bffFetch<null>(`/api/workspaces/submissions/${submissionId}`, {
     method: "DELETE",

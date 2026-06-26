@@ -6,7 +6,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAssignmentsByWorkspace } from "@/app/src/lib/api/assignments";
 import type { AssignmentResponse } from "@/app/src/lib/api/assignments";
-import { getSubmissionsByAssignment } from "@/app/src/lib/api/submissions";
+import { getSubmissionsByAssignment, gradeSubmission } from "@/app/src/lib/api/submissions";
 import type { SubmissionResponse } from "@/app/src/lib/api/submissions";
 import { getWorkspaceMembers } from "@/app/src/lib/api/workspaces";
 import type { WorkspaceMemberDetailsResponse } from "@/app/src/lib/api/workspaces";
@@ -80,6 +80,22 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
       (item) => String(item.id) === String(taskId),
     ) ?? null;
   }, [rawAssignments, taskId]);
+
+  const maxScore = useMemo(() => {
+    if (!assignment) return undefined;
+    const scale = assignment.settings?.gradingScale;
+    if (typeof scale === "number" && scale > 0) return scale;
+    const rubric = assignment.rubric;
+    if (typeof rubric?.totalWeight === "number") return rubric.totalWeight;
+    if (typeof rubric?.points === "number") return rubric.points;
+    if (Array.isArray(rubric?.criteria)) {
+      return rubric.criteria.reduce<number>((total, c: Record<string, unknown>) => {
+        if (typeof c.weight === "number") return total + c.weight;
+        return total;
+      }, 0);
+    }
+    return 100;
+  }, [assignment]);
 
   const isLoading = isLoadingMembers || isLoadingSubmissions;
 
@@ -365,14 +381,33 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
     const grade = Number(gradeInput);
     if (Number.isNaN(grade)) return;
 
-    setLocalGrades((current) => ({
-      ...current,
-      [String(selectedRow.member.userId)]: {
-        grade,
-        feedback: feedbackInput,
-      },
-    }));
-    toast.success("Calificación guardada localmente");
+    const finalFeedback = feedbackInput.trim() || "Calificado por el profesor";
+
+    if (selectedRow.submission) {
+      try {
+        await gradeSubmission(selectedRow.submission.id, grade, finalFeedback);
+        await mutateSubmissions();
+        setLocalGrades((current) => ({
+          ...current,
+          [String(selectedRow.member.userId)]: {
+            grade,
+            feedback: finalFeedback,
+          },
+        }));
+        toast.success("Calificación guardada");
+      } catch {
+        toast.error("Error al guardar calificación");
+      }
+    } else {
+      setLocalGrades((current) => ({
+        ...current,
+        [String(selectedRow.member.userId)]: {
+          grade,
+          feedback: finalFeedback,
+        },
+      }));
+      toast.success("Calificación guardada localmente");
+    }
   };
 
   const handleGradeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -469,6 +504,7 @@ export default function AssignmentAdminDetail({ workspaceId, taskId }: Props) {
                     ? aiSuggestions[String(selectedRow.submission.id)]
                     : undefined
                 }
+                maxScore={maxScore}
                 isAnalyzing={
                   analyzingUserId === String(selectedRow.member.userId)
                 }

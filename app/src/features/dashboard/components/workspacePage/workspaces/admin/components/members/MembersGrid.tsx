@@ -5,9 +5,10 @@ type Props = {
   members: WorkspaceMemberDetailsResponse[];
   isLoading?: boolean;
   error?: string | null;
+  currentUserId?: string;
 };
 
-export default function MembersGrid({ members, isLoading, error }: Props) {
+export default function MembersGrid({ members, isLoading, error, currentUserId }: Props) {
   if (isLoading) {
     return (
       <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -43,7 +44,7 @@ export default function MembersGrid({ members, isLoading, error }: Props) {
         </li>
       ) : (
         members.map((member) => (
-          <MembersCard key={member.id} member={member} />
+          <MembersCard key={member.id} member={member} currentUserId={currentUserId} />
         ))
       )}
     </div>

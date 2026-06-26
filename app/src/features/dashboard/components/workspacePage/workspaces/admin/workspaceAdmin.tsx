@@ -14,6 +14,7 @@ import TaskGrid from "./components/TaskGrid";
 import { useWorkspaceAssignments } from "./hooks/useWorkspaceAssignments";
 import MembersGrid from "./components/members/MembersGrid";
 import { useWorkspaceMembers } from "./hooks/useWorkspaceMembers";
+import { useUser } from "@/app/src/lib/contexts/UserContext";
 
 const CreateTaskModal = dynamic(
   () => import("./components/CreateTaskModal"),
@@ -76,6 +77,8 @@ export default function WorkspaceAdmin({ workspace }: Props) {
     isLoadingAssignments,
     setAssignmentTasks,
   } = useWorkspaceAssignments(workspace.id);
+
+  const { user } = useUser();
 
   const { members, isLoadingMembers, membersError } = useWorkspaceMembers(
     workspace.id,
@@ -209,7 +212,8 @@ export default function WorkspaceAdmin({ workspace }: Props) {
   const assignmentTasksWithCounts = assignmentTasks.map((task) => ({
     ...task,
     doneCount: submissionStats[task.id]?.submitted ?? task.doneCount,
-    totalCount: studentMembersCount || totalMembers,
+    gradedCount: submissionStats[task.id]?.graded ?? task.gradedCount,
+    totalCount: studentMembersCount,
   }));
 
   // Tareas normales, Tareas por calificar, y tareas calificadas
@@ -426,6 +430,7 @@ export default function WorkspaceAdmin({ workspace }: Props) {
               members={members}
               isLoading={isLoadingMembers}
               error={membersError}
+              currentUserId={user?.id}
             />
           </div>
         )}

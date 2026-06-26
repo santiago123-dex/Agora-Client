@@ -123,7 +123,9 @@ export function getStoredAiAnalysis(
 ):
   | {
       total_score: number;
+      max_score?: number;
       feedback_summary: string;
+      grading_model?: string;
       criteria_results: Array<{
         criterion_id: string;
         criterion_name: string;
@@ -160,7 +162,9 @@ export function getStoredAiAnalysis(
 
   return {
     total_score: score,
+    max_score: typeof aiRecord.maxScore === "number" ? aiRecord.maxScore : undefined,
     feedback_summary: String(aiRecord.feedback ?? ""),
+    grading_model: typeof aiRecord.gradingModel === "string" ? aiRecord.gradingModel : undefined,
     criteria_results,
     evaluated_at: String(aiRecord.evaluatedAt ?? ""),
   };

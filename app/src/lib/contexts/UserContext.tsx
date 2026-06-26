@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 
 export type CurrentUser = {
+  id?: string;
   fullName?: string;
   firstName?: string;
   lastName?: string;

@@ -8,7 +8,6 @@ type BaseWorkspace = {
   description?: string;
 }
 
-/** Tarea en la vista detalle admin (mock). */
 export type WorkspaceAdminTask = {
   id: string;
   title: string;
@@ -16,8 +15,8 @@ export type WorkspaceAdminTask = {
   dueLabel: string;
   points: number;
   doneCount: number;
+  gradedCount: number;
   totalCount: number;
-  /** Texto del botón ancho en tarjeta “por calificar” */
   gradeButtonLabel?: string;
   taskState: "pending_grade" | "graded" | "upcoming";
 };

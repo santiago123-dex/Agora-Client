@@ -35,7 +35,7 @@ export default function TaskCard({
   workspaceId?: string | number;
   from?: string | null;
 }) {
-  const pendingToGrade = Math.max(task.totalCount - task.doneCount, 0);
+  const pendingToGrade = Math.max(task.totalCount - task.gradedCount, 0);
   const actionLabel =
     task.gradeButtonLabel ??
     (task.taskState === "graded"

@@ -2,6 +2,11 @@ import type { AssignmentResponse } from "@/app/src/lib/api/assignments";
 import type { WorkspaceAdminTask } from "../../../data/workspace";
 
 export function getAssignmentPoints(assignment: AssignmentResponse) {
+  const gradingScale = assignment.settings?.gradingScale;
+  if (typeof gradingScale === "number" && gradingScale > 0) {
+    return gradingScale;
+  }
+
   const rubric = assignment.rubric;
 
   if (typeof rubric?.totalWeight === "number") {
@@ -44,6 +49,7 @@ export function assignmentToAdminTask(
     }),
     points: getAssignmentPoints(assignment),
     doneCount: 0,
+    gradedCount: 0,
     totalCount: 0,
     taskState:
       assignment.status === "CERRADO"
