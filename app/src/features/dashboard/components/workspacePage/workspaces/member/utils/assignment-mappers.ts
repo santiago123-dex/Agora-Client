@@ -38,6 +38,8 @@ export function assignmentToMemberTask(
   const wasSubmitted = Boolean(submission);
 
   if (typeof score === "number") {
+    const maxScore = getAssignmentPoints(assignment);
+    const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : score;
     return {
       id: String(assignment.id),
       title: assignment.name,
@@ -45,7 +47,7 @@ export function assignmentToMemberTask(
       dueLabel: formatDueDate(assignment.dueDate),
       points: getAssignmentPoints(assignment),
       taskState: "graded",
-      gradeLabel: `${score}%`,
+      gradeLabel: `${score}/${maxScore} (${pct}%)`,
       actionLabel: undefined,
     };
   }

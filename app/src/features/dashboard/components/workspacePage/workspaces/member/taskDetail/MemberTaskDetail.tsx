@@ -263,8 +263,12 @@ export default function MemberTaskDetail({ workspaceId, taskId }: Props) {
                 const r = submission.result as Record<string, unknown>;
                 const teacher = r.teacher as Record<string, unknown> | undefined;
                 const ai = r.ai as Record<string, unknown> | undefined;
-                const score = teacher?.score ?? ai?.score ?? r.grade ?? r.score;
-                return typeof score === "number" ? `${score}%` : "—";
+                const rawScore = teacher?.score ?? ai?.score ?? r.grade ?? r.score;
+                if (typeof rawScore !== "number") return "—";
+                const maxScale = assignment?.settings?.gradingScale;
+                const maxScore = typeof maxScale === "number" && maxScale > 0 ? maxScale : 100;
+                const pct = maxScore > 0 ? Math.round((rawScore / maxScore) * 100) : 0;
+                return `${rawScore} / ${maxScore} (${pct}%)`;
               })()}
             </p>
             {(() => {

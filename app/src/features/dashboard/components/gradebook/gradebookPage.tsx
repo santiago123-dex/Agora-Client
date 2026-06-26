@@ -45,6 +45,18 @@ function getGrade(submission?: SubmissionResponse): number | null {
   return typeof score === "number" ? score : null;
 }
 
+function getMaxScore(assignment: { settings?: Record<string, unknown> | null }): number {
+  const scale = assignment.settings?.gradingScale;
+  if (typeof scale === "number" && scale > 0) return scale;
+  return 100;
+}
+
+function normalizeGrade(rawScore: number | null, maxScore: number): number | null {
+  if (rawScore === null) return null;
+  if (maxScore <= 0) return rawScore;
+  return Math.round((rawScore / maxScore) * 100);
+}
+
 function getMemberName(m: WorkspaceMemberDetailsResponse): string {
   return m.fullName || `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() || "Sin nombre";
 }
@@ -104,8 +116,9 @@ export default function GradebookPage() {
   const allGrades = useMemo(() => {
     if (!data) return [];
     return data.assignments.map((a) => {
+      const maxScore = getMaxScore(a);
       const grades = data.members
-        .map((m) => getGrade(data.submissionMap.get(String(a.id))?.get(String(m.userId))))
+        .map((m) => normalizeGrade(getGrade(data.submissionMap.get(String(a.id))?.get(String(m.userId))), maxScore))
         .filter((g): g is number => g !== null);
       return { assignmentId: String(a.id), grades };
     });
@@ -120,15 +133,17 @@ export default function GradebookPage() {
       const colIsAvg = sortCol === "__avg__";
       members = [...members].sort((a, b) => {
         if (colIsAvg) {
-          const gradesA = data.assignments.map((as) => getGrade(data.submissionMap.get(String(as.id))?.get(String(a.userId)))).filter((g): g is number => g !== null);
+          const gradesA = data.assignments.map((as) => normalizeGrade(getGrade(data.submissionMap.get(String(as.id))?.get(String(a.userId))), getMaxScore(as))).filter((g): g is number => g !== null);
           const avgA = gradesA.length > 0 ? gradesA.reduce((x, y) => x + y, 0) / gradesA.length : -1;
-          const gradesB = data.assignments.map((as) => getGrade(data.submissionMap.get(String(as.id))?.get(String(b.userId)))).filter((g): g is number => g !== null);
+          const gradesB = data.assignments.map((as) => normalizeGrade(getGrade(data.submissionMap.get(String(as.id))?.get(String(b.userId))), getMaxScore(as))).filter((g): g is number => g !== null);
           const avgB = gradesB.length > 0 ? gradesB.reduce((x, y) => x + y, 0) / gradesB.length : -1;
           return sortDir === "asc" ? avgA - avgB : avgB - avgA;
         }
 
-        const gradeA = getGrade(data.submissionMap.get(sortCol)?.get(String(a.userId))) ?? -1;
-        const gradeB = getGrade(data.submissionMap.get(sortCol)?.get(String(b.userId))) ?? -1;
+        const maxScoreA = getMaxScore(data.assignments.find((as) => String(as.id) === sortCol)!);
+        const gradeA = normalizeGrade(getGrade(data.submissionMap.get(sortCol)?.get(String(a.userId))), maxScoreA) ?? -1;
+        const maxScoreB = getMaxScore(data.assignments.find((as) => String(as.id) === sortCol)!);
+        const gradeB = normalizeGrade(getGrade(data.submissionMap.get(sortCol)?.get(String(b.userId))), maxScoreB) ?? -1;
         return sortDir === "asc" ? gradeA - gradeB : gradeB - gradeA;
       });
     }
@@ -141,7 +156,7 @@ export default function GradebookPage() {
     const header = ["Estudiante", ...data.assignments.map((a) => a.name), "Promedio"];
     const rows = data.members.map((m) => {
       const grades = data.assignments.map((a) => {
-        const grade = getGrade(data.submissionMap.get(String(a.id))?.get(String(m.userId)));
+        const grade = normalizeGrade(getGrade(data.submissionMap.get(String(a.id))?.get(String(m.userId))), getMaxScore(a));
         return grade !== null ? String(grade) : "";
       });
       const valid = grades.filter((g) => g !== "").map(Number);
@@ -308,7 +323,7 @@ export default function GradebookPage() {
                     filteredMembers.map((member) => {
                       const grades = data.assignments.map((a) => {
                         const sub = data.submissionMap.get(String(a.id))?.get(String(member.userId));
-                        return getGrade(sub);
+                        return normalizeGrade(getGrade(sub), getMaxScore(a));
                       });
                       const validGrades = grades.filter((g): g is number => g !== null);
                       const avg = validGrades.length > 0
