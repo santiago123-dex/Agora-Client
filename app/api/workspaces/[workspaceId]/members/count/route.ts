@@ -32,13 +32,16 @@ export async function GET(request: Request, { params }: Props) {
       );
     }
 
-    const roleQuery = role ? `?role=${role}` : "";
-    const result = await serverApiFetch<{ count: number }>(
-      `/workspaces/member/workspace/${workspaceId}/count${roleQuery}`,
+    const members = await serverApiFetch<WorkspaceMemberResponse[]>(
+      `/workspaces/member/workspace/${workspaceId}`,
       { method: "GET" },
     );
 
-    return NextResponse.json(result);
+    const filtered = role
+      ? members.filter((m) => m.role === role)
+      : members;
+
+    return NextResponse.json({ count: filtered.length });
   } catch (error) {
     return NextResponse.json(
       {
