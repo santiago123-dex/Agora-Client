@@ -5,6 +5,8 @@ import { useUserConfig } from "./hooks/useUserConfig";
 import PersonalInfoCard from "./components/PersonalInfoCard";
 import AiAgentCard from "./components/AiAgentCard";
 import NotificationsCard from "./components/NotificationsCard";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function ConfigurationPage() {
   const {
@@ -17,6 +19,10 @@ export default function ConfigurationPage() {
     updateConfig,
     save,
   } = useUserConfig();
+  // Generic para decir que tipo de dato estamos guardado
+  const [activeTab, setActiveTab] = useState<"perfil" | "configuration">(
+    "perfil",
+  );
 
   if (isLoading || !form) {
     return (
@@ -33,7 +39,9 @@ export default function ConfigurationPage() {
     <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 pb-10 dark:bg-[#0b1120] sm:px-7">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6">
-          <h1 className="serif text-xl text-slate-900 dark:text-slate-100">Configuración</h1>
+          <h1 className="serif text-xl text-slate-900 dark:text-slate-100">
+            Configuración
+          </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Administra tu perfil y preferencias
           </p>
@@ -51,6 +59,31 @@ export default function ConfigurationPage() {
           </div>
         )}
 
+        <div className="mb-5 inline-flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-[#1a2639]">
+          <button
+            type="button"
+            onClick={() => setActiveTab("perfil")}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              activeTab === "perfil"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-[#0f1a2e] dark:text-slate-100"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            }`}
+          >
+            Perfil
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("configuration")}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              activeTab === "configuration"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-[#0f1a2e] dark:text-slate-100"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            }`}
+          >
+            Configuración
+          </button>
+        </div>
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -58,33 +91,37 @@ export default function ConfigurationPage() {
           }}
           className="space-y-5"
         >
-          <PersonalInfoCard
-            firstName={form.firstName}
-            lastName={form.lastName}
-            email={form.email}
-            avatarUrl={form.avatarUrl}
-            onChange={updateField}
-            onAvatarChange={(url) => updateField("avatarUrl", url)}
-          />
-
-          <div className="grid gap-5 lg:grid-cols-2">
-            <NotificationsCard
-              newSubmission={form.config.newSubmission}
-              newGrading={form.config.newGrading}
-              submissionAlert={form.config.submissionAlert}
-              sendEmailNotification={form.config.sendEmailNotification}
-              onChange={updateConfig}
+          {activeTab == "perfil" && (
+            <PersonalInfoCard
+              firstName={form.firstName}
+              lastName={form.lastName}
+              email={form.email}
+              avatarUrl={form.avatarUrl}
+              onChange={updateField}
+              onAvatarChange={(url) => updateField("avatarUrl", url)}
             />
+          )}
 
-            <AiAgentCard
-              agenticMode={form.config.agenticMode}
-              retroStyle={form.config.retroStyle}
-              exigencyLevel={form.config.exigencyLevel}
-              weeklyReport={form.config.weeklyReport}
-              onChange={updateConfig}
-              onSelect={updateConfig}
-            />
-          </div>
+          {activeTab == "configuration" && (
+            <div className="grid gap-5 lg:grid-cols-2">
+              <NotificationsCard
+                newSubmission={form.config.newSubmission}
+                newGrading={form.config.newGrading}
+                submissionAlert={form.config.submissionAlert}
+                sendEmailNotification={form.config.sendEmailNotification}
+                onChange={updateConfig}
+              />
+
+              <AiAgentCard
+                agenticMode={form.config.agenticMode}
+                retroStyle={form.config.retroStyle}
+                exigencyLevel={form.config.exigencyLevel}
+                weeklyReport={form.config.weeklyReport}
+                onChange={updateConfig}
+                onSelect={updateConfig}
+              />
+            </div>
+          )}
 
           <div className="flex justify-end">
             <button

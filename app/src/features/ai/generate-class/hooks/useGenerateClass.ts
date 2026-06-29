@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  generateClassPlan,
+  generateClassPlanStream,
   saveClassPlan,
   getClassPlanHistory,
   getClassPlan,
@@ -10,7 +10,6 @@ import {
   deleteConversation,
   type GenerateClassResponse,
   type ClassPlanListItem,
-  type ClassPlanDetail,
   type PlanData,
 } from "@/app/src/lib/api/ai";
 
@@ -104,7 +103,7 @@ export function useGenerateClass() {
 
   async function loadConversations() {
     try {
-      const res = await fetch("/api/ai/chat/conversations");
+      const res = await fetch("/api/ai/chat/conversations?type=class_generator");
       if (!res.ok) return;
       const data = await res.json();
       setConversations(data.conversations ?? []);
@@ -134,55 +133,67 @@ export function useGenerateClass() {
       content: prompt,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const placeholderId = crypto.randomUUID();
+    const placeholderMsg: ChatMessage = {
+      id: placeholderId,
+      role: "assistant",
+      content: "",
+    };
+
+    setMessages((prev) => [...prev, userMsg, placeholderMsg]);
     setIsGenerating(true);
     setError(null);
 
     try {
-      const response = await generateClassPlan(
-        prompt,
-        sessionId ?? undefined,
-      );
+      const stream = generateClassPlanStream(prompt, sessionId ?? undefined);
+      let fullContent = "";
 
-      if (response.session_id) {
-        setSessionId(response.session_id);
-        localStorage.setItem(SESSION_KEY, response.session_id);
+      for await (const event of stream) {
+        if (event.type === "token") {
+          fullContent += event.content;
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === placeholderId ? { ...msg, content: fullContent } : msg,
+            ),
+          );
+        } else if (event.type === "result") {
+          const data = event.data;
+          if (data.session_id) {
+            setSessionId(data.session_id);
+            localStorage.setItem(SESSION_KEY, data.session_id);
+          }
+
+          const isChat = data.type === "chat";
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === placeholderId
+                ? {
+                    ...msg,
+                    content: isChat ? (data.message ?? data.title) : data.title,
+                    plan: data,
+                  }
+                : msg,
+            ),
+          );
+
+          loadConversations();
+        } else if (event.type === "error") {
+          throw new Error(event.detail);
+        }
       }
-
-      loadConversations();
-
-      const isChat = response.type === "chat";
-      const assistantMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: isChat ? (response.message ?? response.title) : response.title,
-        plan: response,
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      const errorMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "error",
-        content: err instanceof Error ? err.message : "Error al generar el plan de clase",
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === placeholderId
+            ? { ...msg, role: "error", content: err instanceof Error ? err.message : "Error al generar el plan de clase" }
+            : msg,
+        ),
+      );
       setError("No se pudo generar el plan. Intentá de nuevo.");
     } finally {
       setIsGenerating(false);
     }
   }, [isGenerating, sessionId]);
-
-  const savePlan = useCallback(async (title: string, prompt: string, planData: PlanData) => {
-    try {
-      await saveClassPlan(title, prompt, planData);
-      const { toast } = await import("sonner");
-      toast.success("Plan de clase guardado");
-    } catch {
-      const { toast } = await import("sonner");
-      toast.error("Error al guardar el plan");
-    }
-  }, []);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -190,6 +201,18 @@ export function useGenerateClass() {
       setHistory(result.plans);
     } catch {}
   }, []);
+
+  const savePlan = useCallback(async (title: string, prompt: string, planData: PlanData) => {
+    try {
+      await saveClassPlan(title, prompt, planData);
+      loadHistory();
+      const { toast } = await import("sonner");
+      toast.success("Plan de clase guardado");
+    } catch {
+      const { toast } = await import("sonner");
+      toast.error("Error al guardar el plan");
+    }
+  }, [loadHistory]);
 
   const toggleHistory = useCallback(() => {
     if (!showHistory) {
