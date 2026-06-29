@@ -210,6 +210,47 @@ export function generateClassPlan(prompt: string, sessionId?: string) {
   });
 }
 
+export type StreamEvent =
+  | { type: "token"; content: string }
+  | { type: "result"; data: GenerateClassResponse }
+  | { type: "error"; detail: string };
+
+export async function* generateClassPlanStream(
+  prompt: string,
+  sessionId?: string,
+): AsyncGenerator<StreamEvent> {
+  const response = await fetch("/api/ai/generate-class/stream", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, session_id: sessionId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message ?? `Error ${response.status} al generar el plan`);
+  }
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed) {
+        yield JSON.parse(trimmed) as StreamEvent;
+      }
+    }
+  }
+}
+
 export function saveClassPlan(title: string, prompt: string, plan_data: PlanData) {
   return bffFetch<{ plan: ClassPlanDetail }>("/api/ai/generate-class/save", {
     method: "POST",

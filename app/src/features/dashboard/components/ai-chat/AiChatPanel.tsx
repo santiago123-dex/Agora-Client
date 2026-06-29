@@ -8,7 +8,7 @@ import {
   useMemo,
   useTransition,
 } from "react";
-import { ChevronLeft, MessageSquarePlus, X, MessageSquare, Trash2, Send } from "lucide-react";
+import { ChevronLeft, MessageSquarePlus, X, MessageSquare, Trash2, Send, Maximize2, Minimize2 } from "lucide-react";
 import { sendChatMessage } from "@/app/src/lib/api/ai";
 import type { ChatResponse, AiBlock, GradeResult } from "@/app/src/lib/api/ai";
 import { getWorkspaceMembers, getMyWorkspaces } from "@/app/src/lib/api/workspaces";
@@ -120,6 +120,7 @@ export default function AiChatPanel({
   const [inConversation, setInConversation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [fullscreen, setFullscreen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -169,7 +170,7 @@ export default function AiChatPanel({
 
   async function fetchConversations() {
     try {
-      const res = await fetch("/api/ai/chat/conversations");
+      const res = await fetch("/api/ai/chat/conversations?type=chat");
       if (!res.ok) return [];
       const data = await res.json();
       const list: Conversation[] = data.conversations ?? [];
@@ -381,7 +382,11 @@ export default function AiChatPanel({
 
   return (
     <aside
-      className={`fixed right-0 top-0 z-40 flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all duration-300 lg:w-[420px] dark:border-[#253245] dark:bg-[#141f33] ${
+      className={`fixed right-0 top-0 z-40 flex h-full w-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all duration-300 dark:border-[#253245] dark:bg-[#141f33] ${
+        fullscreen
+          ? "lg:w-[calc(100vw-2rem)] lg:max-w-5xl"
+          : "lg:w-[420px]"
+      } ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -412,6 +417,15 @@ export default function AiChatPanel({
         </div>
 
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setFullscreen((v) => !v)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
+            aria-label={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+            title={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+          >
+            {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </button>
           <button
             type="button"
             onClick={handleNewConversation}

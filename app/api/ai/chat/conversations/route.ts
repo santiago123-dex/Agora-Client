@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverApiFetch } from "@/app/src/lib/api/server-client";
 import { ApiError } from "@/app/src/lib/api/client";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const result = await serverApiFetch<Record<string, unknown>>("/ai/chat/conversations", {
+    const type = request.nextUrl.searchParams.get("type");
+    const path = type ? `/ai/chat/conversations?type=${type}` : "/ai/chat/conversations";
+    const result = await serverApiFetch<Record<string, unknown>>(path, {
       method: "GET",
     });
     return NextResponse.json(result);

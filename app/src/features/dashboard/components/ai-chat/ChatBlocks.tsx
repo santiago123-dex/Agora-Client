@@ -359,7 +359,7 @@ function TableBlock({ block }: { block: AiBlock }) {
   const nameIndex = headers.findIndex((h) => isNameColumn(h));
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-[#253245]">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#253245]">
       <table className="w-full text-left text-xs">
         <thead>
           <tr className="bg-slate-50 dark:bg-[#0a1424]">
