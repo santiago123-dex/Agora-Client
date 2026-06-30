@@ -14,12 +14,12 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
   const data = plan.plan_data;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#253245] dark:bg-[#0f1a2e]">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <h3 className="serif text-2xl text-slate-950 dark:text-slate-100">
+    <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <h3 className="serif min-w-0 text-xl break-words text-slate-950 sm:text-2xl dark:text-slate-100">
           {plan.title}
         </h3>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <button
             type="button"
             onClick={() => onSave(plan.title, prompt, data)}
@@ -41,7 +41,7 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
 
       <div className="space-y-6">
         <Section title="Objetivo">
-          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          <p className="break-words text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             {data.objective}
           </p>
         </Section>
@@ -49,7 +49,7 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
         <Section title="Temas">
           <ul className="list-inside list-disc space-y-1 text-sm text-slate-600 dark:text-slate-400">
             {data.topics.map((topic, i) => (
-              <li key={i}>{topic}</li>
+              <li key={i} className="break-words">{topic}</li>
             ))}
           </ul>
         </Section>
@@ -60,12 +60,12 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
               {data.topic_details.map((td, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]"
+                  className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-[#1e293b] dark:bg-[#0a1424] sm:p-4"
                 >
-                  <h4 className="mb-2 text-base font-semibold text-slate-950 dark:text-slate-100">
+                  <h4 className="mb-2 break-words text-base font-semibold text-slate-950 dark:text-slate-100">
                     {td.name}
                   </h4>
-                  <p className="mb-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  <p className="mb-3 break-words text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     {td.explanation}
                   </p>
                   {td.key_points.length > 0 && (
@@ -75,7 +75,7 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
                       </p>
                       <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
                         {td.key_points.map((kp, j) => (
-                          <li key={j}>{kp}</li>
+                          <li key={j} className="break-words">{kp}</li>
                         ))}
                       </ul>
                     </div>
@@ -87,7 +87,7 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
                       </p>
                       <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
                         {td.examples.map((ex, j) => (
-                          <li key={j}>{ex}</li>
+                          <li key={j} className="break-words">{ex}</li>
                         ))}
                       </ul>
                     </div>
@@ -103,17 +103,17 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
             {data.activities.map((activity, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]"
+                className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-[#1e293b] dark:bg-[#0a1424] sm:p-4"
               >
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-950 dark:text-slate-100">
+                <div className="mb-1 flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="break-words text-sm font-semibold text-slate-950 dark:text-slate-100">
                     {activity.name}
                   </span>
                   <span className="text-xs font-medium text-[#275D79] dark:text-[#7BB8D4]">
                     {activity.duration}
                   </span>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="break-words text-sm text-slate-600 dark:text-slate-400">
                   {activity.description}
                 </p>
               </div>
@@ -122,8 +122,27 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
         </Section>
 
         <Section title="Rúbrica de Evaluación">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="space-y-3 sm:hidden">
+            {data.rubric.map((item, i) => (
+              <article
+                key={i}
+                className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-[#1e293b] dark:bg-[#0a1424]"
+              >
+                <h5 className="break-words text-sm font-semibold text-slate-950 dark:text-slate-100">
+                  {item.criterion}
+                </h5>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <RubricLevel label="Excelente" value={item.excellent} />
+                  <RubricLevel label="Bueno" value={item.good} />
+                  <RubricLevel label="Suficiente" value={item.fair} />
+                  <RubricLevel label="Insuficiente" value={item.poor} />
+                </dl>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto sm:block">
+            <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-semibold uppercase text-slate-500 dark:border-[#253245] dark:text-slate-400">
                   <th className="px-3 py-2">Criterio</th>
@@ -139,19 +158,19 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
                     key={i}
                     className="border-b border-slate-100 dark:border-[#1e293b]"
                   >
-                    <td className="px-3 py-2 font-medium text-slate-950 dark:text-slate-100">
+                    <td className="break-words px-3 py-2 text-sm font-medium text-slate-950 dark:text-slate-100">
                       {item.criterion}
                     </td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                    <td className="break-words px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
                       {item.excellent}
                     </td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                    <td className="break-words px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
                       {item.good}
                     </td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                    <td className="break-words px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
                       {item.fair}
                     </td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                    <td className="break-words px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
                       {item.poor}
                     </td>
                   </tr>
@@ -164,10 +183,10 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
         {data.evaluation && (
           <Section title="Evaluación">
             <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[#1e293b] dark:bg-[#0a1424]">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="break-words text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Método: {data.evaluation.method}
               </p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-1 break-words text-sm text-slate-600 dark:text-slate-400">
                 {data.evaluation.criteria}
               </p>
             </div>
@@ -180,6 +199,19 @@ export default function ClassPlanCard({ plan, onSave, prompt }: Props) {
           button { display: none !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+function RubricLevel({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-[#275D79] dark:text-[#7BB8D4]">
+        {label}
+      </dt>
+      <dd className="mt-0.5 break-words text-slate-600 dark:text-slate-400">
+        {value}
+      </dd>
     </div>
   );
 }

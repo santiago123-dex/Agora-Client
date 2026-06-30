@@ -5,7 +5,6 @@ import { useUserConfig } from "./hooks/useUserConfig";
 import PersonalInfoCard from "./components/PersonalInfoCard";
 import AiAgentCard from "./components/AiAgentCard";
 import NotificationsCard from "./components/NotificationsCard";
-import Link from "next/link";
 import { useState } from "react";
 
 export default function ConfigurationPage() {
@@ -26,19 +25,27 @@ export default function ConfigurationPage() {
 
   if (isLoading || !form) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F7F7F8] dark:bg-[#0b1120]">
-        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-          <Loader2 size={16} className="animate-spin" />
-          Cargando configuración...
+      <section className="px-4 py-6 pb-10 sm:px-7">
+        <div className="mx-auto max-w-5xl space-y-6">
+          <div>
+            <h1 className="serif text-xl text-slate-900 dark:text-slate-100">
+              Configuración
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Cargando...
+            </p>
+          </div>
+          <div className="h-48 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+          <div className="h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F8] px-4 py-6 pb-10 dark:bg-[#0b1120] sm:px-7">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6">
+    <section className="px-4 py-6 pb-10 sm:px-7">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div>
           <h1 className="serif text-xl text-slate-900 dark:text-slate-100">
             Configuración
           </h1>
@@ -48,18 +55,18 @@ export default function ConfigurationPage() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">
             Cambios guardados correctamente
           </div>
         )}
 
-        <div className="mb-5 inline-flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-[#1a2639]">
+        <div className="inline-flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-[#1a2639]">
           <button
             type="button"
             onClick={() => setActiveTab("perfil")}
@@ -144,6 +151,6 @@ export default function ConfigurationPage() {
           </div>
         </form>
       </div>
-    </div>
+    </section>
   );
 }
