@@ -52,36 +52,36 @@ export default function GenerateClassChat() {
   };
 
   return (
-    <div className="flex h-full">
-      <div className="flex flex-1 flex-col">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3 dark:border-[#253245] dark:bg-[#0b1120]">
-          <div className="flex items-center gap-2">
+    <div className="flex h-full min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-[#253245] dark:bg-[#0b1120] sm:px-6">
+          <div className="flex min-w-0 items-center gap-2">
             <Sparkles size={18} className="text-[#275D79] dark:text-[#7BB8D4]" />
-            <h1 className="text-lg font-semibold text-slate-950 dark:text-slate-100">
+            <h1 className="truncate text-base font-semibold text-slate-950 dark:text-slate-100 sm:text-lg">
               Generar Clase
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
               onClick={createNewChat}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#1a2740] dark:text-slate-400 dark:hover:bg-[#253245]"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#1a2740] dark:text-slate-400 dark:hover:bg-[#253245] sm:px-3"
             >
               <Plus size={14} />
-              Nueva clase
+              <span className="hidden sm:inline">Nueva clase</span>
             </button>
             <button
               type="button"
               onClick={toggleHistory}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#1a2740] dark:text-slate-400 dark:hover:bg-[#253245]"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#1a2740] dark:text-slate-400 dark:hover:bg-[#253245] sm:px-3"
             >
               <History size={14} />
-              Historial
+              <span className="hidden sm:inline">Historial</span>
             </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <Sparkles size={40} className="mb-4 text-[#275D79]/30 dark:text-[#7BB8D4]/30" />
@@ -94,18 +94,18 @@ export default function GenerateClassChat() {
               </p>
             </div>
           ) : (
-            <div className="mx-auto max-w-3xl space-y-6">
+            <div className="mx-auto w-full max-w-3xl space-y-5 sm:space-y-6">
               {messages.map((msg) => (
-                <div key={msg.id}>
+                <div key={msg.id} className="min-w-0">
                   {msg.role === "user" && (
                     <div className="flex justify-end">
-                      <div className="max-w-[80%] rounded-2xl bg-[#275D79] px-4 py-3 text-sm text-white">
+                      <div className="max-w-[92%] break-words rounded-2xl bg-[#275D79] px-4 py-3 text-sm text-white sm:max-w-[80%]">
                         {msg.content}
                       </div>
                     </div>
                   )}
                   {msg.role === "assistant" && msg.plan && msg.plan.type === "chat" && (
-                    <div className="max-w-[80%] rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-800 dark:bg-[#1a2740] dark:text-slate-200">
+                    <div className="max-w-[92%] break-words rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-800 dark:bg-[#1a2740] dark:text-slate-200 sm:max-w-[80%]">
                       {msg.content}
                     </div>
                   )}
@@ -140,7 +140,7 @@ export default function GenerateClassChat() {
           )}
         </div>
 
-        <div className="border-t border-slate-200 bg-white px-6 py-4 dark:border-[#253245] dark:bg-[#0b1120]">
+        <div className="border-t border-slate-200 bg-white px-4 py-3 dark:border-[#253245] dark:bg-[#0b1120] sm:px-6 sm:py-4">
           <div className="mx-auto flex max-w-3xl gap-3">
             <textarea
               ref={inputRef}
@@ -165,7 +165,7 @@ export default function GenerateClassChat() {
       </div>
 
       {showHistory && (
-        <aside className="w-80 border-l border-slate-200 bg-white dark:border-[#253245] dark:bg-[#0b1120]">
+        <aside className="fixed inset-0 z-50 flex w-full flex-col bg-white sm:static sm:z-auto sm:w-80 sm:border-l sm:bg-transparent dark:bg-[#0b1120] sm:dark:bg-transparent">
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-[#253245]">
             <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-100">
               Historial
