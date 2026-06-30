@@ -167,8 +167,8 @@ export default function CalendarPage() {
     return (
       <section className="px-4 py-6 pb-10 sm:px-7">
         <h1 className="mb-6 serif text-2xl text-slate-950 dark:text-slate-100">Calendario</h1>
-        <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
-          <div className="h-96 rounded bg-slate-100 dark:bg-slate-800" />
+          <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 dark:border-[#253245] dark:bg-[#0f1a2e]">
+          <div className="h-48 rounded bg-slate-100 sm:h-96 dark:bg-slate-800" />
         </div>
       </section>
     );
@@ -183,7 +183,7 @@ export default function CalendarPage() {
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{totalEvents} tareas con fecha asignada</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-[#253245] dark:bg-[#0f1a2e]">
               <button
                 type="button"
@@ -284,7 +284,7 @@ export default function CalendarPage() {
               {calendarDays.map((day, idx) => (
                 <div
                   key={idx}
-                  className={`relative min-h-24 border-b border-r border-slate-100 px-1.5 py-2 dark:border-[#253245] ${
+                  className={`relative min-h-16 border-b border-r border-slate-100 px-1.5 py-1.5 sm:min-h-24 sm:py-2 dark:border-[#253245] ${
                     day.day === 0 ? "bg-slate-50 dark:bg-[#0a1220]" : ""
                   }`}
                 >
@@ -347,7 +347,7 @@ export default function CalendarPage() {
                       {wd.day}
                     </span>
                   </div>
-                  <div className="space-y-1 px-1.5 pb-2 min-h-[200px]">
+                  <div className="space-y-1 px-1.5 pb-2 min-h-[120px] sm:min-h-[200px]">
                     {wd.events.length === 0 ? (
                       <p className="px-1 py-4 text-center text-[10px] text-slate-300 dark:text-slate-600">Sin tareas</p>
                     ) : (

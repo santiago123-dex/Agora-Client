@@ -16,16 +16,26 @@ export async function POST(request: Request) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  if (body.session_id) {
-    headers["X-Session-Id"] = body.session_id;
+  async function doFetch(sid?: string) {
+    const h = { ...headers };
+    if (sid) h["X-Session-Id"] = sid;
+
+    return fetch(`${GATEWAY_URL}/ai/generate-class/stream`, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify({ prompt: body.prompt }),
+      cache: "no-store",
+    });
   }
 
-  const agentResponse = await fetch(`${GATEWAY_URL}/ai/generate-class/stream`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ prompt: body.prompt }),
-    cache: "no-store",
-  });
+  let agentResponse = await doFetch(body.session_id);
+
+  if (agentResponse.status === 401 && body.session_id) {
+    const errorData = await agentResponse.json().catch(() => null);
+    if (errorData?.code === "SESSION_EXPIRED" || errorData?.detail?.code === "SESSION_EXPIRED") {
+      agentResponse = await doFetch();
+    }
+  }
 
   if (!agentResponse.ok) {
     const errorData = await agentResponse.json().catch(() => null);
