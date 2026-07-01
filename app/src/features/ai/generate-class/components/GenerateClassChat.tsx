@@ -173,7 +173,7 @@ export default function GenerateClassChat() {
             <button
               type="button"
               onClick={toggleHistory}
-              className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1a2740]"
+              className="rounded-xl p-2.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1a2740]"
             >
               <X size={16} />
             </button>

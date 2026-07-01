@@ -19,7 +19,7 @@ export default function NavbarLanding() {
     ];
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 landing-header">
+        <header className="fixed top-0 left-0 right-0 z-50 landing-header" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-10">
                 <Link href="/" className="flex items-center gap-2.5 text-slate-950 sm:gap-3">
                     <div className="flex items-center justify-center rounded-xl">
@@ -64,7 +64,7 @@ export default function NavbarLanding() {
 
                     <button
                         onClick={() => setIsMobileOpen(!isMobileOpen)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 text-slate-500 md:hidden"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-500 md:hidden"
                         aria-label="Menú de navegación"
                     >
                         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -73,7 +73,7 @@ export default function NavbarLanding() {
             </div>
 
             {isMobileOpen ? (
-                <div className="border-t border-slate-200 bg-white px-4 pb-4 pt-2 md:hidden">
+                <div className="border-t border-slate-200 bg-white px-4 pb-4 pt-2 md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
                     <nav className="flex flex-col gap-2 text-sm">
                         {navLinks.map((link) => (
                             <Link
@@ -89,14 +89,14 @@ export default function NavbarLanding() {
                             <Link
                                 href="/auth/login"
                                 onClick={() => setIsMobileOpen(false)}
-                                className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-300 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-50"
+                                className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-50"
                             >
                                 Iniciar Sesión
                             </Link>
                             <Link
                                 href="/auth/register"
                                 onClick={() => setIsMobileOpen(false)}
-                                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm transition hover:bg-[#285a77]"
+                                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2f6787] text-sm font-semibold text-white shadow-sm transition hover:bg-[#285a77]"
                             >
                                 Comenzar Gratis
                             </Link>

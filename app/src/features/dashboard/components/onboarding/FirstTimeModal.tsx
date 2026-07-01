@@ -76,14 +76,14 @@ export default function FirstTimeModal() {
                         <button
                             type="button"
                             onClick={dismiss}
-                            className="flex-1 rounded-xl border border-slate-300 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                            className="flex-1 rounded-xl border border-slate-300 py-2.5 min-h-11 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
                         >
                             Omitir
                         </button>
                         <button
                             type="button"
                             onClick={() => setStep((s) => s + 1)}
-                            className="flex-1 rounded-xl bg-[#275D79] py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61]"
+                            className="flex-1 rounded-xl bg-[#275D79] py-2.5 min-h-11 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61]"
                         >
                             Siguiente
                         </button>
@@ -92,7 +92,7 @@ export default function FirstTimeModal() {
                     <button
                         type="button"
                         onClick={dismiss}
-                        className="w-full rounded-xl bg-[#275D79] py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61]"
+                        className="w-full rounded-xl bg-[#275D79] py-2.5 min-h-11 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f4a61]"
                     >
                         ¡Empezar!
                     </button>

@@ -397,7 +397,7 @@ export default function LayoutDashboard({
                   //Esto es para accesibilidad, le dice al lector de pantalla que este boton controla el menu lateral
                   aria-controls="mobile-dashboard-menu"
                   onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 lg:hidden"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 lg:hidden"
                 >
                   {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
@@ -409,7 +409,7 @@ export default function LayoutDashboard({
                     setSidebarCollapsed(!sidebarCollapsed);
                     if (willExpand && isAiOpen) setIsAiOpen(false);
                   }}
-                  className="hidden h-10 w-10 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 lg:inline-flex"
+                  className="hidden h-11 w-11 items-center justify-center rounded-md border border-[#dadada] bg-white text-[#275D79] transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 lg:inline-flex"
                   aria-label={
                     sidebarCollapsed
                       ? "Expandir menú lateral"
@@ -427,7 +427,7 @@ export default function LayoutDashboard({
                   <button
                     type="button"
                     onClick={toggleTheme}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                     aria-label="Cambiar tema"
                   >
                     <Sun size={18} className="hidden dark:block" />
@@ -437,7 +437,7 @@ export default function LayoutDashboard({
                   <button
                     type="button"
                     onClick={() => setIsAiOpen((prev) => !prev)}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition ${
+                    className={`inline-flex h-11 w-11 items-center justify-center rounded-lg border transition ${
                       isAiOpen
                         ? "border-[#275D79] bg-[#275D79] text-white dark:border-[#275D79] dark:bg-[#275D79]"
                         : "border-[#dadada] bg-white text-[#275D79] hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
@@ -469,6 +469,7 @@ export default function LayoutDashboard({
             className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82vw] bg-[#275D79] shadow-2xl transition-transform duration-300 ease-in-out dark:bg-[#141f33] dark:border-r dark:border-[#253245] lg:hidden ${
               isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             }`}
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           >
             <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
               <Link href="/" className="flex items-center gap-2">
@@ -484,7 +485,7 @@ export default function LayoutDashboard({
                 type="button"
                 aria-label="Cerrar menú lateral"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/20 text-white"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/20 text-white"
               >
                 <X size={17} />
               </button>

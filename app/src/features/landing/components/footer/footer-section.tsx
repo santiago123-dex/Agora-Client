@@ -4,7 +4,7 @@ import Link from "next/link";
 import logo from "@/app/src/features/landing/assets/logo.png";
 
 const footer = (
-  <footer className="border-t border-slate-200 bg-[#edf5f8]">
+  <footer className="border-t border-slate-200 bg-[#edf5f8]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10 text-slate-600 lg:flex-row lg:items-center lg:justify-between lg:px-10">
       <Link href="/" className="flex items-center gap-3 text-slate-950">
         <Image

@@ -212,7 +212,7 @@ export default function CalendarPage() {
             <button
               type="button"
               onClick={goToToday}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:bg-[#1a2740]"
+              className="inline-flex h-11 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:text-slate-400 dark:hover:bg-[#1a2740]"
             >
               <CalendarDays size={14} />
               Hoy
@@ -222,7 +222,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={prev}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
               >
                 <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               </button>
@@ -247,7 +247,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={next}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 dark:border-[#253245] dark:bg-[#0f1a2e] dark:hover:bg-[#1a2740]"
               >
                 <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               </button>

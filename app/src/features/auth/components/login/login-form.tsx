@@ -78,7 +78,7 @@ export default function LoginForm() {
     };
 
     return (
-        <section className="auth-page relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-[#dceef5] px-6 py-10 dark:bg-slate-950">
+        <section className="auth-page relative flex min-h-screen items-center justify-center overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-[#dceef5] px-6 py-10 dark:bg-slate-950">
             <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-[#275D79]/10 blur-3xl dark:opacity-20" />
             <div className="absolute -bottom-16 right-12 h-56 w-56 rounded-full bg-[#9DC2F8]/20 blur-3xl dark:opacity-20" />
             <div className="absolute -right-12 top-1/3 h-80 w-80 rounded-full bg-[#275D79]/8 blur-3xl dark:opacity-20" />
@@ -156,7 +156,7 @@ export default function LoginForm() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center h-11 w-11 text-slate-400 hover:text-slate-600"
                                 tabIndex={-1}
                                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >

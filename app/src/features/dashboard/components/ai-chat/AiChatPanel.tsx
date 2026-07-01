@@ -397,7 +397,7 @@ export default function AiChatPanel({
             <button
               type="button"
               onClick={backToList}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
               aria-label="Volver"
             >
               <ChevronLeft size={16} />
@@ -420,7 +420,7 @@ export default function AiChatPanel({
           <button
             type="button"
             onClick={() => setFullscreen((v) => !v)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
             aria-label={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
             title={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
           >
@@ -429,7 +429,7 @@ export default function AiChatPanel({
           <button
             type="button"
             onClick={handleNewConversation}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
             aria-label="Nueva conversación"
             title="Nueva conversación"
           >
@@ -438,7 +438,7 @@ export default function AiChatPanel({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#253245] dark:hover:text-slate-300"
             aria-label="Cerrar chat"
           >
           <X size={18} />

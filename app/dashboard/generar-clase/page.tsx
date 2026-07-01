@@ -2,7 +2,7 @@ import GenerateClassChat from "@/app/src/features/ai/generate-class/components/G
 
 export default function GenerarClasePage() {
   return (
-    <section className="flex h-[calc(100vh-4rem)] flex-col">
+    <section className="flex h-[calc(100dvh-4rem)] flex-col">
       <GenerateClassChat />
     </section>
   );
